@@ -1,0 +1,3 @@
+{
+  "extends": "@Meta-Bear/config/tsconfig.base.json"
+}
