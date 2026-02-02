@@ -11,7 +11,7 @@
     "build:firefox": "wxt build -b firefox",
     "zip": "wxt zip",
     "zip:firefox": "wxt zip -b firefox",
-    "compile": "tsc --noEmit",
+    "check-types": "tsgo --noEmit",
     "postinstall": "wxt prepare"
   },
   "dependencies": {
@@ -21,8 +21,8 @@
   "devDependencies": {
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
+    "@typescript/native-preview": "latest",
     "@wxt-dev/module-react": "^1.1.5",
-    "typescript": "^5.9.3",
     "wxt": "^0.20.6"
   }
 }
