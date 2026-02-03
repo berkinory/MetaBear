@@ -1,5 +1,6 @@
 import {
   Analytics01Icon,
+  Cancel01Icon,
   HeadingIcon,
   Image01Icon,
   InformationCircleIcon,
@@ -38,6 +39,12 @@ const isRestrictedUrl = (url: string | undefined): boolean => {
   ];
 
   return restrictedPatterns.some((pattern) => pattern.test(url));
+};
+
+const handleClose = () => {
+  if (typeof window !== "undefined") {
+    window.parent?.postMessage({ type: "CLOSE_PANEL" }, "*");
+  }
 };
 
 export default function App() {
@@ -89,11 +96,33 @@ export default function App() {
   }, []);
 
   return (
-    <div className="flex h-full w-full flex-col rounded-2xl border border-border bg-card shadow-[0_18px_45px_rgba(0,0,0,0.18)]">
+    <div className="flex h-full w-full flex-col rounded-2xl bg-background">
+      <header className="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
+        <div className="flex items-center gap-3">
+          <img src="/icon/128.png" alt="MetaBear" className="h-8 w-8" />
+          <div className="flex flex-col">
+            <span className="text-sm font-semibold">MetaBear</span>
+            <span className="text-xs text-muted-foreground">metabear.dev</span>
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={handleClose}
+          className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border text-muted-foreground transition hover:text-foreground"
+          aria-label="Close panel"
+          title="Close"
+        >
+          <HugeiconsIcon
+            icon={Cancel01Icon}
+            strokeWidth={2}
+            className="size-4"
+          />
+        </button>
+      </header>
       <Tabs defaultValue="audit" className="flex-1 flex flex-col gap-0">
         <TabsList
           variant="line"
-          className="w-full justify-between rounded-t-2xl border-b border-border bg-card/95 px-2 py-1"
+          className="w-full justify-between border-b border-border bg-background/95 px-2 py-1"
         >
           <TabsTrigger
             value="audit"

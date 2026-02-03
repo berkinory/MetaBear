@@ -15,9 +15,11 @@ const CONTENT_SCRIPT_FLAG = "__metabear_content_script_ready__";
 let listenerRegistered = false;
 let panelMounted = false;
 let panelRoot: HTMLDivElement | null = null;
+let closeListenerRegistered = false;
 
 const PANEL_CONTAINER_ID = "__metabear_panel__";
 const PANEL_URL = browser.runtime.getURL("/panel.html");
+const PANEL_ORIGIN = new URL(PANEL_URL).origin;
 
 export default defineContentScript({
   main() {
@@ -33,6 +35,23 @@ export default defineContentScript({
 
     if (listenerRegistered) {
       return;
+    }
+
+    if (!closeListenerRegistered) {
+      window.addEventListener("message", (event) => {
+        if (!panelMounted) {
+          return;
+        }
+
+        if (event.origin !== PANEL_ORIGIN) {
+          return;
+        }
+
+        if (event.data?.type === "CLOSE_PANEL") {
+          togglePanel();
+        }
+      });
+      closeListenerRegistered = true;
     }
 
     const messageListener = (
@@ -119,7 +138,6 @@ function togglePanel(): void {
   panelRoot.style.height = "520px";
   panelRoot.style.zIndex = "2147483647";
   panelRoot.style.borderRadius = "16px";
-  panelRoot.style.boxShadow = "0 12px 40px rgba(0, 0, 0, 0.18)";
   panelRoot.style.overflow = "hidden";
   panelRoot.style.background = "transparent";
 
