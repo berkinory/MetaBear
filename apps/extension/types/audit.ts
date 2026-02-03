@@ -69,6 +69,10 @@ export interface AuditMessage {
   type: "RUN_AUDIT";
 }
 
+export interface TogglePanelMessage {
+  type: "TOGGLE_PANEL";
+}
+
 export interface AuditForTabMessage {
   tabId: number;
   type: "RUN_AUDIT_FOR_TAB";
@@ -80,4 +84,4 @@ export interface AuditResponse {
   success: boolean;
 }
 
-export type Message = AuditForTabMessage | AuditMessage;
+export type Message = AuditForTabMessage | AuditMessage | TogglePanelMessage;

@@ -8,21 +8,44 @@ import type {
   Issue,
   LinkInfo,
   MetadataInfo,
+  TogglePanelMessage,
 } from "@/types/audit";
 
+const CONTENT_SCRIPT_FLAG = "__metabear_content_script_ready__";
 let listenerRegistered = false;
+let panelMounted = false;
+let panelRoot: HTMLDivElement | null = null;
+
+const PANEL_CONTAINER_ID = "__metabear_panel__";
+const PANEL_URL = browser.runtime.getURL("/panel.html");
 
 export default defineContentScript({
   main() {
+    const globalScope = globalThis as typeof globalThis & {
+      [CONTENT_SCRIPT_FLAG]?: boolean;
+    };
+
+    if (globalScope[CONTENT_SCRIPT_FLAG]) {
+      return;
+    }
+
+    globalScope[CONTENT_SCRIPT_FLAG] = true;
+
     if (listenerRegistered) {
       return;
     }
 
     const messageListener = (
-      message: AuditMessage,
+      message: AuditMessage | TogglePanelMessage,
       _sender: unknown,
-      sendResponse: (response: AuditResult) => void
+      sendResponse: (response?: AuditResult) => void
     ) => {
+      if (message.type === "TOGGLE_PANEL") {
+        togglePanel();
+        sendResponse();
+        return false;
+      }
+
       if (message.type === "RUN_AUDIT") {
         (async () => {
           try {
@@ -70,8 +93,49 @@ export default defineContentScript({
     browser.runtime.onMessage.addListener(messageListener);
     listenerRegistered = true;
   },
-  matches: ["http://*/*", "https://*/*"],
+  registration: "runtime",
 });
+
+function togglePanel(): void {
+  if (panelMounted) {
+    panelRoot?.remove();
+    panelRoot = null;
+    panelMounted = false;
+    return;
+  }
+
+  const existing = document.getElementById(PANEL_CONTAINER_ID);
+  if (existing) {
+    existing.remove();
+  }
+
+  panelRoot = document.createElement("div");
+  panelRoot.id = PANEL_CONTAINER_ID;
+  panelRoot.setAttribute("aria-hidden", "false");
+  panelRoot.style.position = "fixed";
+  panelRoot.style.top = "12px";
+  panelRoot.style.right = "12px";
+  panelRoot.style.width = "360px";
+  panelRoot.style.height = "520px";
+  panelRoot.style.zIndex = "2147483647";
+  panelRoot.style.borderRadius = "16px";
+  panelRoot.style.boxShadow = "0 12px 40px rgba(0, 0, 0, 0.18)";
+  panelRoot.style.overflow = "hidden";
+  panelRoot.style.background = "transparent";
+
+  const iframe = document.createElement("iframe");
+  iframe.src = PANEL_URL;
+  iframe.style.width = "100%";
+  iframe.style.height = "100%";
+  iframe.style.border = "0";
+  iframe.style.display = "block";
+  iframe.setAttribute("allowtransparency", "true");
+  iframe.setAttribute("title", "MetaBear Panel");
+
+  panelRoot.appendChild(iframe);
+  document.documentElement.appendChild(panelRoot);
+  panelMounted = true;
+}
 
 async function runAudit(): Promise<AuditResult> {
   const accessibility = await axe.run(document);

@@ -1,3 +1,12 @@
+import {
+  Analytics01Icon,
+  HeadingIcon,
+  Image01Icon,
+  InformationCircleIcon,
+  Link01Icon,
+  Share08Icon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useEffect, useState } from "react";
 
 import type { AuditResponse, AuditResult } from "@/types/audit";
@@ -80,19 +89,90 @@ export default function App() {
   }, []);
 
   return (
-    <div className="flex flex-col min-w-[320px] min-h-[300px]">
-      <header className="flex items-center justify-between p-3 border-b">
-        <h1 className="text-lg font-bold">MetaBear</h1>
-      </header>
-
-      <Tabs defaultValue="audit" className="flex-1 flex flex-col">
-        <TabsList className="w-full justify-start rounded-none border-b">
-          <TabsTrigger value="audit">Audit</TabsTrigger>
-          <TabsTrigger value="headings">Headings</TabsTrigger>
-          <TabsTrigger value="images">Images</TabsTrigger>
-          <TabsTrigger value="links">Links</TabsTrigger>
-          <TabsTrigger value="metadata">Metadata</TabsTrigger>
-          <TabsTrigger value="social">Social</TabsTrigger>
+    <div className="flex h-full w-full flex-col rounded-2xl border border-border bg-card shadow-[0_18px_45px_rgba(0,0,0,0.18)]">
+      <Tabs defaultValue="audit" className="flex-1 flex flex-col gap-0">
+        <TabsList
+          variant="line"
+          className="w-full justify-between rounded-t-2xl border-b border-border bg-card/95 px-2 py-1"
+        >
+          <TabsTrigger
+            value="audit"
+            aria-label="Audit"
+            title="Audit"
+            className="h-9 w-9 p-0"
+          >
+            <HugeiconsIcon
+              icon={Analytics01Icon}
+              strokeWidth={2}
+              className="size-4"
+            />
+            <span className="sr-only">Audit</span>
+          </TabsTrigger>
+          <TabsTrigger
+            value="headings"
+            aria-label="Headings"
+            title="Headings"
+            className="h-9 w-9 p-0"
+          >
+            <HugeiconsIcon
+              icon={HeadingIcon}
+              strokeWidth={2}
+              className="size-4"
+            />
+            <span className="sr-only">Headings</span>
+          </TabsTrigger>
+          <TabsTrigger
+            value="images"
+            aria-label="Images"
+            title="Images"
+            className="h-9 w-9 p-0"
+          >
+            <HugeiconsIcon
+              icon={Image01Icon}
+              strokeWidth={2}
+              className="size-4"
+            />
+            <span className="sr-only">Images</span>
+          </TabsTrigger>
+          <TabsTrigger
+            value="links"
+            aria-label="Links"
+            title="Links"
+            className="h-9 w-9 p-0"
+          >
+            <HugeiconsIcon
+              icon={Link01Icon}
+              strokeWidth={2}
+              className="size-4"
+            />
+            <span className="sr-only">Links</span>
+          </TabsTrigger>
+          <TabsTrigger
+            value="metadata"
+            aria-label="Metadata"
+            title="Metadata"
+            className="h-9 w-9 p-0"
+          >
+            <HugeiconsIcon
+              icon={InformationCircleIcon}
+              strokeWidth={2}
+              className="size-4"
+            />
+            <span className="sr-only">Metadata</span>
+          </TabsTrigger>
+          <TabsTrigger
+            value="social"
+            aria-label="Social"
+            title="Social"
+            className="h-9 w-9 p-0"
+          >
+            <HugeiconsIcon
+              icon={Share08Icon}
+              strokeWidth={2}
+              className="size-4"
+            />
+            <span className="sr-only">Social</span>
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="audit" className="flex-1 p-4 overflow-auto">
