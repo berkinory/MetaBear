@@ -365,27 +365,19 @@ function collectImages(): ImageInfo[] {
     }
 
     const { src } = img;
+
+    if (src.startsWith("data:") && !src.startsWith("data:image/")) {
+      continue;
+    }
+
+    let isValidUrl = true;
     try {
-      const url = new URL(src);
-      const { pathname } = url;
-
-      if (pathname === "/" || pathname === "") {
-        continue;
-      }
-
-      const hasImageExtension =
-        /\.(jpg|jpeg|png|gif|webp|svg|bmp|ico|avif)(\?.*)?$/i.test(pathname);
-      const hasDataUri = src.startsWith("data:image/");
-
-      if (!hasImageExtension && !hasDataUri) {
-        if (
-          url.origin === window.location.origin &&
-          url.pathname === window.location.pathname
-        ) {
-          continue;
-        }
-      }
+      const _url = new URL(src);
     } catch {
+      isValidUrl = false;
+    }
+
+    if (!isValidUrl) {
       continue;
     }
 
@@ -499,23 +491,30 @@ function auditHeadings(headings: HeadingInfo[]): Issue[] {
     });
   }
 
+  let hasSkip = false;
   for (let i = 1; i < headings.length; i += 1) {
     const currentLevel = headings[i].level;
     const previousLevel = headings[i - 1].level;
     const skip = currentLevel - previousLevel;
 
     if (skip > 1) {
-      issues.push({
-        type: "accessibility",
-        severity: "serious",
-        id: `heading-skip-${i}`,
-        title: "Heading hierarchy skip detected",
-        description: `Heading structure skips from h${previousLevel} to h${currentLevel}. Headings should not skip levels (e.g., h2 should follow h1, not h3).`,
-      });
+      hasSkip = true;
+      break;
     }
   }
 
-  if (headings[0].level !== 1) {
+  if (hasSkip) {
+    issues.push({
+      type: "accessibility",
+      severity: "serious",
+      id: "heading-hierarchy-skip",
+      title: "Heading hierarchy skips detected",
+      description:
+        "Heading structure skips levels (e.g., h1 to h3). Headings should not skip levels for proper document structure and accessibility.",
+    });
+  }
+
+  if (h1Count > 0 && headings[0].level !== 1) {
     issues.push({
       type: "accessibility",
       severity: "serious",
@@ -538,7 +537,8 @@ function collectLinks(): LinkInfo[] {
       continue;
     }
 
-    const text = link.textContent?.trim() || "";
+    const text =
+      link.textContent?.trim() || link.getAttribute("aria-label")?.trim() || "";
     const title = link.getAttribute("title");
     const rel = link.getAttribute("rel") || "";
 
@@ -572,15 +572,10 @@ function auditLinks(links: LinkInfo[]): Issue[] {
   }
 
   let emptyTextCount = 0;
-  let externalWithoutNofollowCount = 0;
 
   for (const link of links) {
     if (!link.text || link.text.trim() === "") {
       emptyTextCount += 1;
-    }
-
-    if (link.isExternal && !link.hasNofollow) {
-      externalWithoutNofollowCount += 1;
     }
   }
 
@@ -591,16 +586,6 @@ function auditLinks(links: LinkInfo[]): Issue[] {
       id: "link-empty-text",
       title: "Links with empty text",
       description: `${emptyTextCount} link(s) have no visible text. All links should have descriptive text for accessibility.`,
-    });
-  }
-
-  if (externalWithoutNofollowCount > 0) {
-    issues.push({
-      type: "seo",
-      severity: "serious",
-      id: "link-external-nofollow",
-      title: "External links without nofollow",
-      description: `${externalWithoutNofollowCount} external link(s) don't have rel="nofollow". Consider adding nofollow to external links to preserve PageRank.`,
     });
   }
 
