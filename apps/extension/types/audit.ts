@@ -1,20 +1,59 @@
 import type { AxeResults } from "axe-core";
 
-export interface PerformanceData {
-  domContentLoaded: number | null;
-  domElements: number;
-  fcp: number | null;
-  lcp: number | null;
-  pageLoad: number | null;
-  pageSize: number;
-  resourceCount: number;
-  ttfb: number | null;
+export type IssueType = "accessibility" | "seo" | "performance" | "security";
+export type IssueSeverity = "critical" | "serious";
+
+export interface Issue {
+  type: IssueType;
+  severity: IssueSeverity;
+  id: string;
+  title: string;
+  description: string;
+  helpUrl?: string;
+}
+
+export interface HeadingInfo {
+  level: 1 | 2 | 3 | 4 | 5 | 6;
+  text: string;
+}
+
+export interface ImageInfo {
+  src: string;
+  alt: string | null;
+  width: number;
+  height: number;
+  hasAlt: boolean;
+}
+
+export interface MetadataInfo {
+  title: string | null;
+  description: string | null;
+  canonical: string | null;
+  lang: string | null;
+  keywords: string | null;
+  author: string | null;
+  openGraph: {
+    title: string | null;
+    description: string | null;
+    image: string | null;
+    url: string | null;
+    type: string | null;
+  };
+  twitter: {
+    card: string | null;
+    title: string | null;
+    description: string | null;
+    image: string | null;
+  };
 }
 
 export interface AuditResult {
   accessibility: AxeResults | null;
   error?: string;
-  performance: PerformanceData;
+  issues: Issue[];
+  metadata: MetadataInfo;
+  headings: HeadingInfo[];
+  images: ImageInfo[];
 }
 
 export interface AuditMessage {

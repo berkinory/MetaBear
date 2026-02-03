@@ -5,6 +5,9 @@ import type { AuditResponse, AuditResult } from "@/types/audit";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { AuditTab } from "./tabs/AuditTab";
+import { HeadingsTab } from "./tabs/HeadingsTab";
+import { ImagesTab } from "./tabs/ImagesTab";
+import { MetadataTab } from "./tabs/MetadataTab";
 
 const isRestrictedUrl = (url: string | undefined): boolean => {
   if (!url) {
@@ -47,7 +50,6 @@ export default function App() {
         throw new Error("No active tab found");
       }
 
-      // Check if URL is restricted
       if (isRestrictedUrl(tab.url)) {
         setIsRestricted(true);
         setLoading(false);
@@ -84,6 +86,9 @@ export default function App() {
       <Tabs defaultValue="audit" className="flex-1 flex flex-col">
         <TabsList className="w-full justify-start rounded-none border-b">
           <TabsTrigger value="audit">Audit</TabsTrigger>
+          <TabsTrigger value="headings">Headings</TabsTrigger>
+          <TabsTrigger value="images">Images</TabsTrigger>
+          <TabsTrigger value="metadata">Metadata</TabsTrigger>
           <TabsTrigger value="settings">Settings</TabsTrigger>
         </TabsList>
 
@@ -95,6 +100,18 @@ export default function App() {
             isRestricted={isRestricted}
             onRetry={runAudit}
           />
+        </TabsContent>
+
+        <TabsContent value="headings" className="flex-1 p-4 overflow-auto">
+          <HeadingsTab headings={result?.headings || null} />
+        </TabsContent>
+
+        <TabsContent value="images" className="flex-1 p-4 overflow-auto">
+          <ImagesTab images={result?.images || null} />
+        </TabsContent>
+
+        <TabsContent value="metadata" className="flex-1 p-4 overflow-auto">
+          <MetadataTab metadata={result?.metadata || null} />
         </TabsContent>
 
         <TabsContent value="settings" className="flex-1 p-4 overflow-auto">
