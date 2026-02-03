@@ -19,10 +19,12 @@
     "react-dom": "^19.2.3"
   },
   "devDependencies": {
+    "@tailwindcss/vite": "^4.1.18",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "@typescript/native-preview": "latest",
     "@wxt-dev/module-react": "^1.1.5",
+    "tailwindcss": "^4.1.18",
     "wxt": "^0.20.6"
   }
 }

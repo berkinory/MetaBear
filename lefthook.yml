@@ -3,5 +3,5 @@ pre-commit:
   commands:
     check:
       run: bun check
-    types:
+    check-types:
       run: bun run check-types
