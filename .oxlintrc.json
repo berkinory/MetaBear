@@ -37,6 +37,8 @@
     "max-lines": "off",
     "max-statements": "off",
     "complexity": "off",
-    "func-style": "off"
+    "func-style": "off",
+    "react/no-multi-comp": "off",
+    "sort-keys": "off"
   }
 }

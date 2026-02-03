@@ -1,48 +1,111 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-import reactLogo from "@/assets/react.svg";
-import wxtLogo from "@/assets/wxt.svg";
+import type { AuditResponse, AuditResult } from "@/types/audit";
 
-function App() {
-  const [count, setCount] = useState(0);
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+import { AuditTab } from "./tabs/AuditTab";
+
+const isRestrictedUrl = (url: string | undefined): boolean => {
+  if (!url) {
+    return true;
+  }
+
+  const restrictedPatterns = [
+    /^chrome:\/\//,
+    /^chrome-extension:\/\//,
+    /^edge:\/\//,
+    /^about:/,
+    /^view-source:/,
+    /^file:\/\//,
+    /^https?:\/\/chrome\.google\.com\/webstore/,
+    /^https?:\/\/chromewebstore\.google\.com/,
+    /^https?:\/\/microsoftedge\.microsoft\.com\/addons/,
+  ];
+
+  return restrictedPatterns.some((pattern) => pattern.test(url));
+};
+
+export default function App() {
+  const [loading, setLoading] = useState(true);
+  const [result, setResult] = useState<AuditResult | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [isRestricted, setIsRestricted] = useState(false);
+
+  const runAudit = async () => {
+    setLoading(true);
+    setError(null);
+    setIsRestricted(false);
+
+    try {
+      const [tab] = await browser.tabs.query({
+        active: true,
+        currentWindow: true,
+      });
+
+      if (!tab?.id) {
+        throw new Error("No active tab found");
+      }
+
+      // Check if URL is restricted
+      if (isRestrictedUrl(tab.url)) {
+        setIsRestricted(true);
+        setLoading(false);
+        return;
+      }
+
+      const response: AuditResponse = await browser.runtime.sendMessage({
+        tabId: tab.id,
+        type: "RUN_AUDIT_FOR_TAB",
+      });
+
+      if (!response.success || !response.data) {
+        throw new Error(response.error ?? "Unknown error");
+      }
+
+      setResult(response.data);
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "Unknown error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    runAudit();
+  }, []);
 
   return (
-    <div className="flex flex-col items-center justify-center p-8 text-center">
-      <div className="flex gap-4">
-        <a href="https://wxt.dev" target="_blank">
-          <img
-            src={wxtLogo}
-            className="h-24 p-6 transition-all hover:drop-shadow-[0_0_2em_#54bc4ae0]"
-            alt="WXT logo"
+    <div className="flex flex-col min-w-[320px] min-h-[300px]">
+      <header className="flex items-center justify-between p-3 border-b">
+        <h1 className="text-lg font-bold">MetaBear</h1>
+      </header>
+
+      <Tabs defaultValue="audit" className="flex-1 flex flex-col">
+        <TabsList className="w-full justify-start rounded-none border-b">
+          <TabsTrigger value="audit">Audit</TabsTrigger>
+          <TabsTrigger value="settings">Settings</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="audit" className="flex-1 p-4 overflow-auto">
+          <AuditTab
+            error={error}
+            loading={loading}
+            result={result}
+            isRestricted={isRestricted}
+            onRetry={runAudit}
           />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img
-            src={reactLogo}
-            className="h-24 p-6 transition-all hover:drop-shadow-[0_0_2em_#61dafbaa] animate-spin-slow"
-            alt="React logo"
-          />
-        </a>
-      </div>
-      <h1 className="text-5xl font-bold mt-4">WXT + React</h1>
-      <div className="p-8">
-        <button
-          type="button"
-          onClick={() => setCount((count) => count + 1)}
-          className="px-5 py-2.5 rounded-lg bg-neutral-800 border border-transparent hover:border-indigo-500 font-medium transition-colors cursor-pointer"
-        >
-          count is {count}
-        </button>
-        <p className="mt-4">
-          Edit <code className="bg-neutral-800 px-1 rounded">src/App.tsx</code>{" "}
-          and save to test HMR
-        </p>
-      </div>
-      <p className="text-neutral-400">
-        Click on the WXT and React logos to learn more
-      </p>
+        </TabsContent>
+
+        <TabsContent value="settings" className="flex-1 p-4 overflow-auto">
+          <div className="space-y-4">
+            <h2 className="text-base font-semibold">Settings</h2>
+            <p className="text-sm text-muted-foreground">
+              Configuration options will be available here.
+            </p>
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
-
-export default App;
