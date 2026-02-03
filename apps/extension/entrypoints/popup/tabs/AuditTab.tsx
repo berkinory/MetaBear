@@ -1,7 +1,7 @@
 /* oxlint-disable react/no-multi-comp */
 import type { AxeResults } from "axe-core";
 
-import type { AuditResult } from "@/types/audit";
+import type { AuditResult, Issue } from "@/types/audit";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -16,15 +16,10 @@ interface AuditTabProps {
   onRetry: () => void;
 }
 
-const formatMs = (v: number | null) =>
-  v !== null ? `${Math.round(v)}ms` : "-";
-
 const getImpactVariant = (impact: string) => {
-  const variants: Record<string, "destructive" | "default" | "secondary"> = {
+  const variants: Record<string, "destructive" | "default"> = {
     critical: "destructive",
     serious: "destructive",
-    moderate: "secondary",
-    minor: "secondary",
   };
   return variants[impact] ?? "default";
 };
@@ -103,11 +98,7 @@ export function AuditTab({
 
   return (
     <div className="space-y-4">
-      <PerformanceCard
-        fcp={result.performance.fcp}
-        lcp={result.performance.lcp}
-        ttfb={result.performance.ttfb}
-      />
+      {result.issues.length > 0 && <IssuesCard issues={result.issues} />}
       {result.accessibility && (
         <AccessibilityCard data={result.accessibility} />
       )}
@@ -115,39 +106,57 @@ export function AuditTab({
   );
 }
 
-function PerformanceCard({
-  fcp,
-  lcp,
-  ttfb,
-}: {
-  fcp: number | null;
-  lcp: number | null;
-  ttfb: number | null;
-}) {
+function IssuesCard({ issues }: { issues: Issue[] }) {
+  const getTypeColor = (type: Issue["type"]) => {
+    const colors: Record<Issue["type"], string> = {
+      accessibility: "text-blue-600 dark:text-blue-400",
+      seo: "text-green-600 dark:text-green-400",
+      performance: "text-orange-600 dark:text-orange-400",
+      security: "text-red-600 dark:text-red-400",
+    };
+    return colors[type];
+  };
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Performance</CardTitle>
+        <CardTitle>Issues ({issues.length})</CardTitle>
       </CardHeader>
       <CardContent className="space-y-2">
-        <div className="flex justify-between text-sm">
-          <span className="text-muted-foreground">TTFB</span>
-          <span className="font-mono">{formatMs(ttfb)}</span>
-        </div>
-        <div className="flex justify-between text-sm">
-          <span className="text-muted-foreground">FCP</span>
-          <span className="font-mono">{formatMs(fcp)}</span>
-        </div>
-        <div className="flex justify-between text-sm">
-          <span className="text-muted-foreground">LCP</span>
-          <span className="font-mono">{formatMs(lcp)}</span>
-        </div>
+        {issues.map((issue) => (
+          <Card key={issue.id} className="bg-muted">
+            <CardContent className="pt-4">
+              <div className="flex items-start gap-2">
+                <Badge variant="destructive">{issue.severity}</Badge>
+                <div className="flex-1 space-y-1">
+                  <div className="flex items-start gap-2">
+                    <span
+                      className={`text-xs font-medium ${getTypeColor(issue.type)}`}
+                    >
+                      {issue.type.toUpperCase()}
+                    </span>
+                    <span className="text-xs font-semibold flex-1">
+                      {issue.title}
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {issue.description}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
       </CardContent>
     </Card>
   );
 }
 
 function AccessibilityCard({ data }: { data: AxeResults }) {
+  const criticalViolations = data.violations.filter(
+    (v) => v.impact === "critical" || v.impact === "serious"
+  );
+
   return (
     <Card>
       <CardHeader>
@@ -158,7 +167,7 @@ function AccessibilityCard({ data }: { data: AxeResults }) {
           <Card className="border-destructive/50 bg-destructive/10">
             <CardContent className="pt-4">
               <div className="text-lg font-bold text-destructive">
-                {data.violations.length}
+                {criticalViolations.length}
               </div>
               <div className="text-xs text-muted-foreground">Violations</div>
             </CardContent>
@@ -181,16 +190,16 @@ function AccessibilityCard({ data }: { data: AxeResults }) {
           </Card>
         </div>
 
-        {data.violations.length > 0 && (
+        {criticalViolations.length > 0 && (
           <div className="space-y-2">
             <h3 className="text-xs font-semibold text-muted-foreground">
               Top Issues:
             </h3>
-            {data.violations.slice(0, 3).map((v) => (
+            {criticalViolations.slice(0, 3).map((v) => (
               <Card key={v.id} className="bg-muted">
                 <CardContent className="pt-4">
                   <div className="text-xs flex items-start gap-2">
-                    <Badge variant={getImpactVariant(v.impact ?? "minor")}>
+                    <Badge variant={getImpactVariant(v.impact ?? "serious")}>
                       {v.impact}
                     </Badge>
                     <span className="flex-1">{v.description}</span>
