@@ -1,0 +1,160 @@
+@custom-variant dark (&:is(.dark *));
+
+@font-face {
+  font-family: 'Geist';
+  src: url('/fonts/Geist.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'JetBrainsMono';
+  src: url('/fonts/JetBrainsMono.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --background: #f9fafa;
+  --foreground: rgba(0, 0, 0, 0.85);
+  --card: #ffffff;
+  --card-foreground: rgba(0, 0, 0, 0.85);
+  --popover: #ffffff;
+  --popover-foreground: rgba(0, 0, 0, 0.85);
+  --primary: rgba(0, 0, 0, 0.85);
+  --primary-foreground: #f9fafa;
+  --secondary: rgba(0, 0, 0, 0.04);
+  --secondary-foreground: rgba(0, 0, 0, 0.85);
+  --muted: rgba(0, 0, 0, 0.04);
+  --muted-foreground: rgba(0, 0, 0, 0.4);
+  --accent: rgba(0, 0, 0, 0.04);
+  --accent-foreground: rgba(0, 0, 0, 0.85);
+  --destructive: #dc2626;
+  --border: rgba(0, 0, 0, 0.1);
+  --input: rgba(0, 0, 0, 0.1);
+  --ring: rgba(0, 0, 0, 0.4);
+  --chart-1: oklch(0.809 0.105 251.813);
+  --chart-2: oklch(0.623 0.214 259.815);
+  --chart-3: oklch(0.546 0.245 262.881);
+  --chart-4: oklch(0.488 0.243 264.376);
+  --chart-5: oklch(0.424 0.199 265.638);
+  --radius: 0.45rem;
+  --sidebar: #f9fafa;
+  --sidebar-foreground: rgba(0, 0, 0, 0.85);
+  --sidebar-primary: rgba(0, 0, 0, 0.85);
+  --sidebar-primary-foreground: #f9fafa;
+  --sidebar-accent: rgba(0, 0, 0, 0.04);
+  --sidebar-accent-foreground: rgba(0, 0, 0, 0.85);
+  --sidebar-border: rgba(0, 0, 0, 0.1);
+  --sidebar-ring: rgba(0, 0, 0, 0.4);
+
+  --content-width: 25rem;
+  --selection: rgba(0, 0, 0, 0.08);
+  --code-bg: rgba(0, 0, 0, 0.04);
+  --mark: #f3ffc4;
+  --text-tertiary: rgba(0, 0, 0, 0.24);
+
+  --sans: Geist;
+  --mono: JetBrainsMono;
+  --font-size-s: 0.8125rem;
+  --font-size-m: 0.9375rem;
+  --font-size-l: 1.0625rem;
+  --font-weight-light: 350;
+  --font-weight-regular: 400;
+  --font-weight-bold: 500;
+  --spacing-s: -0.08em;
+  --spacing-m: -0.02em;
+}
+
+.dark {
+  --background: #1c1c1c;
+  --foreground: rgba(255, 255, 255, 0.9);
+  --card: #242424;
+  --card-foreground: rgba(255, 255, 255, 0.9);
+  --popover: #242424;
+  --popover-foreground: rgba(255, 255, 255, 0.9);
+  --primary: rgba(255, 255, 255, 0.9);
+  --primary-foreground: #1c1c1c;
+  --secondary: rgba(255, 255, 255, 0.04);
+  --secondary-foreground: rgba(255, 255, 255, 0.9);
+  --muted: rgba(255, 255, 255, 0.04);
+  --muted-foreground: rgba(255, 255, 255, 0.4);
+  --accent: rgba(255, 255, 255, 0.04);
+  --accent-foreground: rgba(255, 255, 255, 0.9);
+  --destructive: #f87171;
+  --border: rgba(255, 255, 255, 0.1);
+  --input: rgba(255, 255, 255, 0.1);
+  --ring: rgba(255, 255, 255, 0.4);
+  --chart-1: oklch(0.809 0.105 251.813);
+  --chart-2: oklch(0.623 0.214 259.815);
+  --chart-3: oklch(0.546 0.245 262.881);
+  --chart-4: oklch(0.488 0.243 264.376);
+  --chart-5: oklch(0.424 0.199 265.638);
+  --sidebar: #1c1c1c;
+  --sidebar-foreground: rgba(255, 255, 255, 0.9);
+  --sidebar-primary: rgba(255, 255, 255, 0.9);
+  --sidebar-primary-foreground: #1c1c1c;
+  --sidebar-accent: rgba(255, 255, 255, 0.04);
+  --sidebar-accent-foreground: rgba(255, 255, 255, 0.9);
+  --sidebar-border: rgba(255, 255, 255, 0.1);
+  --sidebar-ring: rgba(255, 255, 255, 0.4);
+
+  --selection: rgba(255, 255, 255, 0.08);
+  --code-bg: rgba(255, 255, 255, 0.04);
+  --mark: #545b37;
+  --text-tertiary: rgba(255, 255, 255, 0.24);
+}
+
+@theme inline {
+  --font-sans: Geist, system-ui, sans-serif;
+  --font-mono: JetBrainsMono, ui-monospace, monospace;
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply font-sans bg-background text-foreground;
+  }
+}

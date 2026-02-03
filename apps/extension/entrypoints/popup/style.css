@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "@/src/styles/global.css";
 
 @theme {
   --animate-spin-slow: spin 20s linear infinite;
@@ -10,8 +11,3 @@ body {
   min-height: 400px;
 }
 
-body {
-  margin: 0;
-  background-color: #242424;
-  color: rgba(255, 255, 255, 0.87);
-}
