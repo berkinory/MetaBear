@@ -25,6 +25,14 @@ export interface ImageInfo {
   hasAlt: boolean;
 }
 
+export interface LinkInfo {
+  href: string;
+  text: string;
+  title: string | null;
+  isExternal: boolean;
+  hasNofollow: boolean;
+}
+
 export interface MetadataInfo {
   title: string | null;
   description: string | null;
@@ -54,6 +62,7 @@ export interface AuditResult {
   metadata: MetadataInfo;
   headings: HeadingInfo[];
   images: ImageInfo[];
+  links: LinkInfo[];
 }
 
 export interface AuditMessage {

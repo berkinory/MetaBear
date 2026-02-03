@@ -6,6 +6,7 @@ import type {
   HeadingInfo,
   ImageInfo,
   Issue,
+  LinkInfo,
   MetadataInfo,
 } from "@/types/audit";
 
@@ -36,6 +37,7 @@ export default defineContentScript({
               issues: [],
               headings: [],
               images: [],
+              links: [],
               metadata: {
                 title: null,
                 description: null,
@@ -95,6 +97,8 @@ async function runAudit(): Promise<AuditResult> {
 
   const images = collectImages();
 
+  const links = collectLinks();
+
   const seoIssues = auditSEO(metadata);
   issues.push(...seoIssues);
 
@@ -104,7 +108,10 @@ async function runAudit(): Promise<AuditResult> {
   const imageIssues = auditImages(images);
   issues.push(...imageIssues);
 
-  return { accessibility, issues, metadata, headings, images };
+  const linkIssues = auditLinks(links);
+  issues.push(...linkIssues);
+
+  return { accessibility, issues, metadata, headings, images, links };
 }
 
 function collectMetadata(): MetadataInfo {
@@ -515,6 +522,85 @@ function auditHeadings(headings: HeadingInfo[]): Issue[] {
       id: "heading-first-not-h1",
       title: "First heading is not H1",
       description: `First heading on the page is h${headings[0].level}. The first heading should be an h1.`,
+    });
+  }
+
+  return issues;
+}
+
+function collectLinks(): LinkInfo[] {
+  const links: LinkInfo[] = [];
+  const linkElements = document.querySelectorAll("a[href]");
+
+  for (const link of linkElements) {
+    const href = link.getAttribute("href");
+    if (!href || href.trim() === "" || href === "#") {
+      continue;
+    }
+
+    const text = link.textContent?.trim() || "";
+    const title = link.getAttribute("title");
+    const rel = link.getAttribute("rel") || "";
+
+    let isExternal = false;
+    try {
+      const linkUrl = new URL(href, window.location.href);
+      isExternal = linkUrl.origin !== window.location.origin;
+    } catch {
+      isExternal = false;
+    }
+
+    const hasNofollow = rel.split(/\s+/).includes("nofollow");
+
+    links.push({
+      href,
+      text,
+      title,
+      isExternal,
+      hasNofollow,
+    });
+  }
+
+  return links;
+}
+
+function auditLinks(links: LinkInfo[]): Issue[] {
+  const issues: Issue[] = [];
+
+  if (links.length === 0) {
+    return issues;
+  }
+
+  let emptyTextCount = 0;
+  let externalWithoutNofollowCount = 0;
+
+  for (const link of links) {
+    if (!link.text || link.text.trim() === "") {
+      emptyTextCount += 1;
+    }
+
+    if (link.isExternal && !link.hasNofollow) {
+      externalWithoutNofollowCount += 1;
+    }
+  }
+
+  if (emptyTextCount > 0) {
+    issues.push({
+      type: "accessibility",
+      severity: "serious",
+      id: "link-empty-text",
+      title: "Links with empty text",
+      description: `${emptyTextCount} link(s) have no visible text. All links should have descriptive text for accessibility.`,
+    });
+  }
+
+  if (externalWithoutNofollowCount > 0) {
+    issues.push({
+      type: "seo",
+      severity: "serious",
+      id: "link-external-nofollow",
+      title: "External links without nofollow",
+      description: `${externalWithoutNofollowCount} external link(s) don't have rel="nofollow". Consider adding nofollow to external links to preserve PageRank.`,
     });
   }
 
