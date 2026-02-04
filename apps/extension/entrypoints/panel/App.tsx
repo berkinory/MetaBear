@@ -96,13 +96,18 @@ export default function App() {
   }, []);
 
   return (
-    <div className="flex h-full w-full flex-col overflow-hidden rounded-3xl pb-1 shadow-[0_0_0_1px_rgba(255,255,255,0.1),0_4px_24px_rgba(0,0,0,0.4)]" style={{ backgroundColor: 'rgba(48, 48, 48, 1)' }}>
+    <div
+      className="flex h-full w-full flex-col overflow-hidden rounded-3xl pb-1 shadow-[0_0_0_1px_rgba(255,255,255,0.1),0_4px_24px_rgba(0,0,0,0.4)]"
+      style={{ backgroundColor: "rgba(48, 48, 48, 1)" }}
+    >
       <header className="flex items-center justify-between gap-3 border-b border-white/10 px-4 py-3">
         <div className="flex items-center gap-2.5">
           <img src="/icon/128.png" alt="MetaBear" className="h-7 w-7" />
           <div className="flex flex-col">
             <span className="text-sm font-semibold">MetaBear</span>
-            <span className="text-[11px] text-muted-foreground">metabear.dev</span>
+            <span className="text-[11px] text-muted-foreground">
+              metabear.dev
+            </span>
           </div>
         </div>
         <button
@@ -122,85 +127,73 @@ export default function App() {
       <Tabs defaultValue="audit" className="min-h-0 flex-1 flex flex-col gap-0">
         <TabsList
           variant="line"
-          className="w-full justify-between border-b border-white/10 bg-transparent px-2 py-1"
+          className="grid h-auto w-full grid-cols-3 gap-1 border-b border-white/10 bg-transparent p-2"
         >
           <TabsTrigger
             value="audit"
-            aria-label="Audit"
-            title="Audit"
-            className="h-9 w-9 p-0"
+            className="flex h-8 items-center justify-center gap-1.5 rounded-md px-2 text-xs text-white/60 transition-colors data-[state=active]:bg-white/15 data-[state=active]:text-white"
           >
             <HugeiconsIcon
               icon={Analytics01Icon}
               strokeWidth={2}
-              className="size-4"
+              className="size-3.5"
             />
-            <span className="sr-only">Audit</span>
-          </TabsTrigger>
-          <TabsTrigger
-            value="headings"
-            aria-label="Headings"
-            title="Headings"
-            className="h-9 w-9 p-0"
-          >
-            <HugeiconsIcon
-              icon={HeadingIcon}
-              strokeWidth={2}
-              className="size-4"
-            />
-            <span className="sr-only">Headings</span>
-          </TabsTrigger>
-          <TabsTrigger
-            value="images"
-            aria-label="Images"
-            title="Images"
-            className="h-9 w-9 p-0"
-          >
-            <HugeiconsIcon
-              icon={Image01Icon}
-              strokeWidth={2}
-              className="size-4"
-            />
-            <span className="sr-only">Images</span>
-          </TabsTrigger>
-          <TabsTrigger
-            value="links"
-            aria-label="Links"
-            title="Links"
-            className="h-9 w-9 p-0"
-          >
-            <HugeiconsIcon
-              icon={Link01Icon}
-              strokeWidth={2}
-              className="size-4"
-            />
-            <span className="sr-only">Links</span>
+            <span>Audit</span>
           </TabsTrigger>
           <TabsTrigger
             value="metadata"
-            aria-label="Metadata"
-            title="Metadata"
-            className="h-9 w-9 p-0"
+            className="flex h-8 items-center justify-center gap-1.5 rounded-md px-2 text-xs text-white/60 transition-colors data-[state=active]:bg-white/15 data-[state=active]:text-white"
           >
             <HugeiconsIcon
               icon={InformationCircleIcon}
               strokeWidth={2}
-              className="size-4"
+              className="size-3.5"
             />
-            <span className="sr-only">Metadata</span>
+            <span>Meta</span>
+          </TabsTrigger>
+          <TabsTrigger
+            value="headings"
+            className="flex h-8 items-center justify-center gap-1.5 rounded-md px-2 text-xs text-white/60 transition-colors data-[state=active]:bg-white/15 data-[state=active]:text-white"
+          >
+            <HugeiconsIcon
+              icon={HeadingIcon}
+              strokeWidth={2}
+              className="size-3.5"
+            />
+            <span>Headings</span>
+          </TabsTrigger>
+          <TabsTrigger
+            value="images"
+            className="flex h-8 items-center justify-center gap-1.5 rounded-md px-2 text-xs text-white/60 transition-colors data-[state=active]:bg-white/15 data-[state=active]:text-white"
+          >
+            <HugeiconsIcon
+              icon={Image01Icon}
+              strokeWidth={2}
+              className="size-3.5"
+            />
+            <span>Images</span>
+          </TabsTrigger>
+          <TabsTrigger
+            value="links"
+            className="flex h-8 items-center justify-center gap-1.5 rounded-md px-2 text-xs text-white/60 transition-colors data-[state=active]:bg-white/15 data-[state=active]:text-white"
+          >
+            <HugeiconsIcon
+              icon={Link01Icon}
+              strokeWidth={2}
+              className="size-3.5"
+            />
+            <span>Links</span>
           </TabsTrigger>
           <TabsTrigger
             value="social"
-            aria-label="Social"
-            title="Social"
-            className="h-9 w-9 p-0"
+            className="flex h-8 items-center justify-center gap-1.5 rounded-md px-2 text-xs text-white/60 transition-colors data-[state=active]:bg-white/15 data-[state=active]:text-white"
           >
             <HugeiconsIcon
               icon={Share08Icon}
               strokeWidth={2}
-              className="size-4"
+              className="size-3.5"
             />
-            <span className="sr-only">Social</span>
+            <span>Social</span>
           </TabsTrigger>
         </TabsList>
 
@@ -214,6 +207,14 @@ export default function App() {
           />
         </TabsContent>
 
+        <TabsContent value="metadata" className="flex-1 p-4 overflow-auto">
+          <MetadataTab
+            metadata={result?.metadata || null}
+            linkCount={result?.links.length ?? 0}
+            imageCount={result?.images.length ?? 0}
+          />
+        </TabsContent>
+
         <TabsContent value="headings" className="flex-1 p-4 overflow-auto">
           <HeadingsTab headings={result?.headings || null} />
         </TabsContent>
@@ -224,10 +225,6 @@ export default function App() {
 
         <TabsContent value="links" className="flex-1 p-4 overflow-auto">
           <LinksTab links={result?.links || null} />
-        </TabsContent>
-
-        <TabsContent value="metadata" className="flex-1 p-4 overflow-auto">
-          <MetadataTab metadata={result?.metadata || null} />
         </TabsContent>
 
         <TabsContent value="social" className="flex-1 p-4 overflow-auto">
