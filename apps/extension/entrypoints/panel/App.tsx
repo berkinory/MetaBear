@@ -43,7 +43,7 @@ const isRestrictedUrl = (url: string | undefined): boolean => {
 
 const handleClose = () => {
   if (typeof window !== "undefined") {
-    window.parent?.postMessage({ type: "CLOSE_PANEL" }, window.location.origin);
+    window.parent?.postMessage({ type: "CLOSE_PANEL" }, "*");
   }
 };
 
