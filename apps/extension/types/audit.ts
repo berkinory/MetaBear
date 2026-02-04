@@ -1,7 +1,7 @@
 import type { AxeResults } from "axe-core";
 
 export type IssueType = "accessibility" | "seo" | "performance" | "security";
-export type IssueSeverity = "critical" | "serious";
+export type IssueSeverity = "high" | "medium";
 
 export interface Issue {
   type: IssueType;
@@ -40,6 +40,9 @@ export interface MetadataInfo {
   lang: string | null;
   keywords: string | null;
   author: string | null;
+  wordCount: number;
+  charCount: number;
+  url: string;
   openGraph: {
     title: string | null;
     description: string | null;
@@ -53,6 +56,11 @@ export interface MetadataInfo {
     description: string | null;
     image: string | null;
   };
+  robots: {
+    url: string;
+    exists: boolean;
+  };
+  sitemaps: string[];
 }
 
 export interface AuditResult {
@@ -63,10 +71,15 @@ export interface AuditResult {
   headings: HeadingInfo[];
   images: ImageInfo[];
   links: LinkInfo[];
+  score: number;
 }
 
 export interface AuditMessage {
   type: "RUN_AUDIT";
+}
+
+export interface TogglePanelMessage {
+  type: "TOGGLE_PANEL";
 }
 
 export interface AuditForTabMessage {
@@ -80,4 +93,4 @@ export interface AuditResponse {
   success: boolean;
 }
 
-export type Message = AuditForTabMessage | AuditMessage;
+export type Message = AuditForTabMessage | AuditMessage | TogglePanelMessage;

@@ -5,6 +5,33 @@ import type {
 } from "@/types/audit";
 
 export default defineBackground(() => {
+  browser.action.onClicked.addListener(async (tab) => {
+    if (!tab.id) {
+      return;
+    }
+
+    if (isRestrictedUrl(tab.url)) {
+      return;
+    }
+
+    try {
+      await browser.tabs.sendMessage(tab.id, { type: "TOGGLE_PANEL" });
+      return;
+    } catch {
+      // No content script yet
+    }
+
+    try {
+      await browser.scripting.executeScript({
+        target: { tabId: tab.id },
+        files: ["content-scripts/content.js"],
+      });
+      await browser.tabs.sendMessage(tab.id, { type: "TOGGLE_PANEL" });
+    } catch {
+      // Ignore injection failures on restricted pages.
+    }
+  });
+
   browser.runtime.onMessage.addListener(
     (message: AuditForTabMessage, _sender, sendResponse) => {
       if (message.type === "RUN_AUDIT_FOR_TAB") {
@@ -26,6 +53,26 @@ export default defineBackground(() => {
     }
   );
 });
+
+const isRestrictedUrl = (url: string | undefined): boolean => {
+  if (!url) {
+    return true;
+  }
+
+  const restrictedPatterns = [
+    /^chrome:\/\//,
+    /^chrome-extension:\/\//,
+    /^edge:\/\//,
+    /^about:/,
+    /^view-source:/,
+    /^file:\/\//,
+    /^https?:\/\/chrome\.google\.com\/webstore/,
+    /^https?:\/\/chromewebstore\.google\.com/,
+    /^https?:\/\/microsoftedge\.microsoft\.com\/addons/,
+  ];
+
+  return restrictedPatterns.some((pattern) => pattern.test(url));
+};
 
 async function runAuditForTab(tabId: number): Promise<AuditResult> {
   return browser.tabs.sendMessage(tabId, { type: "RUN_AUDIT" });

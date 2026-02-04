@@ -98,11 +98,51 @@ export function AuditTab({
 
   return (
     <div className="space-y-4">
+      <ScoreCard score={result.score} issues={result.issues} />
       {result.issues.length > 0 && <IssuesCard issues={result.issues} />}
       {result.accessibility && (
         <AccessibilityCard data={result.accessibility} />
       )}
     </div>
+  );
+}
+
+function ScoreCard({ score, issues }: { score: number; issues: Issue[] }) {
+  const highCount = issues.filter((i) => i.severity === "high").length;
+  const mediumCount = issues.filter((i) => i.severity === "medium").length;
+
+  let scoreColor = "text-red-500";
+  if (score >= 80) {
+    scoreColor = "text-green-500";
+  } else if (score >= 60) {
+    scoreColor = "text-yellow-500";
+  }
+
+  return (
+    <Card>
+      <CardContent className="pt-6 pb-5">
+        <div className="flex flex-col items-center gap-1">
+          <div className={`text-5xl font-bold tabular-nums ${scoreColor}`}>
+            {score}
+          </div>
+          <div className="text-xs text-muted-foreground">out of 100</div>
+          <div className="flex gap-4 mt-2 text-xs text-muted-foreground">
+            <span>
+              <span className="text-destructive font-semibold">
+                {highCount}
+              </span>{" "}
+              high
+            </span>
+            <span>
+              <span className="text-yellow-500 font-semibold">
+                {mediumCount}
+              </span>{" "}
+              medium
+            </span>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -127,7 +167,13 @@ function IssuesCard({ issues }: { issues: Issue[] }) {
           <Card key={issue.id} className="bg-muted">
             <CardContent className="pt-4">
               <div className="flex items-start gap-2">
-                <Badge variant="destructive">{issue.severity}</Badge>
+                <Badge
+                  variant={
+                    issue.severity === "high" ? "destructive" : "secondary"
+                  }
+                >
+                  {issue.severity}
+                </Badge>
                 <div className="flex-1 space-y-1">
                   <div className="flex items-start gap-2">
                     <span
@@ -153,7 +199,7 @@ function IssuesCard({ issues }: { issues: Issue[] }) {
 }
 
 function AccessibilityCard({ data }: { data: AxeResults }) {
-  const criticalViolations = data.violations.filter(
+  const violations = data.violations.filter(
     (v) => v.impact === "critical" || v.impact === "serious"
   );
 
@@ -167,7 +213,7 @@ function AccessibilityCard({ data }: { data: AxeResults }) {
           <Card className="border-destructive/50 bg-destructive/10">
             <CardContent className="pt-4">
               <div className="text-lg font-bold text-destructive">
-                {criticalViolations.length}
+                {violations.length}
               </div>
               <div className="text-xs text-muted-foreground">Violations</div>
             </CardContent>
@@ -190,12 +236,12 @@ function AccessibilityCard({ data }: { data: AxeResults }) {
           </Card>
         </div>
 
-        {criticalViolations.length > 0 && (
+        {violations.length > 0 && (
           <div className="space-y-2">
             <h3 className="text-xs font-semibold text-muted-foreground">
               Top Issues:
             </h3>
-            {criticalViolations.slice(0, 3).map((v) => (
+            {violations.slice(0, 3).map((v) => (
               <Card key={v.id} className="bg-muted">
                 <CardContent className="pt-4">
                   <div className="text-xs flex items-start gap-2">

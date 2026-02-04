@@ -8,21 +8,63 @@ import type {
   Issue,
   LinkInfo,
   MetadataInfo,
+  TogglePanelMessage,
 } from "@/types/audit";
 
+const CONTENT_SCRIPT_FLAG = "__metabear_content_script_ready__";
 let listenerRegistered = false;
+let panelMounted = false;
+let panelRoot: HTMLDivElement | null = null;
+let closeListenerRegistered = false;
+
+const PANEL_CONTAINER_ID = "__metabear_panel__";
+const PANEL_URL = browser.runtime.getURL("/panel.html");
+const PANEL_ORIGIN = new URL(PANEL_URL).origin;
 
 export default defineContentScript({
   main() {
+    const globalScope = globalThis as typeof globalThis & {
+      [CONTENT_SCRIPT_FLAG]?: boolean;
+    };
+
+    if (globalScope[CONTENT_SCRIPT_FLAG]) {
+      return;
+    }
+
+    globalScope[CONTENT_SCRIPT_FLAG] = true;
+
     if (listenerRegistered) {
       return;
     }
 
+    if (!closeListenerRegistered) {
+      window.addEventListener("message", (event) => {
+        if (!panelMounted) {
+          return;
+        }
+
+        if (event.origin !== PANEL_ORIGIN) {
+          return;
+        }
+
+        if (event.data?.type === "CLOSE_PANEL") {
+          togglePanel();
+        }
+      });
+      closeListenerRegistered = true;
+    }
+
     const messageListener = (
-      message: AuditMessage,
+      message: AuditMessage | TogglePanelMessage,
       _sender: unknown,
-      sendResponse: (response: AuditResult) => void
+      sendResponse: (response?: AuditResult) => void
     ) => {
+      if (message.type === "TOGGLE_PANEL") {
+        togglePanel();
+        sendResponse();
+        return false;
+      }
+
       if (message.type === "RUN_AUDIT") {
         (async () => {
           try {
@@ -38,6 +80,7 @@ export default defineContentScript({
               headings: [],
               images: [],
               links: [],
+              score: 100,
               metadata: {
                 title: null,
                 description: null,
@@ -45,6 +88,9 @@ export default defineContentScript({
                 lang: null,
                 keywords: null,
                 author: null,
+                wordCount: 0,
+                charCount: 0,
+                url: "",
                 openGraph: {
                   title: null,
                   description: null,
@@ -58,6 +104,8 @@ export default defineContentScript({
                   description: null,
                   image: null,
                 },
+                robots: { url: "", exists: false },
+                sitemaps: [],
               },
             });
           }
@@ -70,8 +118,48 @@ export default defineContentScript({
     browser.runtime.onMessage.addListener(messageListener);
     listenerRegistered = true;
   },
-  matches: ["http://*/*", "https://*/*"],
+  registration: "runtime",
 });
+
+function togglePanel(): void {
+  if (panelMounted) {
+    panelRoot?.remove();
+    panelRoot = null;
+    panelMounted = false;
+    return;
+  }
+
+  const existing = document.getElementById(PANEL_CONTAINER_ID);
+  if (existing) {
+    existing.remove();
+  }
+
+  panelRoot = document.createElement("div");
+  panelRoot.id = PANEL_CONTAINER_ID;
+  panelRoot.setAttribute("aria-hidden", "false");
+  panelRoot.style.position = "fixed";
+  panelRoot.style.top = "12px";
+  panelRoot.style.right = "12px";
+  panelRoot.style.width = "360px";
+  panelRoot.style.height = "600px";
+  panelRoot.style.zIndex = "2147483647";
+  panelRoot.style.borderRadius = "16px";
+  panelRoot.style.overflow = "hidden";
+  panelRoot.style.background = "transparent";
+
+  const iframe = document.createElement("iframe");
+  iframe.src = PANEL_URL;
+  iframe.style.width = "100%";
+  iframe.style.height = "100%";
+  iframe.style.border = "0";
+  iframe.style.display = "block";
+  iframe.setAttribute("allowtransparency", "true");
+  iframe.setAttribute("title", "MetaBear Panel");
+
+  panelRoot.appendChild(iframe);
+  document.documentElement.appendChild(panelRoot);
+  panelMounted = true;
+}
 
 async function runAudit(): Promise<AuditResult> {
   const accessibility = await axe.run(document);
@@ -82,7 +170,9 @@ async function runAudit(): Promise<AuditResult> {
     .filter((v) => v.impact === "critical" || v.impact === "serious")
     .map((v) => ({
       type: "accessibility" as const,
-      severity: v.impact as "critical" | "serious",
+      severity: (v.impact === "critical" ? "high" : "medium") as
+        | "high"
+        | "medium",
       id: v.id,
       title: v.help,
       description: v.description,
@@ -91,7 +181,9 @@ async function runAudit(): Promise<AuditResult> {
 
   issues.push(...accessibilityIssues);
 
-  const metadata = collectMetadata();
+  const baseMetadata = collectMetadata();
+  const { robots, sitemaps } = await checkRobotsAndSitemap();
+  const metadata = { ...baseMetadata, robots, sitemaps };
 
   const headings = collectHeadings();
 
@@ -111,10 +203,14 @@ async function runAudit(): Promise<AuditResult> {
   const linkIssues = auditLinks(links);
   issues.push(...linkIssues);
 
-  return { accessibility, issues, metadata, headings, images, links };
+  const highCount = issues.filter((i) => i.severity === "high").length;
+  const mediumCount = issues.filter((i) => i.severity === "medium").length;
+  const score = Math.max(0, 100 - highCount * 5 - mediumCount * 2);
+
+  return { accessibility, issues, metadata, headings, images, links, score };
 }
 
-function collectMetadata(): MetadataInfo {
+function collectMetadata(): Omit<MetadataInfo, "robots" | "sitemaps"> {
   const title = document.querySelector("title");
   const titleText = title?.textContent?.trim() || null;
 
@@ -147,6 +243,10 @@ function collectMetadata(): MetadataInfo {
   );
   const twitterImage = document.querySelector('meta[name="twitter:image"]');
 
+  const bodyText = document.body?.textContent?.trim() || "";
+  const wordCount = bodyText ? bodyText.split(/\s+/).length : 0;
+  const charCount = bodyText.length;
+
   return {
     title: titleText,
     description,
@@ -154,6 +254,9 @@ function collectMetadata(): MetadataInfo {
     lang,
     keywords,
     author,
+    wordCount,
+    charCount,
+    url: document.URL,
     openGraph: {
       title: ogTitle?.getAttribute("content") || null,
       description: ogDescription?.getAttribute("content") || null,
@@ -176,156 +279,124 @@ function auditSEO(metadata: MetadataInfo): Issue[] {
   if (!metadata.title) {
     issues.push({
       type: "seo",
-      severity: "critical",
+      severity: "high",
       id: "seo-missing-title",
-      title: "Missing page title",
-      description:
-        "Page is missing a <title> tag. Title is crucial for SEO and user experience.",
+      title: "Missing Page Title",
+      description: "No <title> tag found. Required for SEO and browser tabs.",
     });
-  } else if (metadata.title.length < 30) {
+  } else if (metadata.title.length < 40) {
     issues.push({
       type: "seo",
-      severity: "serious",
+      severity: "high",
       id: "seo-title-too-short",
-      title: "Page title too short",
-      description: `Title is only ${metadata.title.length} characters. Recommended: 50-60 characters for optimal SEO.`,
+      title: "Short Page Title",
+      description: `Title is ${metadata.title.length} chars. Recommended: 40–60 characters.`,
     });
   } else if (metadata.title.length > 60) {
     issues.push({
       type: "seo",
-      severity: "serious",
+      severity: "high",
       id: "seo-title-too-long",
-      title: "Page title too long",
-      description: `Title is ${metadata.title.length} characters. It may be truncated in search results (recommended: 50-60 characters).`,
+      title: "Long Page Title",
+      description: `Title is ${metadata.title.length} chars. Recommended: 40–60 characters.`,
     });
   }
 
   if (!metadata.description) {
     issues.push({
       type: "seo",
-      severity: "critical",
+      severity: "high",
       id: "seo-missing-description",
-      title: "Missing meta description",
+      title: "Missing Meta Description",
       description:
-        "Page is missing a meta description. This affects click-through rates from search results.",
+        "No meta description found. Affects click-through rate in search results.",
     });
-  } else if (metadata.description.length < 120) {
+  } else if (metadata.description.length < 100) {
     issues.push({
       type: "seo",
-      severity: "serious",
+      severity: "high",
       id: "seo-description-too-short",
-      title: "Meta description too short",
-      description: `Description is only ${metadata.description.length} characters. Recommended: 150-160 characters.`,
+      title: "Short Meta Description",
+      description: `Description is ${metadata.description.length} chars. Recommended: 100–150 characters.`,
     });
-  } else if (metadata.description.length > 160) {
+  } else if (metadata.description.length > 150) {
     issues.push({
       type: "seo",
-      severity: "serious",
+      severity: "high",
       id: "seo-description-too-long",
-      title: "Meta description too long",
-      description: `Description is ${metadata.description.length} characters. It may be truncated in search results (recommended: 150-160 characters).`,
+      title: "Long Meta Description",
+      description: `Description is ${metadata.description.length} chars. Recommended: 100–150 characters.`,
     });
   }
 
   if (!metadata.canonical) {
     issues.push({
       type: "seo",
-      severity: "serious",
+      severity: "high",
       id: "seo-missing-canonical",
-      title: "Missing canonical URL",
-      description:
-        "Page doesn't have a canonical URL. This can lead to duplicate content issues.",
+      title: "Missing Canonical",
+      description: "No canonical URL. Can cause duplicate content issues.",
     });
+  } else {
+    try {
+      const current = new URL(window.location.href);
+      const canonical = new URL(metadata.canonical, window.location.href);
+      if (
+        current.origin + current.pathname !==
+        canonical.origin + canonical.pathname
+      ) {
+        issues.push({
+          type: "seo",
+          severity: "medium",
+          id: "seo-canonical-mismatch",
+          title: "Canonical Mismatch",
+          description: `Current and canonical URLs don't match. Current: ${current.origin + current.pathname} | Canonical: ${canonical.origin + canonical.pathname}`,
+        });
+      }
+    } catch {
+      // invalid canonical URL format
+    }
   }
 
   if (!metadata.lang) {
     issues.push({
       type: "seo",
-      severity: "critical",
+      severity: "high",
       id: "seo-missing-lang",
-      title: "Missing language attribute",
-      description:
-        "The <html> element is missing a lang attribute. This affects accessibility and SEO.",
+      title: "Missing Lang Attribute",
+      description: "No lang on <html>. Required for accessibility and SEO.",
     });
   }
 
+  const missingOgTags: string[] = [];
   if (!metadata.openGraph.title) {
-    issues.push({
-      type: "seo",
-      severity: "serious",
-      id: "seo-missing-og-title",
-      title: "Missing OpenGraph title",
-      description:
-        "Missing og:title tag. This affects how your page appears when shared on social media.",
-    });
+    missingOgTags.push("og:title");
   }
-
   if (!metadata.openGraph.description) {
-    issues.push({
-      type: "seo",
-      severity: "serious",
-      id: "seo-missing-og-description",
-      title: "Missing OpenGraph description",
-      description:
-        "Missing og:description tag. This affects social media previews.",
-    });
+    missingOgTags.push("og:description");
   }
-
   if (!metadata.openGraph.image) {
+    missingOgTags.push("og:image");
+  }
+
+  if (missingOgTags.length > 0) {
     issues.push({
       type: "seo",
-      severity: "serious",
-      id: "seo-missing-og-image",
-      title: "Missing OpenGraph image",
-      description:
-        "Missing og:image tag. Social media posts without images get less engagement.",
+      severity: "medium",
+      id: "seo-missing-og-tags",
+      title: "Missing OG Tags",
+      description: `Missing: ${missingOgTags.join(", ")}. Affects social media previews.`,
     });
   }
 
-  if (!metadata.openGraph.url) {
+  if (metadata.wordCount < 100) {
     issues.push({
       type: "seo",
-      severity: "serious",
-      id: "seo-missing-og-url",
-      title: "Missing OpenGraph URL",
-      description:
-        "Missing og:url tag. This should be the canonical URL of the page.",
+      severity: "medium",
+      id: "seo-thin-content",
+      title: "Thin Content",
+      description: `Only ${metadata.wordCount} words. Pages under 100 words may be seen as thin content.`,
     });
-  }
-
-  if (!metadata.openGraph.type) {
-    issues.push({
-      type: "seo",
-      severity: "serious",
-      id: "seo-missing-og-type",
-      title: "Missing OpenGraph type",
-      description:
-        "Missing og:type tag. This helps social networks understand your content type.",
-    });
-  }
-
-  if (!metadata.twitter.card) {
-    issues.push({
-      type: "seo",
-      severity: "serious",
-      id: "seo-missing-twitter-card",
-      title: "Missing Twitter Card",
-      description:
-        "Missing twitter:card tag. This affects how your page appears on Twitter/X.",
-    });
-  }
-
-  if (metadata.keywords) {
-    const keywordCount = metadata.keywords.split(",").length;
-    if (keywordCount > 10) {
-      issues.push({
-        type: "seo",
-        severity: "serious",
-        id: "seo-keyword-stuffing",
-        title: "Potential keyword stuffing",
-        description: `Found ${keywordCount} meta keywords. Meta keywords are largely ignored by search engines and excessive use may be seen as spam.`,
-      });
-    }
   }
 
   return issues;
@@ -406,49 +477,21 @@ function auditImages(images: ImageInfo[]): Issue[] {
     return issues;
   }
 
-  const badAltPatterns = [
-    /^image$/i,
-    /^photo$/i,
-    /^picture$/i,
-    /^img$/i,
-    /^icon$/i,
-    /^logo$/i,
-    /^\d+$/,
-    /^(jpg|jpeg|png|gif|webp|svg)$/i,
-    /\.(jpg|jpeg|png|gif|webp|svg)$/i,
-  ];
-
   let missingAltCount = 0;
-  let badAltCount = 0;
 
   for (const img of images) {
     if (!img.hasAlt) {
       missingAltCount += 1;
-    } else if (img.alt && img.alt !== "") {
-      const altText: string = img.alt;
-      if (badAltPatterns.some((pattern) => pattern.test(altText))) {
-        badAltCount += 1;
-      }
     }
   }
 
   if (missingAltCount > 0) {
     issues.push({
       type: "accessibility",
-      severity: "critical",
+      severity: "high",
       id: "image-missing-alt",
-      title: "Images missing alt attribute",
-      description: `${missingAltCount} image(s) are missing alt attributes. All images must have alt attributes for accessibility.`,
-    });
-  }
-
-  if (badAltCount > 0) {
-    issues.push({
-      type: "accessibility",
-      severity: "serious",
-      id: "image-bad-alt",
-      title: "Images with poor alt text quality",
-      description: `${badAltCount} image(s) have poor quality alt text (e.g., "image", "photo", filenames). Alt text should describe the image content meaningfully.`,
+      title: "Missing Alt Text",
+      description: `${missingAltCount} image(s) without alt text. Required for screen readers.`,
     });
   }
 
@@ -461,34 +504,13 @@ function auditHeadings(headings: HeadingInfo[]): Issue[] {
   if (headings.length === 0) {
     issues.push({
       type: "accessibility",
-      severity: "serious",
+      severity: "medium",
       id: "heading-no-headings",
-      title: "No headings found",
+      title: "No Headings",
       description:
-        "Page has no heading elements (h1-h6). Headings are important for accessibility and SEO.",
+        "No h1–h6 elements found. Headings help structure and accessibility.",
     });
     return issues;
-  }
-
-  const h1Count = headings.filter((h) => h.level === 1).length;
-
-  if (h1Count === 0) {
-    issues.push({
-      type: "seo",
-      severity: "critical",
-      id: "heading-missing-h1",
-      title: "Missing H1 heading",
-      description:
-        "Page is missing an h1 heading. Every page should have exactly one h1 for SEO and accessibility.",
-    });
-  } else if (h1Count > 1) {
-    issues.push({
-      type: "seo",
-      severity: "serious",
-      id: "heading-multiple-h1",
-      title: "Multiple H1 headings",
-      description: `Page has ${h1Count} h1 headings. There should be only one h1 per page for optimal SEO.`,
-    });
   }
 
   let hasSkip = false;
@@ -506,21 +528,11 @@ function auditHeadings(headings: HeadingInfo[]): Issue[] {
   if (hasSkip) {
     issues.push({
       type: "accessibility",
-      severity: "serious",
+      severity: "medium",
       id: "heading-hierarchy-skip",
-      title: "Heading hierarchy skips detected",
+      title: "Heading Level Skip",
       description:
-        "Heading structure skips levels (e.g., h1 to h3). Headings should not skip levels for proper document structure and accessibility.",
-    });
-  }
-
-  if (h1Count > 0 && headings[0].level !== 1) {
-    issues.push({
-      type: "accessibility",
-      severity: "serious",
-      id: "heading-first-not-h1",
-      title: "First heading is not H1",
-      description: `First heading on the page is h${headings[0].level}. The first heading should be an h1.`,
+        "Levels are skipped (e.g., h1 → h3). Keep heading levels sequential.",
     });
   }
 
@@ -582,12 +594,66 @@ function auditLinks(links: LinkInfo[]): Issue[] {
   if (emptyTextCount > 0) {
     issues.push({
       type: "accessibility",
-      severity: "serious",
+      severity: "high",
       id: "link-empty-text",
-      title: "Links with empty text",
-      description: `${emptyTextCount} link(s) have no visible text. All links should have descriptive text for accessibility.`,
+      title: "Empty Link Text",
+      description: `${emptyTextCount} link(s) with no visible text. Add descriptive text for accessibility.`,
     });
   }
 
   return issues;
+}
+
+async function checkRobotsAndSitemap(): Promise<{
+  robots: { url: string; exists: boolean };
+  sitemaps: string[];
+}> {
+  const { origin } = document.location;
+  const robotsUrl = `${origin}/robots.txt`;
+  let robotsExists = false;
+  let robotsText = "";
+  const sitemaps: string[] = [];
+
+  try {
+    const response = await fetch(robotsUrl);
+    robotsExists = response.ok;
+    if (robotsExists) {
+      robotsText = await response.text();
+    }
+  } catch {
+    // robots.txt not accessible
+  }
+
+  try {
+    const sitemapUrl = `${origin}/sitemap.xml`;
+    const response = await fetch(sitemapUrl);
+    if (response.ok) {
+      const text = await response.text();
+      const doc = new DOMParser().parseFromString(text, "application/xml");
+      const locs = doc.querySelectorAll("sitemapindex loc");
+      if (locs.length > 0) {
+        for (const loc of locs) {
+          const url = loc.textContent?.trim();
+          if (url) {
+            sitemaps.push(url);
+          }
+        }
+      } else {
+        sitemaps.push(sitemapUrl);
+      }
+    }
+  } catch {
+    // sitemap.xml not accessible
+  }
+
+  if (sitemaps.length === 0 && robotsText) {
+    for (const line of robotsText.split("\n")) {
+      const match = line.match(/^Sitemap:\s*(.+)$/i);
+      if (match) {
+        sitemaps.push(match[1].trim());
+      }
+    }
+  }
+
+  return { robots: { url: robotsUrl, exists: robotsExists }, sitemaps };
 }
