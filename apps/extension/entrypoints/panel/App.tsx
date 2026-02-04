@@ -96,33 +96,33 @@ export default function App() {
   }, []);
 
   return (
-    <div className="flex h-full w-full flex-col rounded-2xl bg-background">
-      <header className="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
-        <div className="flex items-center gap-3">
-          <img src="/icon/128.png" alt="MetaBear" className="h-8 w-8" />
+    <div className="flex h-full w-full flex-col overflow-hidden rounded-3xl pb-1 shadow-[0_0_0_1px_rgba(255,255,255,0.1),0_4px_24px_rgba(0,0,0,0.4)]" style={{ backgroundColor: 'rgba(48, 48, 48, 1)' }}>
+      <header className="flex items-center justify-between gap-3 border-b border-white/10 px-4 py-3">
+        <div className="flex items-center gap-2.5">
+          <img src="/icon/128.png" alt="MetaBear" className="h-7 w-7" />
           <div className="flex flex-col">
             <span className="text-sm font-semibold">MetaBear</span>
-            <span className="text-xs text-muted-foreground">metabear.dev</span>
+            <span className="text-[11px] text-muted-foreground">metabear.dev</span>
           </div>
         </div>
         <button
           type="button"
           onClick={handleClose}
-          className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border text-muted-foreground transition hover:text-foreground"
+          className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-white/20 bg-white/10 text-muted-foreground transition hover:bg-white/20 hover:text-foreground"
           aria-label="Close panel"
           title="Close"
         >
           <HugeiconsIcon
             icon={Cancel01Icon}
             strokeWidth={2}
-            className="size-4"
+            className="size-3.5"
           />
         </button>
       </header>
-      <Tabs defaultValue="audit" className="flex-1 flex flex-col gap-0">
+      <Tabs defaultValue="audit" className="min-h-0 flex-1 flex flex-col gap-0">
         <TabsList
           variant="line"
-          className="w-full justify-between border-b border-border bg-background/95 px-2 py-1"
+          className="w-full justify-between border-b border-white/10 bg-transparent px-2 py-1"
         >
           <TabsTrigger
             value="audit"
