@@ -375,7 +375,7 @@ function IssuesCard({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Issues</CardTitle>
+        <CardTitle className="text-muted-foreground">Issues</CardTitle>
       </CardHeader>
       <CardContent className="space-y-2">
         {loading ? (

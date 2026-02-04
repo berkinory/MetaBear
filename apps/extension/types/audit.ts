@@ -40,6 +40,7 @@ export interface MetadataInfo {
   lang: string | null;
   keywords: string | null;
   author: string | null;
+  robotsContent: string | null;
   favicon: string | null;
   wordCount: number;
   charCount: number;

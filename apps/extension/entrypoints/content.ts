@@ -88,6 +88,7 @@ export default defineContentScript({
                 lang: null,
                 keywords: null,
                 author: null,
+                robotsContent: null,
                 favicon: null,
                 wordCount: 0,
                 charCount: 0,
@@ -229,6 +230,9 @@ function collectMetadata(): Omit<MetadataInfo, "robots" | "sitemaps"> {
   const metaAuthor = document.querySelector('meta[name="author"]');
   const author = metaAuthor?.getAttribute("content") || null;
 
+  const metaRobots = document.querySelector('meta[name="robots"]');
+  const robotsContent = metaRobots?.getAttribute("content") || null;
+
   const faviconEl = document.querySelector(
     'link[rel="icon"], link[rel="shortcut icon"], link[rel="apple-touch-icon"]'
   );
@@ -261,6 +265,7 @@ function collectMetadata(): Omit<MetadataInfo, "robots" | "sitemaps"> {
     lang,
     keywords,
     author,
+    robotsContent,
     favicon,
     wordCount,
     charCount,
@@ -298,7 +303,7 @@ function auditSEO(metadata: MetadataInfo): Issue[] {
       severity: "high",
       id: "seo-title-too-short",
       title: "Short Page Title",
-      description: `Title is ${metadata.title.length} chars. Recommended: 40–60 characters.`,
+      description: `Title is ${metadata.title.length} characters. Recommended: 40–60 characters.`,
     });
   } else if (metadata.title.length > 60) {
     issues.push({
@@ -306,7 +311,7 @@ function auditSEO(metadata: MetadataInfo): Issue[] {
       severity: "high",
       id: "seo-title-too-long",
       title: "Long Page Title",
-      description: `Title is ${metadata.title.length} chars. Recommended: 40–60 characters.`,
+      description: `Title is ${metadata.title.length} characters. Recommended: 40–60 characters.`,
     });
   }
 
@@ -325,7 +330,7 @@ function auditSEO(metadata: MetadataInfo): Issue[] {
       severity: "high",
       id: "seo-description-too-short",
       title: "Short Meta Description",
-      description: `Description is ${metadata.description.length} chars. Recommended: 100–150 characters.`,
+      description: `Description is ${metadata.description.length} characters. Recommended: 100–150 characters.`,
     });
   } else if (metadata.description.length > 150) {
     issues.push({
@@ -333,7 +338,7 @@ function auditSEO(metadata: MetadataInfo): Issue[] {
       severity: "high",
       id: "seo-description-too-long",
       title: "Long Meta Description",
-      description: `Description is ${metadata.description.length} chars. Recommended: 100–150 characters.`,
+      description: `Description is ${metadata.description.length} characters. Recommended: 100–150 characters.`,
     });
   }
 
