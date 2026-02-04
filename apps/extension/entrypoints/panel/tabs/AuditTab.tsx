@@ -1,11 +1,13 @@
+/* oxlint-disable react/no-multi-comp */
 import {
+  Copy01Icon,
   DashboardSpeed01Icon,
-  SecurityIcon,
-  UniversalAccessIcon,
   SeoIcon,
+  SecurityIcon,
+  Tick02Icon,
+  UniversalAccessIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-/* oxlint-disable react/no-multi-comp */
 import {
   animate,
   motion,
@@ -13,7 +15,7 @@ import {
   useMotionValue,
   useTransform,
 } from "motion/react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import type { AuditResult, Issue, MetadataInfo } from "@/types/audit";
 
@@ -314,6 +316,28 @@ function ScoreCard({
   );
 }
 
+const copyToClipboard = async (text: string) => {
+  try {
+    await navigator.clipboard.writeText(text);
+    return;
+  } catch {
+    // Fallback
+  }
+
+  const textarea = document.createElement("textarea");
+  textarea.value = text;
+  textarea.setAttribute("readonly", "true");
+  textarea.style.position = "absolute";
+  textarea.style.left = "-9999px";
+  document.body.appendChild(textarea);
+  textarea.select();
+  document.execCommand("copy");
+  textarea.remove();
+};
+
+const buildPrompt = (issue: Issue) =>
+  `This is a comment from MetaBear browser extension: ${issue.title}. ${issue.description} How can I resolve this? If you propose a fix, please make it concise.`;
+
 function IssuesCard({
   loading,
   issues,
@@ -321,6 +345,18 @@ function IssuesCard({
   loading: boolean;
   issues: Issue[] | null;
 }) {
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const copiedTimeoutRef = useRef<number | null>(null);
+
+  useEffect(
+    () => () => {
+      if (copiedTimeoutRef.current) {
+        window.clearTimeout(copiedTimeoutRef.current);
+      }
+    },
+    []
+  );
+
   const getIssueIcon = (type: Issue["type"]) => {
     const icons: Record<Issue["type"], typeof SeoIcon> = {
       accessibility: UniversalAccessIcon,
@@ -355,24 +391,53 @@ function IssuesCard({
         ) : (
           issues?.map((issue) => (
             <Card key={issue.id} className="border border-white/10 bg-white/5">
-              <CardContent className="space-y-2 py-0">
-                <Badge
-                  variant="secondary"
-                  className={
-                    issue.severity === "high"
-                      ? "w-fit gap-1 select-none bg-red-500/15 text-red-200"
-                      : "w-fit gap-1 select-none bg-orange-400/15 text-orange-200"
-                  }
-                >
-                  <HugeiconsIcon
-                    icon={getIssueIcon(issue.type)}
-                    strokeWidth={2}
-                    className="size-3"
-                  />
-                  {issue.type === "seo"
-                    ? "SEO"
-                    : issue.type.charAt(0).toUpperCase() + issue.type.slice(1)}
-                </Badge>
+              <CardContent className="space-y-1 py-0">
+                <div className="flex items-start justify-between gap-2">
+                  <Badge
+                    variant="secondary"
+                    className={
+                      issue.severity === "high"
+                        ? "w-fit gap-1 select-none bg-red-500/15 text-red-200"
+                        : "w-fit gap-1 select-none bg-orange-400/15 text-orange-200"
+                    }
+                  >
+                    <HugeiconsIcon
+                      icon={getIssueIcon(issue.type)}
+                      strokeWidth={2}
+                      className="size-3"
+                    />
+                    {issue.type === "seo"
+                      ? "SEO"
+                      : issue.type.charAt(0).toUpperCase() +
+                        issue.type.slice(1)}
+                  </Badge>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground"
+                    onClick={async () => {
+                      await copyToClipboard(buildPrompt(issue));
+                      setCopiedId(issue.id);
+                      if (copiedTimeoutRef.current) {
+                        window.clearTimeout(copiedTimeoutRef.current);
+                      }
+                      copiedTimeoutRef.current = window.setTimeout(() => {
+                        setCopiedId(null);
+                      }, 2500);
+                    }}
+                    aria-label="Copy prompt"
+                  >
+                    <HugeiconsIcon
+                      icon={copiedId === issue.id ? Tick02Icon : Copy01Icon}
+                      strokeWidth={2}
+                      className={
+                        copiedId === issue.id
+                          ? "size-3.5 blur-[0.5px]"
+                          : "size-3.5"
+                      }
+                    />
+                  </Button>
+                </div>
                 <div className="text-sm font-medium text-foreground">
                   {issue.title}
                 </div>
