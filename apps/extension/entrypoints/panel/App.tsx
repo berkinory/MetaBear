@@ -12,6 +12,7 @@ import { useEffect, useState } from "react";
 
 import type { AuditResponse, AuditResult } from "@/types/audit";
 
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { AuditTab } from "./tabs/AuditTab";
@@ -100,7 +101,7 @@ export default function App() {
       className="flex h-full w-full flex-col overflow-hidden rounded-3xl pb-1 shadow-[0_0_0_1px_rgba(255,255,255,0.1),0_4px_24px_rgba(0,0,0,0.4)]"
       style={{ backgroundColor: "rgba(48, 48, 48, 1)" }}
     >
-      <header className="flex items-center justify-between gap-3 border-b border-white/10 px-4 py-3">
+      <header className="flex items-center justify-between gap-3 px-4 py-3">
         <div className="flex items-center gap-2.5">
           <img src="/icon/128.png" alt="MetaBear" className="h-7 w-7" />
           <div className="flex flex-col">
@@ -127,7 +128,7 @@ export default function App() {
       <Tabs defaultValue="audit" className="min-h-0 flex-1 flex flex-col gap-0">
         <TabsList
           variant="line"
-          className="grid h-auto w-full grid-cols-3 gap-1 border-b border-white/10 bg-transparent p-2"
+          className="grid h-auto w-full grid-cols-3 gap-1 bg-transparent p-2"
         >
           <TabsTrigger
             value="audit"
@@ -197,38 +198,62 @@ export default function App() {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="audit" className="flex-1 p-4 overflow-auto">
-          <AuditTab
-            error={error}
-            loading={loading}
-            result={result}
-            isRestricted={isRestricted}
-            onRetry={runAudit}
-          />
+        <TabsContent value="audit" className="flex-1 pt-1">
+          <ScrollArea className="h-full">
+            <div className="p-4">
+              <AuditTab
+                error={error}
+                loading={loading}
+                result={result}
+                isRestricted={isRestricted}
+                onRetry={runAudit}
+              />
+            </div>
+          </ScrollArea>
         </TabsContent>
 
-        <TabsContent value="metadata" className="flex-1 p-4 overflow-auto">
-          <MetadataTab
-            metadata={result?.metadata || null}
-            linkCount={result?.links.length ?? 0}
-            imageCount={result?.images.length ?? 0}
-          />
+        <TabsContent value="metadata" className="flex-1 pt-1">
+          <ScrollArea className="h-full">
+            <div className="p-4">
+              <MetadataTab
+                metadata={result?.metadata || null}
+                linkCount={result?.links.length ?? 0}
+                imageCount={result?.images.length ?? 0}
+              />
+            </div>
+          </ScrollArea>
         </TabsContent>
 
-        <TabsContent value="headings" className="flex-1 p-4 overflow-auto">
-          <HeadingsTab headings={result?.headings || null} />
+        <TabsContent value="headings" className="flex-1 pt-1">
+          <ScrollArea className="h-full">
+            <div className="p-4">
+              <HeadingsTab headings={result?.headings || null} />
+            </div>
+          </ScrollArea>
         </TabsContent>
 
-        <TabsContent value="images" className="flex-1 p-4 overflow-auto">
-          <ImagesTab images={result?.images || null} />
+        <TabsContent value="images" className="flex-1 pt-1">
+          <ScrollArea className="h-full">
+            <div className="p-4">
+              <ImagesTab images={result?.images || null} />
+            </div>
+          </ScrollArea>
         </TabsContent>
 
-        <TabsContent value="links" className="flex-1 p-4 overflow-auto">
-          <LinksTab links={result?.links || null} />
+        <TabsContent value="links" className="flex-1 pt-1">
+          <ScrollArea className="h-full">
+            <div className="p-4">
+              <LinksTab links={result?.links || null} />
+            </div>
+          </ScrollArea>
         </TabsContent>
 
-        <TabsContent value="social" className="flex-1 p-4 overflow-auto">
-          <SocialTab metadata={result?.metadata || null} />
+        <TabsContent value="social" className="flex-1 pt-1">
+          <ScrollArea className="h-full">
+            <div className="p-4">
+              <SocialTab metadata={result?.metadata || null} />
+            </div>
+          </ScrollArea>
         </TabsContent>
       </Tabs>
     </div>
