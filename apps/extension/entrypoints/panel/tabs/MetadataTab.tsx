@@ -113,7 +113,14 @@ function BasicMetaCard({
 }
 
 function openUrl(url: string) {
-  window.open(url, "_blank");
+  try {
+    const { protocol } = new URL(url);
+    if (protocol === "http:" || protocol === "https:") {
+      window.open(url, "_blank");
+    }
+  } catch {
+    // invalid URL
+  }
 }
 
 function getSitemapLabel(url: string) {
