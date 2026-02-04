@@ -2,7 +2,7 @@ import {
   DashboardSpeed01Icon,
   SecurityIcon,
   UniversalAccessIcon,
-  RankingIcon,
+  SeoIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 /* oxlint-disable react/no-multi-comp */
@@ -322,9 +322,9 @@ function IssuesCard({
   issues: Issue[] | null;
 }) {
   const getIssueIcon = (type: Issue["type"]) => {
-    const icons: Record<Issue["type"], typeof RankingIcon> = {
+    const icons: Record<Issue["type"], typeof SeoIcon> = {
       accessibility: UniversalAccessIcon,
-      seo: RankingIcon,
+      seo: SeoIcon,
       performance: DashboardSpeed01Icon,
       security: SecurityIcon,
     };
