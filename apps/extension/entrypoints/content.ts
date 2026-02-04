@@ -629,11 +629,13 @@ async function checkRobotsAndSitemap(): Promise<{
     const response = await fetch(sitemapUrl);
     if (response.ok) {
       const text = await response.text();
-      if (text.includes("<sitemapindex")) {
-        const matches = text.match(/<loc>\s*(.*?)\s*<\/loc>/g);
-        if (matches) {
-          for (const match of matches) {
-            sitemaps.push(match.replace(/<\/?loc>/g, "").trim());
+      const doc = new DOMParser().parseFromString(text, "application/xml");
+      const locs = doc.querySelectorAll("sitemapindex loc");
+      if (locs.length > 0) {
+        for (const loc of locs) {
+          const url = loc.textContent?.trim();
+          if (url) {
+            sitemaps.push(url);
           }
         }
       } else {
