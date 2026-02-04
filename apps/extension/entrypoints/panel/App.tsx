@@ -131,7 +131,7 @@ export default function App() {
         >
           <TabsTrigger
             value="audit"
-            className="flex h-8 items-center justify-center gap-1.5 rounded-md px-2 text-xs text-white/60 transition-colors data-[state=active]:bg-white/15 data-[state=active]:text-white"
+            className="flex h-8 items-center justify-center gap-1.5 rounded-md px-2 text-xs text-white/60 transition-colors hover:bg-white/10 data-[state=active]:bg-white/20 data-[state=active]:!text-white"
           >
             <HugeiconsIcon
               icon={Analytics01Icon}
@@ -142,7 +142,7 @@ export default function App() {
           </TabsTrigger>
           <TabsTrigger
             value="metadata"
-            className="flex h-8 items-center justify-center gap-1.5 rounded-md px-2 text-xs text-white/60 transition-colors data-[state=active]:bg-white/15 data-[state=active]:text-white"
+            className="flex h-8 items-center justify-center gap-1.5 rounded-md px-2 text-xs text-white/60 transition-colors hover:bg-white/10 data-[state=active]:bg-white/20 data-[state=active]:!text-white"
           >
             <HugeiconsIcon
               icon={InformationCircleIcon}
@@ -153,7 +153,7 @@ export default function App() {
           </TabsTrigger>
           <TabsTrigger
             value="headings"
-            className="flex h-8 items-center justify-center gap-1.5 rounded-md px-2 text-xs text-white/60 transition-colors data-[state=active]:bg-white/15 data-[state=active]:text-white"
+            className="flex h-8 items-center justify-center gap-1.5 rounded-md px-2 text-xs text-white/60 transition-colors hover:bg-white/10 data-[state=active]:bg-white/20 data-[state=active]:!text-white"
           >
             <HugeiconsIcon
               icon={HeadingIcon}
@@ -164,7 +164,7 @@ export default function App() {
           </TabsTrigger>
           <TabsTrigger
             value="images"
-            className="flex h-8 items-center justify-center gap-1.5 rounded-md px-2 text-xs text-white/60 transition-colors data-[state=active]:bg-white/15 data-[state=active]:text-white"
+            className="flex h-8 items-center justify-center gap-1.5 rounded-md px-2 text-xs text-white/60 transition-colors hover:bg-white/10 data-[state=active]:bg-white/20 data-[state=active]:!text-white"
           >
             <HugeiconsIcon
               icon={Image01Icon}
@@ -175,7 +175,7 @@ export default function App() {
           </TabsTrigger>
           <TabsTrigger
             value="links"
-            className="flex h-8 items-center justify-center gap-1.5 rounded-md px-2 text-xs text-white/60 transition-colors data-[state=active]:bg-white/15 data-[state=active]:text-white"
+            className="flex h-8 items-center justify-center gap-1.5 rounded-md px-2 text-xs text-white/60 transition-colors hover:bg-white/10 data-[state=active]:bg-white/20 data-[state=active]:!text-white"
           >
             <HugeiconsIcon
               icon={Link01Icon}
@@ -186,7 +186,7 @@ export default function App() {
           </TabsTrigger>
           <TabsTrigger
             value="social"
-            className="flex h-8 items-center justify-center gap-1.5 rounded-md px-2 text-xs text-white/60 transition-colors data-[state=active]:bg-white/15 data-[state=active]:text-white"
+            className="flex h-8 items-center justify-center gap-1.5 rounded-md px-2 text-xs text-white/60 transition-colors hover:bg-white/10 data-[state=active]:bg-white/20 data-[state=active]:!text-white"
           >
             <HugeiconsIcon
               icon={Share08Icon}
