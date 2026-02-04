@@ -1,13 +1,14 @@
 import {
-  Analytics01Icon,
+  Audit02Icon,
   Cancel01Icon,
-  HeadingIcon,
-  Image01Icon,
-  InformationCircleIcon,
-  Link01Icon,
-  Share08Icon,
+  Image02Icon,
+  Link04Icon,
+  Share01Icon,
+  Tag02Icon,
+  TextFontIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+import { motion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 
 import type { AuditResponse, AuditResult } from "@/types/audit";
@@ -141,7 +142,7 @@ export default function App() {
             className="flex h-8 items-center justify-center gap-1.5 rounded-md px-2 text-xs text-white/60 transition-colors hover:bg-white/10 data-[state=active]:bg-white/20 data-[state=active]:!text-white"
           >
             <HugeiconsIcon
-              icon={Analytics01Icon}
+              icon={Audit02Icon}
               strokeWidth={2}
               className="size-3.5"
             />
@@ -152,7 +153,7 @@ export default function App() {
             className="flex h-8 items-center justify-center gap-1.5 rounded-md px-2 text-xs text-white/60 transition-colors hover:bg-white/10 data-[state=active]:bg-white/20 data-[state=active]:!text-white"
           >
             <HugeiconsIcon
-              icon={InformationCircleIcon}
+              icon={Tag02Icon}
               strokeWidth={2}
               className="size-3.5"
             />
@@ -163,7 +164,7 @@ export default function App() {
             className="flex h-8 items-center justify-center gap-1.5 rounded-md px-2 text-xs text-white/60 transition-colors hover:bg-white/10 data-[state=active]:bg-white/20 data-[state=active]:!text-white"
           >
             <HugeiconsIcon
-              icon={HeadingIcon}
+              icon={TextFontIcon}
               strokeWidth={2}
               className="size-3.5"
             />
@@ -174,7 +175,7 @@ export default function App() {
             className="flex h-8 items-center justify-center gap-1.5 rounded-md px-2 text-xs text-white/60 transition-colors hover:bg-white/10 data-[state=active]:bg-white/20 data-[state=active]:!text-white"
           >
             <HugeiconsIcon
-              icon={Image01Icon}
+              icon={Image02Icon}
               strokeWidth={2}
               className="size-3.5"
             />
@@ -185,7 +186,7 @@ export default function App() {
             className="flex h-8 items-center justify-center gap-1.5 rounded-md px-2 text-xs text-white/60 transition-colors hover:bg-white/10 data-[state=active]:bg-white/20 data-[state=active]:!text-white"
           >
             <HugeiconsIcon
-              icon={Link01Icon}
+              icon={Link04Icon}
               strokeWidth={2}
               className="size-3.5"
             />
@@ -196,7 +197,7 @@ export default function App() {
             className="flex h-8 items-center justify-center gap-1.5 rounded-md px-2 text-xs text-white/60 transition-colors hover:bg-white/10 data-[state=active]:bg-white/20 data-[state=active]:!text-white"
           >
             <HugeiconsIcon
-              icon={Share08Icon}
+              icon={Share01Icon}
               strokeWidth={2}
               className="size-3.5"
             />
@@ -206,7 +207,12 @@ export default function App() {
 
         <TabsContent value="audit" className="flex-1 pt-1">
           <ScrollArea className="h-full">
-            <div className="p-4">
+            <motion.div
+              className="p-4"
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+            >
               <AuditTab
                 error={error}
                 loading={loading}
@@ -214,51 +220,76 @@ export default function App() {
                 isRestricted={isRestricted}
                 onRetry={runAudit}
               />
-            </div>
+            </motion.div>
           </ScrollArea>
         </TabsContent>
 
         <TabsContent value="metadata" className="flex-1 pt-1">
           <ScrollArea className="h-full">
-            <div className="p-4">
+            <motion.div
+              className="p-4"
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+            >
               <MetadataTab
                 metadata={result?.metadata || null}
                 linkCount={result?.links.length ?? 0}
                 imageCount={result?.images.length ?? 0}
               />
-            </div>
+            </motion.div>
           </ScrollArea>
         </TabsContent>
 
         <TabsContent value="headings" className="flex-1 pt-1">
           <ScrollArea className="h-full">
-            <div className="p-4">
+            <motion.div
+              className="p-4"
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+            >
               <HeadingsTab headings={result?.headings || null} />
-            </div>
+            </motion.div>
           </ScrollArea>
         </TabsContent>
 
         <TabsContent value="images" className="flex-1 pt-1">
           <ScrollArea className="h-full">
-            <div className="p-4">
+            <motion.div
+              className="p-4"
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+            >
               <ImagesTab images={result?.images || null} />
-            </div>
+            </motion.div>
           </ScrollArea>
         </TabsContent>
 
         <TabsContent value="links" className="flex-1 pt-1">
           <ScrollArea className="h-full">
-            <div className="p-4">
+            <motion.div
+              className="p-4"
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+            >
               <LinksTab links={result?.links || null} />
-            </div>
+            </motion.div>
           </ScrollArea>
         </TabsContent>
 
         <TabsContent value="social" className="flex-1 pt-1">
           <ScrollArea className="h-full">
-            <div className="p-4">
+            <motion.div
+              className="p-4"
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+            >
               <SocialTab metadata={result?.metadata || null} />
-            </div>
+            </motion.div>
           </ScrollArea>
         </TabsContent>
       </Tabs>
