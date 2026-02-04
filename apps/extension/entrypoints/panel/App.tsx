@@ -8,7 +8,7 @@ import {
   Share08Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import type { AuditResponse, AuditResult } from "@/types/audit";
 
@@ -53,6 +53,7 @@ export default function App() {
   const [result, setResult] = useState<AuditResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isRestricted, setIsRestricted] = useState(false);
+  const didRunRef = useRef(false);
 
   const runAudit = async () => {
     setLoading(true);
@@ -93,12 +94,17 @@ export default function App() {
   };
 
   useEffect(() => {
+    if (didRunRef.current) {
+      return;
+    }
+
+    didRunRef.current = true;
     runAudit();
   }, []);
 
   return (
     <div
-      className="flex h-full w-full flex-col overflow-hidden rounded-3xl pb-1 shadow-[0_0_0_1px_rgba(255,255,255,0.1),0_4px_24px_rgba(0,0,0,0.4)]"
+      className="font-sans flex h-full w-full flex-col overflow-hidden rounded-3xl pb-1 shadow-[0_0_0_1px_rgba(255,255,255,0.1),0_4px_24px_rgba(0,0,0,0.4)]"
       style={{ backgroundColor: "rgba(48, 48, 48, 1)" }}
     >
       <header className="flex items-center justify-between gap-3 px-4 py-3">

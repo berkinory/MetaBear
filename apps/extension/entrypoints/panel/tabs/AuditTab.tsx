@@ -1,12 +1,31 @@
+import {
+  DashboardSpeed01Icon,
+  SecurityIcon,
+  UniversalAccessIcon,
+  RankingIcon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 /* oxlint-disable react/no-multi-comp */
-import type { AxeResults } from "axe-core";
+import {
+  animate,
+  motion,
+  useMotionTemplate,
+  useMotionValue,
+  useTransform,
+} from "motion/react";
+import { useEffect, useState } from "react";
 
-import type { AuditResult, Issue } from "@/types/audit";
+import type { AuditResult, Issue, MetadataInfo } from "@/types/audit";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Spinner } from "@/components/ui/spinner";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface AuditTabProps {
   error: string | null;
@@ -16,13 +35,17 @@ interface AuditTabProps {
   onRetry: () => void;
 }
 
-const getImpactVariant = (impact: string) => {
-  const variants: Record<string, "destructive" | "default"> = {
-    critical: "destructive",
-    serious: "destructive",
-  };
-  return variants[impact] ?? "default";
-};
+function cleanUrl(url: string): string {
+  return url.replace(/^https?:\/\//, "").replace(/\/+$/, "");
+}
+
+function formatUrl(url: string): string {
+  const cleaned = cleanUrl(url);
+  if (cleaned.length <= 30) {
+    return cleaned;
+  }
+  return `${cleaned.slice(0, 30)}...`;
+}
 
 export function AuditTab({
   error,
@@ -31,15 +54,6 @@ export function AuditTab({
   isRestricted,
   onRetry,
 }: AuditTabProps) {
-  if (loading) {
-    return (
-      <div className="flex flex-col items-center justify-center py-8 gap-4">
-        <Spinner className="size-8" />
-        <p className="text-muted-foreground">Analyzing...</p>
-      </div>
-    );
-  }
-
   if (isRestricted) {
     return (
       <Card className="border-muted">
@@ -92,168 +106,282 @@ export function AuditTab({
     );
   }
 
-  if (!result) {
-    return null;
-  }
-
   return (
     <div className="space-y-4">
-      <ScoreCard score={result.score} issues={result.issues} />
-      {result.issues.length > 0 && <IssuesCard issues={result.issues} />}
-      {result.accessibility && (
-        <AccessibilityCard data={result.accessibility} />
-      )}
+      <SiteRow loading={loading} metadata={result?.metadata ?? null} />
+      <ScoreCard
+        loading={loading}
+        score={result?.score ?? null}
+        issuesCount={result?.issues.length ?? null}
+      />
+      <IssuesCard loading={loading} issues={result?.issues ?? null} />
     </div>
   );
 }
 
-function ScoreCard({ score, issues }: { score: number; issues: Issue[] }) {
-  const highCount = issues.filter((i) => i.severity === "high").length;
-  const mediumCount = issues.filter((i) => i.severity === "medium").length;
+function SiteRow({
+  loading,
+  metadata,
+}: {
+  loading: boolean;
+  metadata: MetadataInfo | null;
+}) {
+  let content: React.ReactNode = null;
+  const showSkeleton = loading || !metadata;
 
-  let scoreColor = "text-red-500";
-  if (score >= 80) {
-    scoreColor = "text-green-500";
-  } else if (score >= 60) {
-    scoreColor = "text-yellow-500";
+  if (showSkeleton) {
+    content = (
+      <>
+        <Skeleton className="h-6 w-6 rounded" />
+        <Skeleton className="h-4 w-44" />
+      </>
+    );
+  } else {
+    content = (
+      <>
+        {metadata.favicon && (
+          <img
+            src={metadata.favicon}
+            alt=""
+            className="h-6 w-6 rounded object-cover"
+            onError={(e) => {
+              (e.target as HTMLImageElement).style.display = "none";
+            }}
+          />
+        )}
+        <span className="text-sm text-white/70 truncate">
+          {formatUrl(metadata.url)}
+        </span>
+      </>
+    );
+  }
+
+  return <div className="flex items-center gap-2.5 h-5">{content}</div>;
+}
+
+function getScoreColor(score: number): string {
+  if (score >= 85) {
+    return "#22c55e";
+  }
+  if (score >= 70) {
+    return "#eab308";
+  }
+  if (score >= 60) {
+    return "#f97316";
+  }
+  return "#ef4444";
+}
+
+const SCORE_ANIMATION_MS = 1000;
+
+function ScoreCircle({
+  score,
+  showValue,
+}: {
+  score: number;
+  showValue: boolean;
+}) {
+  const size = 88;
+  const strokeWidth = 6;
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const [animatedScore, setAnimatedScore] = useState(0);
+  const scoreValue = useMotionValue(0);
+  const strokeOffset = useTransform(
+    scoreValue,
+    (value) => circumference - (value / 100) * circumference
+  );
+  const numberLift = useMotionValue(0);
+  const numberTranslate = useMotionTemplate`translateY(${numberLift}px)`;
+
+  useEffect(() => {
+    const target = showValue ? score : 0;
+    const controls = animate(scoreValue, target, {
+      duration: SCORE_ANIMATION_MS / 1000,
+      ease: "easeInOut",
+      onUpdate: (value) => {
+        const rounded = Math.round(value);
+        setAnimatedScore(rounded);
+      },
+    });
+
+    animate(numberLift, [1, 0], {
+      duration: SCORE_ANIMATION_MS / 1000,
+      ease: "easeOut",
+    });
+
+    return () => {
+      controls.stop();
+    };
+  }, [score, showValue, scoreValue, numberLift]);
+
+  const color = showValue
+    ? getScoreColor(animatedScore)
+    : "rgba(255, 255, 255, 0.25)";
+
+  return (
+    <div className="relative" style={{ width: size, height: size }}>
+      <svg width={size} height={size} className="-rotate-90">
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={strokeWidth}
+          className="text-white/10"
+        />
+        <motion.circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="none"
+          stroke={color}
+          strokeWidth={strokeWidth}
+          strokeLinecap="round"
+          strokeDasharray={circumference}
+          style={{ strokeDashoffset: strokeOffset }}
+        />
+      </svg>
+      {showValue ? (
+        <motion.span
+          className="absolute inset-0 flex items-center justify-center text-2xl font-bold tabular-nums font-mono"
+          style={{
+            color,
+            textShadow: "0 1px 10px rgba(0, 0, 0, 0.35)",
+            transform: numberTranslate,
+          }}
+        >
+          {animatedScore}
+        </motion.span>
+      ) : null}
+    </div>
+  );
+}
+
+function ScoreCard({
+  loading,
+  score,
+  issuesCount,
+}: {
+  loading: boolean;
+  score: number | null;
+  issuesCount: number | null;
+}) {
+  const showValue = !loading && score !== null;
+  const showIssues = !loading && issuesCount !== null;
+  const issuesLabel = issuesCount === 1 ? "issue" : "issues";
+
+  return (
+    <Card>
+      <CardContent className="py-3 min-h-[150px]">
+        <div className="flex flex-col items-center gap-3">
+          <span className="flex items-center gap-1 text-xs font-semibold tracking-wide text-muted-foreground">
+            SEO Score
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  aria-label="SEO score info"
+                  className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-white/15 bg-white/5 text-[10px] font-semibold text-white/70 shadow-[0_0_0_1px_rgba(255,255,255,0.06)] transition hover:bg-white/10 hover:text-white"
+                >
+                  i
+                </button>
+              </TooltipTrigger>
+              <TooltipContent className="font-sans" sideOffset={6}>
+                Approximate score based on our checks.
+              </TooltipContent>
+            </Tooltip>
+          </span>
+          <ScoreCircle score={showValue ? score : 0} showValue={showValue} />
+          <div className="h-3">
+            {loading ? (
+              <Skeleton className="h-3 w-20" />
+            ) : (
+              <span
+                className="text-xs font-semibold tracking-wide text-muted-foreground"
+                style={{ opacity: showIssues ? 1 : 0 }}
+              >
+                {issuesCount === 0
+                  ? "No issues"
+                  : `${issuesCount} ${issuesLabel}`}
+              </span>
+            )}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function IssuesCard({
+  loading,
+  issues,
+}: {
+  loading: boolean;
+  issues: Issue[] | null;
+}) {
+  const getIssueIcon = (type: Issue["type"]) => {
+    const icons: Record<Issue["type"], typeof RankingIcon> = {
+      accessibility: UniversalAccessIcon,
+      seo: RankingIcon,
+      performance: DashboardSpeed01Icon,
+      security: SecurityIcon,
+    };
+
+    return icons[type];
+  };
+
+  if (!loading && (!issues || issues.length === 0)) {
+    return null;
   }
 
   return (
     <Card>
-      <CardContent className="pt-6 pb-5">
-        <div className="flex flex-col items-center gap-1">
-          <div className={`text-5xl font-bold tabular-nums ${scoreColor}`}>
-            {score}
-          </div>
-          <div className="text-xs text-muted-foreground">out of 100</div>
-          <div className="flex gap-4 mt-2 text-xs text-muted-foreground">
-            <span>
-              <span className="text-destructive font-semibold">
-                {highCount}
-              </span>{" "}
-              high
-            </span>
-            <span>
-              <span className="text-yellow-500 font-semibold">
-                {mediumCount}
-              </span>{" "}
-              medium
-            </span>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-function IssuesCard({ issues }: { issues: Issue[] }) {
-  const getTypeColor = (type: Issue["type"]) => {
-    const colors: Record<Issue["type"], string> = {
-      accessibility: "text-blue-600 dark:text-blue-400",
-      seo: "text-green-600 dark:text-green-400",
-      performance: "text-orange-600 dark:text-orange-400",
-      security: "text-red-600 dark:text-red-400",
-    };
-    return colors[type];
-  };
-
-  return (
-    <Card>
       <CardHeader>
-        <CardTitle>Issues ({issues.length})</CardTitle>
+        <CardTitle>Issues</CardTitle>
       </CardHeader>
       <CardContent className="space-y-2">
-        {issues.map((issue) => (
-          <Card key={issue.id} className="bg-muted">
-            <CardContent className="pt-4">
-              <div className="flex items-start gap-2">
+        {loading ? (
+          <Card className="border border-white/10 bg-white/5">
+            <CardContent className="space-y-2 py-0">
+              <div className="flex items-center gap-2">
+                <Skeleton className="h-5 w-20 rounded-full" />
+              </div>
+              <Skeleton className="h-4 w-40" />
+              <Skeleton className="h-3 w-full" />
+            </CardContent>
+          </Card>
+        ) : (
+          issues?.map((issue) => (
+            <Card key={issue.id} className="border border-white/10 bg-white/5">
+              <CardContent className="space-y-2 py-0">
                 <Badge
-                  variant={
-                    issue.severity === "high" ? "destructive" : "secondary"
+                  variant="secondary"
+                  className={
+                    issue.severity === "high"
+                      ? "w-fit gap-1 select-none bg-red-500/15 text-red-200"
+                      : "w-fit gap-1 select-none bg-orange-400/15 text-orange-200"
                   }
                 >
-                  {issue.severity}
+                  <HugeiconsIcon
+                    icon={getIssueIcon(issue.type)}
+                    strokeWidth={2}
+                    className="size-3"
+                  />
+                  {issue.type === "seo"
+                    ? "SEO"
+                    : issue.type.charAt(0).toUpperCase() + issue.type.slice(1)}
                 </Badge>
-                <div className="flex-1 space-y-1">
-                  <div className="flex items-start gap-2">
-                    <span
-                      className={`text-xs font-medium ${getTypeColor(issue.type)}`}
-                    >
-                      {issue.type.toUpperCase()}
-                    </span>
-                    <span className="text-xs font-semibold flex-1">
-                      {issue.title}
-                    </span>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    {issue.description}
-                  </p>
+                <div className="text-sm font-medium text-foreground">
+                  {issue.title}
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </CardContent>
-    </Card>
-  );
-}
-
-function AccessibilityCard({ data }: { data: AxeResults }) {
-  const violations = data.violations.filter(
-    (v) => v.impact === "critical" || v.impact === "serious"
-  );
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Accessibility</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="grid grid-cols-3 gap-2 text-sm text-center">
-          <Card className="border-destructive/50 bg-destructive/10">
-            <CardContent className="pt-4">
-              <div className="text-lg font-bold text-destructive">
-                {violations.length}
-              </div>
-              <div className="text-xs text-muted-foreground">Violations</div>
-            </CardContent>
-          </Card>
-          <Card className="border-green-500/50 bg-green-500/10">
-            <CardContent className="pt-4">
-              <div className="text-lg font-bold text-green-600 dark:text-green-400">
-                {data.passes.length}
-              </div>
-              <div className="text-xs text-muted-foreground">Passes</div>
-            </CardContent>
-          </Card>
-          <Card className="border-yellow-500/50 bg-yellow-500/10">
-            <CardContent className="pt-4">
-              <div className="text-lg font-bold text-yellow-600 dark:text-yellow-400">
-                {data.incomplete.length}
-              </div>
-              <div className="text-xs text-muted-foreground">Incomplete</div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {violations.length > 0 && (
-          <div className="space-y-2">
-            <h3 className="text-xs font-semibold text-muted-foreground">
-              Top Issues:
-            </h3>
-            {violations.slice(0, 3).map((v) => (
-              <Card key={v.id} className="bg-muted">
-                <CardContent className="pt-4">
-                  <div className="text-xs flex items-start gap-2">
-                    <Badge variant={getImpactVariant(v.impact ?? "serious")}>
-                      {v.impact}
-                    </Badge>
-                    <span className="flex-1">{v.description}</span>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                <p className="text-xs text-muted-foreground">
+                  {issue.description}
+                </p>
+              </CardContent>
+            </Card>
+          ))
         )}
       </CardContent>
     </Card>
