@@ -1,7 +1,9 @@
 /* oxlint-disable react/no-multi-comp */
 import {
+  BrowserIcon,
   Copy01Icon,
   DashboardSpeed01Icon,
+  LicenseNoIcon,
   SeoIcon,
   SecurityIcon,
   Tick02Icon,
@@ -38,7 +40,10 @@ interface AuditTabProps {
 }
 
 function cleanUrl(url: string): string {
-  return url.replace(/^https?:\/\//, "").replace(/\/+$/, "");
+  return url
+    .replace(/^https?:\/\//, "")
+    .replace(/^www\./, "")
+    .replace(/\/+$/, "");
 }
 
 function formatUrl(url: string): string {
@@ -130,6 +135,7 @@ function SiteRow({
 }) {
   let content: React.ReactNode = null;
   const showSkeleton = loading || !metadata;
+  const [faviconFailed, setFaviconFailed] = useState(false);
 
   if (showSkeleton) {
     content = (
@@ -141,15 +147,23 @@ function SiteRow({
   } else {
     content = (
       <>
-        {metadata.favicon && (
+        {metadata.favicon && !faviconFailed ? (
           <img
             src={metadata.favicon}
             alt=""
             className="h-6 w-6 rounded object-cover"
-            onError={(e) => {
-              (e.target as HTMLImageElement).style.display = "none";
+            onError={() => {
+              setFaviconFailed(true);
             }}
           />
+        ) : (
+          <span className="inline-flex h-6 w-6 items-center justify-center text-white/60">
+            <HugeiconsIcon
+              icon={BrowserIcon}
+              strokeWidth={2}
+              className="size-4"
+            />
+          </span>
         )}
         <span className="text-sm text-white/70 truncate">
           {formatUrl(metadata.url)}
@@ -369,7 +383,23 @@ function IssuesCard({
   };
 
   if (!loading && (!issues || issues.length === 0)) {
-    return null;
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-muted-foreground">Issues</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col items-center gap-2 py-6 text-muted-foreground">
+            <HugeiconsIcon
+              icon={LicenseNoIcon}
+              strokeWidth={2}
+              className="size-6"
+            />
+            <span className="text-sm">No issues found</span>
+          </div>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (

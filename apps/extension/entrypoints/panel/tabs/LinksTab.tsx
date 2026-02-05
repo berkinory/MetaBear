@@ -1,3 +1,6 @@
+import { LicenseNoIcon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
+
 /* oxlint-disable react/no-multi-comp */
 import type { LinkInfo } from "@/types/audit";
 
@@ -11,9 +14,21 @@ interface LinksTabProps {
 export function LinksTab({ links }: LinksTabProps) {
   if (!links || links.length === 0) {
     return (
-      <div className="flex items-center justify-center py-8">
-        <p className="text-muted-foreground">No links found on this page</p>
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-muted-foreground">Links</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col items-center gap-2 py-6 text-muted-foreground">
+            <HugeiconsIcon
+              icon={LicenseNoIcon}
+              strokeWidth={2}
+              className="size-6"
+            />
+            <span className="text-sm">No links found</span>
+          </div>
+        </CardContent>
+      </Card>
     );
   }
 
