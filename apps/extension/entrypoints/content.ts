@@ -8,6 +8,7 @@ import type {
   Issue,
   LinkInfo,
   MetadataInfo,
+  ScrollToHeadingMessage,
   TogglePanelMessage,
 } from "@/types/audit";
 
@@ -55,7 +56,7 @@ export default defineContentScript({
     }
 
     const messageListener = (
-      message: AuditMessage | TogglePanelMessage,
+      message: AuditMessage | TogglePanelMessage | ScrollToHeadingMessage,
       _sender: unknown,
       sendResponse: (response?: AuditResult) => void
     ) => {
@@ -113,6 +114,18 @@ export default defineContentScript({
           }
         })();
         return true;
+      }
+
+      if (message.type === "SCROLL_TO_HEADING") {
+        const headings = [
+          ...document.querySelectorAll("h1, h2, h3, h4, h5, h6"),
+        ];
+        const target = headings[message.index] as HTMLElement | undefined;
+        if (target) {
+          target.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+        sendResponse();
+        return false;
       }
       return false;
     };

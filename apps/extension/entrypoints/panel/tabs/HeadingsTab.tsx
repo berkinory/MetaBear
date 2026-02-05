@@ -1,13 +1,30 @@
 import type { HeadingInfo } from "@/types/audit";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface HeadingsTabProps {
   headings: HeadingInfo[] | null;
 }
 
 export function HeadingsTab({ headings }: HeadingsTabProps) {
-  if (!headings || headings.length === 0) {
+  if (!headings) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-muted-foreground">Headings</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          <HeadingRowSkeleton />
+          <HeadingRowSkeleton />
+          <HeadingRowSkeleton />
+          <HeadingRowSkeleton />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (headings.length === 0) {
     return (
       <div className="flex items-center justify-center py-8">
         <p className="text-muted-foreground">No headings found on this page</p>
@@ -18,13 +35,14 @@ export function HeadingsTab({ headings }: HeadingsTabProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Heading Structure ({headings.length})</CardTitle>
+        <CardTitle className="text-muted-foreground">Headings</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-1">
+      <CardContent className="space-y-2">
         {headings.map((heading, idx) => (
           <HeadingRow
             key={`${heading.level}-${idx}-${heading.text.slice(0, 20)}`}
             heading={heading}
+            index={idx}
           />
         ))}
       </CardContent>
@@ -32,76 +50,74 @@ export function HeadingsTab({ headings }: HeadingsTabProps) {
   );
 }
 
-const getLevelStyle = (level: number) => {
-  const styles: Record<
-    number,
-    { color: string; fontSize: string; weight: string }
-  > = {
-    1: {
-      color: "text-foreground",
-      fontSize: "text-base",
-      weight: "font-bold",
-    },
-    2: {
-      color: "text-foreground",
-      fontSize: "text-sm",
-      weight: "font-semibold",
-    },
-    3: {
-      color: "text-foreground/90",
-      fontSize: "text-sm",
-      weight: "font-medium",
-    },
-    4: {
-      color: "text-foreground/80",
-      fontSize: "text-xs",
-      weight: "font-medium",
-    },
-    5: {
-      color: "text-foreground/70",
-      fontSize: "text-xs",
-      weight: "font-normal",
-    },
-    6: {
-      color: "text-foreground/60",
-      fontSize: "text-xs",
-      weight: "font-normal",
-    },
+function HeadingRow({
+  heading,
+  index,
+}: {
+  heading: HeadingInfo;
+  index: number;
+}) {
+  const indent = (heading.level - 1) * 12;
+  const levelTone: Record<number, string> = {
+    1: "text-foreground/90",
+    2: "text-foreground/80",
+    3: "text-foreground/75",
+    4: "text-foreground/70",
+    5: "text-foreground/65",
+    6: "text-foreground/60",
   };
-  return styles[level] || styles[6];
-};
-
-const getLevelBadgeColor = (level: number) => {
-  const colors: Record<number, string> = {
-    1: "bg-blue-500",
-    2: "bg-green-500",
-    3: "bg-yellow-500",
-    4: "bg-orange-500",
-    5: "bg-red-500",
-    6: "bg-purple-500",
+  const levelBadgeTone: Record<number, string> = {
+    1: "border-sky-400/40 bg-sky-400/10 text-sky-200",
+    2: "border-emerald-400/40 bg-emerald-400/10 text-emerald-200",
+    3: "border-amber-400/40 bg-amber-400/10 text-amber-200",
+    4: "border-white/10 bg-white/5 text-muted-foreground",
+    5: "border-white/10 bg-white/5 text-muted-foreground",
+    6: "border-white/10 bg-white/5 text-muted-foreground",
   };
-  return colors[level] || colors[6];
-};
 
-function HeadingRow({ heading }: { heading: HeadingInfo }) {
-  const indent = (heading.level - 1) * 16;
-  const style = getLevelStyle(heading.level);
+  const handleJump = async () => {
+    const [tab] = await browser.tabs.query({
+      active: true,
+      currentWindow: true,
+    });
+    if (!tab?.id) {
+      return;
+    }
+    await browser.tabs.sendMessage(tab.id, {
+      type: "SCROLL_TO_HEADING",
+      index,
+    });
+  };
 
   return (
-    <div
-      className="flex items-start gap-2 py-1.5 px-2 hover:bg-muted/50 rounded-sm transition-colors"
-      style={{ paddingLeft: `${indent + 8}px` }}
+    <button
+      type="button"
+      onClick={async () => {
+        await handleJump();
+      }}
+      className="flex w-full items-start gap-2 rounded-md px-2 py-1 text-left hover:bg-white/5 transition-colors"
+      style={{ paddingLeft: `${indent + 6}px` }}
+      aria-label={`Jump to heading ${heading.text}`}
     >
       <span
-        className={`inline-flex items-center justify-center text-[10px] font-bold text-white rounded w-6 h-5 flex-shrink-0 ${getLevelBadgeColor(heading.level)}`}
+        className={`inline-flex h-5 w-7 flex-shrink-0 items-center justify-center rounded border text-[10px] font-semibold ${levelBadgeTone[heading.level] ?? levelBadgeTone[6]}`}
       >
         H{heading.level}
       </span>
       <span
-        className={`${style.color} ${style.fontSize} ${style.weight} break-words flex-1 leading-relaxed`}
+        className={`flex-1 break-words text-sm font-normal leading-snug ${levelTone[heading.level] ?? "text-foreground/60"}`}
       >
         {heading.text}
       </span>
+    </button>
+  );
+}
+
+function HeadingRowSkeleton() {
+  return (
+    <div className="flex items-start gap-2 rounded-md px-2 py-1">
+      <Skeleton className="h-5 w-7 rounded" />
+      <Skeleton className="h-4 w-full" />
     </div>
   );
 }

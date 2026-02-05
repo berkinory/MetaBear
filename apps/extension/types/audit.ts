@@ -80,6 +80,11 @@ export interface AuditMessage {
   type: "RUN_AUDIT";
 }
 
+export interface ScrollToHeadingMessage {
+  type: "SCROLL_TO_HEADING";
+  index: number;
+}
+
 export interface TogglePanelMessage {
   type: "TOGGLE_PANEL";
 }
