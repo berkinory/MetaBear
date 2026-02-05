@@ -19,10 +19,10 @@ interface ImagesTabProps {
 
 function formatAlt(text: string): string {
   const trimmed = text.trim();
-  if (trimmed.length <= 25) {
+  if (trimmed.length <= 30) {
     return trimmed;
   }
-  return `${trimmed.slice(0, 25)}...`;
+  return `${trimmed.slice(0, 30)}...`;
 }
 
 function getImageFormat(src: string): string | null {
@@ -109,7 +109,10 @@ export function ImagesTab({ images, metadata }: ImagesTabProps) {
                 {validImages.length}
               </Badge>
               {missingAltCount > 0 && (
-                <Badge variant="destructive">
+                <Badge
+                  variant="outline"
+                  className="border-orange-400/40 text-orange-200 bg-orange-400/10"
+                >
                   <span className="font-mono">{missingAltCount}</span>
                   <span className="font-sans ml-1">missing alt</span>
                 </Badge>
@@ -207,7 +210,7 @@ function IconCard({
                 console.error("Download failed:", error);
               }
             }}
-            className="mt-1 flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground transition-colors"
+            className="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground transition-colors"
             aria-label={`Download ${label}`}
           >
             <span className="font-sans">Download</span>
@@ -243,7 +246,7 @@ function ImageRow({ image }: { image: ImageInfo }) {
 
   const altInfo = (() => {
     if (!image.hasAlt) {
-      return { text: "Missing Alt Text", className: "text-destructive" };
+      return { text: "Missing Alt Text", className: "text-orange-200" };
     }
     if (image.alt === "") {
       return { text: "Decorative", className: "text-muted-foreground italic" };
@@ -273,7 +276,7 @@ function ImageRow({ image }: { image: ImageInfo }) {
             <HugeiconsIcon
               icon={Alert01Icon}
               strokeWidth={2}
-              className="size-3.5 text-destructive shrink-0"
+              className="size-3.5 text-orange-200 shrink-0"
             />
           )}
           <span className="flex-1" />

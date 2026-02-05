@@ -51,7 +51,7 @@ function BasicMetaCard({
   })();
   return (
     <Card>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-3">
         <div className="space-y-1">
           <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground">
             <span>Title</span>

@@ -70,7 +70,10 @@ export function LinksTab({ links, baseUrl }: LinksTabProps) {
               {links.length}
             </Badge>
             {emptyTextLinks.length > 0 && (
-              <Badge variant="destructive">
+              <Badge
+                variant="outline"
+                className="border-orange-400/40 text-orange-200 bg-orange-400/10"
+              >
                 <span className="font-mono">{emptyTextLinks.length}</span>
                 <span className="font-sans ml-1">missing text</span>
               </Badge>
@@ -145,8 +148,9 @@ function LinkRow({
   baseUrl: string | null;
 }) {
   const hasMissingText = !link.text || link.text.trim() === "";
-  const displayText = link.text ? truncateText(link.text, 30) : "Missing text";
-  const displayTitle = link.title ? truncateText(link.title, 25) : null;
+  const displayText = link.text ? truncateText(link.text, 35) : "Missing text";
+  const displayTitle = link.title ? truncateText(link.title, 35) : null;
+  const displayHref = truncateText(link.href, 40);
   const isJavascriptLink = /^javascript:/i.test(link.href.trim());
   const resolvedHref = (() => {
     if (isJavascriptLink) {
@@ -197,7 +201,7 @@ function LinkRow({
           )}
           <span
             className={`text-sm font-sans truncate ${
-              hasMissingText ? "text-destructive" : "text-foreground/90"
+              hasMissingText ? "text-orange-200" : "text-foreground/90"
             }`}
             title={link.text || "Missing text"}
           >
@@ -207,13 +211,16 @@ function LinkRow({
             <HugeiconsIcon
               icon={Alert01Icon}
               strokeWidth={2}
-              className="size-3.5 text-destructive shrink-0"
+              className="size-3.5 text-orange-200 shrink-0"
             />
           )}
         </div>
         <div className="flex items-center gap-2 mt-0.5 min-w-0 w-full overflow-hidden">
-          <span className="block text-[10px] text-muted-foreground truncate font-mono min-w-0 w-full">
-            {link.href}
+          <span
+            className="block text-[10px] text-muted-foreground truncate font-mono min-w-0 w-full"
+            title={link.href}
+          >
+            {displayHref}
           </span>
           {link.hasNofollow && (
             <Badge
@@ -226,7 +233,7 @@ function LinkRow({
           {isJavascriptLink && (
             <Badge
               variant="outline"
-              className="text-[10px] px-1.5 py-0 h-4 font-sans shrink-0 border-amber-500/40 text-amber-300 bg-amber-500/10"
+              className="text-[10px] px-1.5 py-0 h-4 font-sans shrink-0 border-orange-400/40 text-orange-200 bg-orange-400/10"
             >
               javascript
             </Badge>
