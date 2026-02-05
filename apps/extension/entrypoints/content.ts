@@ -105,6 +105,8 @@ export default defineContentScript({
                   image: null,
                   url: null,
                   type: null,
+                  locale: null,
+                  siteName: null,
                 },
                 twitter: {
                   card: null,
@@ -330,6 +332,8 @@ function collectMetadata(): Omit<
   const ogImage = document.querySelector('meta[property="og:image"]');
   const ogUrl = document.querySelector('meta[property="og:url"]');
   const ogType = document.querySelector('meta[property="og:type"]');
+  const ogLocale = document.querySelector('meta[property="og:locale"]');
+  const ogSiteName = document.querySelector('meta[property="og:site_name"]');
 
   const twitterCard = document.querySelector('meta[name="twitter:card"]');
   const twitterTitle = document.querySelector('meta[name="twitter:title"]');
@@ -361,6 +365,8 @@ function collectMetadata(): Omit<
       image: ogImage?.getAttribute("content") || null,
       url: ogUrl?.getAttribute("content") || null,
       type: ogType?.getAttribute("content") || null,
+      locale: ogLocale?.getAttribute("content") || null,
+      siteName: ogSiteName?.getAttribute("content") || null,
     },
     twitter: {
       card: twitterCard?.getAttribute("content") || null,

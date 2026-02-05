@@ -4,7 +4,7 @@ import {
   Image02Icon,
   Link04Icon,
   Share01Icon,
-  Tag02Icon,
+  CodeSimpleIcon,
   TextFontIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -153,7 +153,7 @@ export default function App() {
             className="flex h-8 items-center justify-center gap-1.5 rounded-md px-2 text-xs text-white/60 transition-colors hover:bg-white/10 data-[state=active]:bg-white/20 data-[state=active]:!text-white"
           >
             <HugeiconsIcon
-              icon={Tag02Icon}
+              icon={CodeSimpleIcon}
               strokeWidth={2}
               className="size-3.5"
             />

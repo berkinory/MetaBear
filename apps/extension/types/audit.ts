@@ -55,6 +55,8 @@ export interface MetadataInfo {
     image: string | null;
     url: string | null;
     type: string | null;
+    locale: string | null;
+    siteName: string | null;
   };
   twitter: {
     card: string | null;
