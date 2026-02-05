@@ -145,7 +145,7 @@ function togglePanel(): void {
   panelRoot.style.width = "360px";
   panelRoot.style.height = "600px";
   panelRoot.style.zIndex = "2147483647";
-  panelRoot.style.borderRadius = "16px";
+  panelRoot.style.borderRadius = "18px";
   panelRoot.style.overflow = "hidden";
   panelRoot.style.background = "transparent";
 
