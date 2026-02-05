@@ -670,6 +670,9 @@ function collectLinks(): LinkInfo[] {
     if (!href || href.trim() === "" || href === "#") {
       continue;
     }
+    if (/^javascript:/i.test(href.trim())) {
+      continue;
+    }
 
     const text =
       link.textContent?.trim() || link.getAttribute("aria-label")?.trim() || "";

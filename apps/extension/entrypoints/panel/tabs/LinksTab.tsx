@@ -1,4 +1,4 @@
-import { LicenseNoIcon } from "@hugeicons/core-free-icons";
+import { Alert01Icon, LicenseNoIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 
 /* oxlint-disable react/no-multi-comp */
@@ -6,148 +6,253 @@ import type { LinkInfo } from "@/types/audit";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface LinksTabProps {
   links: LinkInfo[] | null;
+  baseUrl: string | null;
 }
 
-export function LinksTab({ links }: LinksTabProps) {
-  if (!links || links.length === 0) {
-    return (
+function truncateText(text: string, maxLength: number): string {
+  if (text.length <= maxLength) {
+    return text;
+  }
+  return `${text.slice(0, maxLength)}...`;
+}
+
+export function LinksTab({ links, baseUrl }: LinksTabProps) {
+  const isLoading = links === null;
+  const internalLinks = links?.filter((link) => !link.isExternal) ?? [];
+  const externalLinks = links?.filter((link) => link.isExternal) ?? [];
+  const emptyTextLinks =
+    links?.filter((link) => !link.text || link.text.trim() === "") ?? [];
+  const sortedLinks = links
+    ? [...links].toSorted((a, b) => Number(b.isExternal) - Number(a.isExternal))
+    : null;
+  let listContent = (
+    <Card>
+      <CardContent>
+        <div className="flex flex-col items-center gap-2 py-6 text-muted-foreground">
+          <HugeiconsIcon
+            icon={LicenseNoIcon}
+            strokeWidth={2}
+            className="size-6"
+          />
+          <span className="text-sm">No links found</span>
+        </div>
+      </CardContent>
+    </Card>
+  );
+
+  if (isLoading) {
+    listContent = (
       <Card>
-        <CardHeader>
-          <CardTitle className="text-muted-foreground">Links</CardTitle>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle className="text-muted-foreground">All Links</CardTitle>
+          <Skeleton className="h-5 w-8 rounded" />
         </CardHeader>
         <CardContent>
-          <div className="flex flex-col items-center gap-2 py-6 text-muted-foreground">
-            <HugeiconsIcon
-              icon={LicenseNoIcon}
-              strokeWidth={2}
-              className="size-6"
-            />
-            <span className="text-sm">No links found</span>
+          <div className="space-y-2">
+            <LinkRowSkeleton />
+            <LinkRowSkeleton />
+            <LinkRowSkeleton />
+          </div>
+        </CardContent>
+      </Card>
+    );
+  } else if (links && links.length > 0) {
+    listContent = (
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle className="text-muted-foreground">All Links</CardTitle>
+          <div className="flex gap-2">
+            <Badge variant="secondary" className="font-mono">
+              {links.length}
+            </Badge>
+            {emptyTextLinks.length > 0 && (
+              <Badge variant="destructive">
+                <span className="font-mono">{emptyTextLinks.length}</span>
+                <span className="font-sans ml-1">missing text</span>
+              </Badge>
+            )}
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            {sortedLinks?.map((link, index) => (
+              <LinkRow
+                key={`${link.href}-${index}`}
+                link={link}
+                baseUrl={baseUrl}
+              />
+            ))}
           </div>
         </CardContent>
       </Card>
     );
   }
 
-  const internalLinks = links.filter((link) => !link.isExternal);
-  const externalLinks = links.filter((link) => link.isExternal);
-  const emptyTextLinks = links.filter(
-    (link) => !link.text || link.text.trim() === ""
-  );
-
   return (
     <div className="space-y-4">
       <Card>
         <CardHeader>
-          <CardTitle>Links Overview</CardTitle>
+          <CardTitle className="text-muted-foreground">Overview</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2">
-          <div className="flex justify-between items-center">
-            <span className="text-sm font-medium">Total Links:</span>
-            <Badge variant="secondary">{links.length}</Badge>
-          </div>
-          <div className="flex justify-between items-center">
-            <span className="text-sm font-medium">Internal Links:</span>
-            <Badge variant="secondary">{internalLinks.length}</Badge>
-          </div>
-          <div className="flex justify-between items-center">
-            <span className="text-sm font-medium">External Links:</span>
-            <Badge variant="secondary">{externalLinks.length}</Badge>
-          </div>
-          {emptyTextLinks.length > 0 && (
-            <div className="flex justify-between items-center">
-              <span className="text-sm font-medium text-destructive">
-                Empty Text:
+          <div className="flex justify-between items-center text-xs font-semibold text-muted-foreground">
+            <span>Total</span>
+            {isLoading ? (
+              <Skeleton className="h-4 w-6 rounded" />
+            ) : (
+              <span className="text-foreground font-mono">
+                {links?.length ?? 0}
               </span>
-              <Badge variant="destructive">{emptyTextLinks.length}</Badge>
-            </div>
-          )}
+            )}
+          </div>
+          <div className="flex justify-between items-center text-xs font-semibold text-muted-foreground">
+            <span>Internal</span>
+            {isLoading ? (
+              <Skeleton className="h-4 w-6 rounded" />
+            ) : (
+              <span className="text-foreground font-mono">
+                {internalLinks.length}
+              </span>
+            )}
+          </div>
+          <div className="flex justify-between items-center text-xs font-semibold text-muted-foreground">
+            <span>External</span>
+            {isLoading ? (
+              <Skeleton className="h-4 w-6 rounded" />
+            ) : (
+              <span className="text-foreground font-mono">
+                {externalLinks.length}
+              </span>
+            )}
+          </div>
         </CardContent>
       </Card>
 
-      {internalLinks.length > 0 && (
-        <LinkListCard title="Internal Links" links={internalLinks} />
-      )}
-
-      {externalLinks.length > 0 && (
-        <LinkListCard title="External Links" links={externalLinks} />
-      )}
-
-      {emptyTextLinks.length > 0 && (
-        <LinkListCard
-          title="Links with Empty Text"
-          links={emptyTextLinks}
-          isError
-        />
-      )}
+      {listContent}
     </div>
   );
 }
 
-interface LinkListCardProps {
-  title: string;
-  links: LinkInfo[];
-  isError?: boolean;
+function LinkRow({
+  link,
+  baseUrl,
+}: {
+  link: LinkInfo;
+  baseUrl: string | null;
+}) {
+  const hasMissingText = !link.text || link.text.trim() === "";
+  const displayText = link.text ? truncateText(link.text, 30) : "Missing text";
+  const displayTitle = link.title ? truncateText(link.title, 25) : null;
+  const isJavascriptLink = /^javascript:/i.test(link.href.trim());
+  const resolvedHref = (() => {
+    if (isJavascriptLink) {
+      return "#";
+    }
+    if (link.isExternal) {
+      return link.href;
+    }
+    if (!baseUrl) {
+      return link.href;
+    }
+    try {
+      return new URL(link.href, baseUrl).toString();
+    } catch {
+      return link.href;
+    }
+  })();
+
+  return (
+    <a
+      href={resolvedHref}
+      target="_blank"
+      rel="noopener noreferrer"
+      onClick={(event) => {
+        if (isJavascriptLink) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+      }}
+      className="flex items-center gap-2 rounded-md px-2 py-2 hover:bg-white/5 transition-colors select-none cursor-pointer min-w-0 w-full"
+    >
+      <div className="min-w-0 w-0 flex-1 overflow-hidden">
+        <div className="flex items-center gap-2 min-w-0 overflow-hidden">
+          {link.isExternal ? (
+            <Badge
+              variant="outline"
+              className="text-[10px] px-1.5 py-0 h-4 font-sans shrink-0 bg-blue-500/10 text-blue-300 border-blue-500/30"
+            >
+              EXT
+            </Badge>
+          ) : (
+            <Badge
+              variant="outline"
+              className="text-[10px] px-1.5 py-0 h-4 font-sans shrink-0 bg-green-500/10 text-green-300 border-green-500/30"
+            >
+              INT
+            </Badge>
+          )}
+          <span
+            className={`text-sm font-sans truncate ${
+              hasMissingText ? "text-destructive" : "text-foreground/90"
+            }`}
+            title={link.text || "Missing text"}
+          >
+            {displayText}
+          </span>
+          {hasMissingText && (
+            <HugeiconsIcon
+              icon={Alert01Icon}
+              strokeWidth={2}
+              className="size-3.5 text-destructive shrink-0"
+            />
+          )}
+        </div>
+        <div className="flex items-center gap-2 mt-0.5 min-w-0 w-full overflow-hidden">
+          <span className="block text-[10px] text-muted-foreground truncate font-mono min-w-0 w-full">
+            {link.href}
+          </span>
+          {link.hasNofollow && (
+            <Badge
+              variant="secondary"
+              className="text-[10px] px-1.5 py-0 h-4 font-sans shrink-0"
+            >
+              nofollow
+            </Badge>
+          )}
+          {isJavascriptLink && (
+            <Badge
+              variant="outline"
+              className="text-[10px] px-1.5 py-0 h-4 font-sans shrink-0 border-amber-500/40 text-amber-300 bg-amber-500/10"
+            >
+              javascript
+            </Badge>
+          )}
+        </div>
+        {displayTitle && (
+          <div className="text-[10px] text-muted-foreground/70 truncate mt-0.5">
+            {displayTitle}
+          </div>
+        )}
+      </div>
+    </a>
+  );
 }
 
-function LinkListCard({ title, links, isError = false }: LinkListCardProps) {
+function LinkRowSkeleton() {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className={isError ? "text-destructive" : ""}>
-          {title} ({links.length})
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-3">
-          {links.map((link, index) => (
-            <div
-              key={`${link.href}-${index}`}
-              className="p-3 rounded-md bg-muted/50 space-y-2 break-all"
-            >
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex-1 min-w-0">
-                  {link.text ? (
-                    <p className="text-sm font-medium">{link.text}</p>
-                  ) : (
-                    <p className="text-sm font-medium text-muted-foreground italic">
-                      (no text)
-                    </p>
-                  )}
-                </div>
-                <div className="flex gap-1 flex-shrink-0">
-                  {link.isExternal && (
-                    <Badge variant="outline" className="text-xs">
-                      External
-                    </Badge>
-                  )}
-                  {link.hasNofollow && (
-                    <Badge variant="secondary" className="text-xs">
-                      nofollow
-                    </Badge>
-                  )}
-                </div>
-              </div>
-              <a
-                href={link.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs text-blue-500 hover:underline block truncate"
-              >
-                {link.href}
-              </a>
-              {link.title && (
-                <p className="text-xs text-muted-foreground">
-                  Title: {link.title}
-                </p>
-              )}
-            </div>
-          ))}
+    <div className="flex items-center gap-2 rounded-md px-2 py-2">
+      <Skeleton className="size-4 rounded" />
+      <div className="min-w-0 w-0 flex-1 space-y-2">
+        <div className="flex items-center gap-2">
+          <Skeleton className="h-4 w-16 rounded" />
+          <Skeleton className="h-4 w-40 rounded" />
         </div>
-      </CardContent>
-    </Card>
+        <Skeleton className="h-3 w-full rounded" />
+      </div>
+    </div>
   );
 }

@@ -271,14 +271,17 @@ export default function App() {
         </TabsContent>
 
         <TabsContent value="links" className="flex-1 pt-1">
-          <ScrollArea className="h-full">
+          <ScrollArea className="h-full overflow-x-hidden">
             <motion.div
-              className="p-4"
+              className="p-4 max-w-full"
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.2, ease: "easeOut" }}
             >
-              <LinksTab links={result?.links || null} />
+              <LinksTab
+                links={result?.links || null}
+                baseUrl={result?.metadata.url ?? null}
+              />
             </motion.div>
           </ScrollArea>
         </TabsContent>

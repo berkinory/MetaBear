@@ -3,6 +3,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 
 import type { HeadingInfo } from "@/types/audit";
 
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -11,29 +12,29 @@ interface HeadingsTabProps {
 }
 
 export function HeadingsTab({ headings }: HeadingsTabProps) {
-  if (!headings) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-muted-foreground">Headings</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-2">
-          <HeadingRowSkeleton />
-          <HeadingRowSkeleton />
-          <HeadingRowSkeleton />
-          <HeadingRowSkeleton />
-        </CardContent>
-      </Card>
-    );
-  }
+  const isLoading = headings === null;
 
-  if (headings.length === 0) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-muted-foreground">Headings</CardTitle>
-        </CardHeader>
-        <CardContent>
+  return (
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between">
+        <CardTitle className="text-muted-foreground">Headings</CardTitle>
+        {isLoading && <Skeleton className="h-5 w-8 rounded" />}
+        {!isLoading && headings.length > 0 && (
+          <Badge variant="secondary" className="font-mono">
+            {headings.length}
+          </Badge>
+        )}
+      </CardHeader>
+      <CardContent>
+        {isLoading && (
+          <div className="space-y-2">
+            <HeadingRowSkeleton />
+            <HeadingRowSkeleton />
+            <HeadingRowSkeleton />
+            <HeadingRowSkeleton />
+          </div>
+        )}
+        {!isLoading && headings.length === 0 && (
           <div className="flex flex-col items-center gap-2 py-6 text-muted-foreground">
             <HugeiconsIcon
               icon={LicenseNoIcon}
@@ -42,24 +43,18 @@ export function HeadingsTab({ headings }: HeadingsTabProps) {
             />
             <span className="text-sm">No headings found</span>
           </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-muted-foreground">Headings</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-2">
-        {headings.map((heading, idx) => (
-          <HeadingRow
-            key={`${heading.level}-${idx}-${heading.text.slice(0, 20)}`}
-            heading={heading}
-            index={idx}
-          />
-        ))}
+        )}
+        {!isLoading && headings.length > 0 && (
+          <div className="space-y-2">
+            {headings.map((heading, idx) => (
+              <HeadingRow
+                key={`${heading.level}-${idx}-${heading.text.slice(0, 20)}`}
+                heading={heading}
+                index={idx}
+              />
+            ))}
+          </div>
+        )}
       </CardContent>
     </Card>
   );
