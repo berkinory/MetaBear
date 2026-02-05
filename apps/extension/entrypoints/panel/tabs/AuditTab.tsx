@@ -345,7 +345,13 @@ const copyToClipboard = async (text: string) => {
   textarea.style.left = "-9999px";
   document.body.appendChild(textarea);
   textarea.select();
-  document.execCommand("copy");
+  if (document.queryCommandSupported?.("copy")) {
+    try {
+      document.execCommand("copy");
+    } catch {
+      // Fallback failed
+    }
+  }
   textarea.remove();
 };
 

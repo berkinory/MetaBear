@@ -250,7 +250,13 @@ function collectMetadata(): Omit<MetadataInfo, "robots" | "sitemaps"> {
     'link[rel="icon"], link[rel="shortcut icon"], link[rel="apple-touch-icon"]'
   );
   const faviconHref = faviconEl?.getAttribute("href") || "/favicon.ico";
-  const favicon = new URL(faviconHref, document.baseURI).href;
+  const favicon = (() => {
+    try {
+      return new URL(faviconHref, document.baseURI).href;
+    } catch {
+      return null;
+    }
+  })();
 
   const ogTitle = document.querySelector('meta[property="og:title"]');
   const ogDescription = document.querySelector(
