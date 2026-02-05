@@ -4,6 +4,7 @@ import type { MetadataInfo } from "@/types/audit";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Textarea } from "@/components/ui/textarea";
 
 interface MetadataTabProps {
   metadata: MetadataInfo | null;
@@ -63,12 +64,13 @@ function BasicMetaCard({
             )}
           </div>
           {loading ? (
-            <Skeleton className="h-8 w-full rounded-lg" />
+            <Skeleton className="h-14 w-full rounded-lg" />
           ) : (
-            <Input
+            <Textarea
               value={metadata?.title ?? ""}
               readOnly
-              className="text-sm text-foreground"
+              rows={2}
+              className="resize-none text-sm text-foreground"
             />
           )}
         </div>
@@ -84,12 +86,13 @@ function BasicMetaCard({
             )}
           </div>
           {loading ? (
-            <Skeleton className="h-8 w-full rounded-lg" />
+            <Skeleton className="h-20 w-full rounded-lg" />
           ) : (
-            <Input
+            <Textarea
               value={metadata?.description ?? ""}
               readOnly
-              className="text-sm text-foreground"
+              rows={3}
+              className="resize-none text-sm text-foreground"
             />
           )}
         </div>
