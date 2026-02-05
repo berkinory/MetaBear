@@ -40,6 +40,8 @@ export interface MetadataInfo {
   lang: string | null;
   keywords: string | null;
   author: string | null;
+  robotsContent: string | null;
+  favicon: string | null;
   wordCount: number;
   charCount: number;
   url: string;
@@ -76,6 +78,11 @@ export interface AuditResult {
 
 export interface AuditMessage {
   type: "RUN_AUDIT";
+}
+
+export interface ScrollToHeadingMessage {
+  type: "SCROLL_TO_HEADING";
+  index: number;
 }
 
 export interface TogglePanelMessage {

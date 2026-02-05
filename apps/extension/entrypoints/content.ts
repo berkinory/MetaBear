@@ -8,6 +8,7 @@ import type {
   Issue,
   LinkInfo,
   MetadataInfo,
+  ScrollToHeadingMessage,
   TogglePanelMessage,
 } from "@/types/audit";
 
@@ -55,7 +56,7 @@ export default defineContentScript({
     }
 
     const messageListener = (
-      message: AuditMessage | TogglePanelMessage,
+      message: AuditMessage | TogglePanelMessage | ScrollToHeadingMessage,
       _sender: unknown,
       sendResponse: (response?: AuditResult) => void
     ) => {
@@ -88,6 +89,8 @@ export default defineContentScript({
                 lang: null,
                 keywords: null,
                 author: null,
+                robotsContent: null,
+                favicon: null,
                 wordCount: 0,
                 charCount: 0,
                 url: "",
@@ -111,6 +114,18 @@ export default defineContentScript({
           }
         })();
         return true;
+      }
+
+      if (message.type === "SCROLL_TO_HEADING") {
+        const headings = [
+          ...document.querySelectorAll("h1, h2, h3, h4, h5, h6"),
+        ];
+        const target = headings[message.index] as HTMLElement | undefined;
+        if (target) {
+          target.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+        sendResponse();
+        return false;
       }
       return false;
     };
@@ -143,7 +158,7 @@ function togglePanel(): void {
   panelRoot.style.width = "360px";
   panelRoot.style.height = "600px";
   panelRoot.style.zIndex = "2147483647";
-  panelRoot.style.borderRadius = "16px";
+  panelRoot.style.borderRadius = "18px";
   panelRoot.style.overflow = "hidden";
   panelRoot.style.background = "transparent";
 
@@ -205,7 +220,7 @@ async function runAudit(): Promise<AuditResult> {
 
   const highCount = issues.filter((i) => i.severity === "high").length;
   const mediumCount = issues.filter((i) => i.severity === "medium").length;
-  const score = Math.max(0, 100 - highCount * 5 - mediumCount * 2);
+  const score = Math.max(0, 100 - highCount * 6 - mediumCount * 5);
 
   return { accessibility, issues, metadata, headings, images, links, score };
 }
@@ -227,6 +242,21 @@ function collectMetadata(): Omit<MetadataInfo, "robots" | "sitemaps"> {
 
   const metaAuthor = document.querySelector('meta[name="author"]');
   const author = metaAuthor?.getAttribute("content") || null;
+
+  const metaRobots = document.querySelector('meta[name="robots"]');
+  const robotsContent = metaRobots?.getAttribute("content") || null;
+
+  const faviconEl = document.querySelector(
+    'link[rel="icon"], link[rel="shortcut icon"], link[rel="apple-touch-icon"]'
+  );
+  const faviconHref = faviconEl?.getAttribute("href") || "/favicon.ico";
+  const favicon = (() => {
+    try {
+      return new URL(faviconHref, document.baseURI).href;
+    } catch {
+      return null;
+    }
+  })();
 
   const ogTitle = document.querySelector('meta[property="og:title"]');
   const ogDescription = document.querySelector(
@@ -254,6 +284,8 @@ function collectMetadata(): Omit<MetadataInfo, "robots" | "sitemaps"> {
     lang,
     keywords,
     author,
+    robotsContent,
+    favicon,
     wordCount,
     charCount,
     url: document.URL,
@@ -290,7 +322,7 @@ function auditSEO(metadata: MetadataInfo): Issue[] {
       severity: "high",
       id: "seo-title-too-short",
       title: "Short Page Title",
-      description: `Title is ${metadata.title.length} chars. Recommended: 40–60 characters.`,
+      description: `Title is ${metadata.title.length} characters. Recommended: 40–60 characters.`,
     });
   } else if (metadata.title.length > 60) {
     issues.push({
@@ -298,7 +330,7 @@ function auditSEO(metadata: MetadataInfo): Issue[] {
       severity: "high",
       id: "seo-title-too-long",
       title: "Long Page Title",
-      description: `Title is ${metadata.title.length} chars. Recommended: 40–60 characters.`,
+      description: `Title is ${metadata.title.length} characters. Recommended: 40–60 characters.`,
     });
   }
 
@@ -317,7 +349,7 @@ function auditSEO(metadata: MetadataInfo): Issue[] {
       severity: "high",
       id: "seo-description-too-short",
       title: "Short Meta Description",
-      description: `Description is ${metadata.description.length} chars. Recommended: 100–150 characters.`,
+      description: `Description is ${metadata.description.length} characters. Recommended: 100–150 characters.`,
     });
   } else if (metadata.description.length > 150) {
     issues.push({
@@ -325,7 +357,7 @@ function auditSEO(metadata: MetadataInfo): Issue[] {
       severity: "high",
       id: "seo-description-too-long",
       title: "Long Meta Description",
-      description: `Description is ${metadata.description.length} chars. Recommended: 100–150 characters.`,
+      description: `Description is ${metadata.description.length} characters. Recommended: 100–150 characters.`,
     });
   }
 
@@ -350,7 +382,8 @@ function auditSEO(metadata: MetadataInfo): Issue[] {
           severity: "medium",
           id: "seo-canonical-mismatch",
           title: "Canonical Mismatch",
-          description: `Current and canonical URLs don't match. Current: ${current.origin + current.pathname} | Canonical: ${canonical.origin + canonical.pathname}`,
+          description:
+            "Current and canonical URLs don't match. Update the canonical tag to reflect the primary URL.",
         });
       }
     } catch {
@@ -360,8 +393,8 @@ function auditSEO(metadata: MetadataInfo): Issue[] {
 
   if (!metadata.lang) {
     issues.push({
-      type: "seo",
-      severity: "high",
+      type: "accessibility",
+      severity: "medium",
       id: "seo-missing-lang",
       title: "Missing Lang Attribute",
       description: "No lang on <html>. Required for accessibility and SEO.",
@@ -392,7 +425,7 @@ function auditSEO(metadata: MetadataInfo): Issue[] {
   if (metadata.wordCount < 100) {
     issues.push({
       type: "seo",
-      severity: "medium",
+      severity: "high",
       id: "seo-thin-content",
       title: "Thin Content",
       description: `Only ${metadata.wordCount} words. Pages under 100 words may be seen as thin content.`,
@@ -488,7 +521,7 @@ function auditImages(images: ImageInfo[]): Issue[] {
   if (missingAltCount > 0) {
     issues.push({
       type: "accessibility",
-      severity: "high",
+      severity: "medium",
       id: "image-missing-alt",
       title: "Missing Alt Text",
       description: `${missingAltCount} image(s) without alt text. Required for screen readers.`,
@@ -594,7 +627,7 @@ function auditLinks(links: LinkInfo[]): Issue[] {
   if (emptyTextCount > 0) {
     issues.push({
       type: "accessibility",
-      severity: "high",
+      severity: "medium",
       id: "link-empty-text",
       title: "Empty Link Text",
       description: `${emptyTextCount} link(s) with no visible text. Add descriptive text for accessibility.`,

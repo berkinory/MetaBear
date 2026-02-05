@@ -2,6 +2,8 @@
 import type { MetadataInfo } from "@/types/audit";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface MetadataTabProps {
   metadata: MetadataInfo | null;
@@ -14,98 +16,176 @@ export function MetadataTab({
   linkCount,
   imageCount,
 }: MetadataTabProps) {
-  if (!metadata) {
-    return (
-      <div className="flex items-center justify-center py-8">
-        <p className="text-muted-foreground">No metadata available</p>
-      </div>
-    );
-  }
+  const isLoading = !metadata;
 
   return (
     <div className="space-y-4">
-      <BasicMetaCard
+      <BasicMetaCard metadata={metadata} loading={isLoading} />
+      <CountsCard
         metadata={metadata}
+        loading={isLoading}
         linkCount={linkCount}
         imageCount={imageCount}
       />
-      <RobotsCard metadata={metadata} />
-      {metadata.keywords && <KeywordsCard keywords={metadata.keywords} />}
-    </div>
-  );
-}
-
-function MetaRow({ label, value }: { label: string; value: string | null }) {
-  return (
-    <div className="space-y-1">
-      <div className="text-xs font-semibold text-muted-foreground">{label}</div>
-      <div className="text-sm break-all">
-        {value ? (
-          <span>{value}</span>
-        ) : (
-          <span className="text-muted-foreground italic">Not set</span>
-        )}
-      </div>
+      {metadata?.keywords && <KeywordsCard keywords={metadata.keywords} />}
     </div>
   );
 }
 
 function BasicMetaCard({
   metadata,
-  linkCount,
-  imageCount,
+  loading,
 }: {
-  metadata: MetadataInfo;
-  linkCount: number;
-  imageCount: number;
+  metadata: MetadataInfo | null;
+  loading: boolean;
 }) {
+  const canonicalStatus = (() => {
+    if (loading) {
+      return null;
+    }
+    if (!metadata?.canonical || !metadata?.url) {
+      return "missing";
+    }
+    return metadata.url === metadata.canonical ? "match" : "mismatch";
+  })();
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Basic Metadata</CardTitle>
-      </CardHeader>
       <CardContent className="space-y-4">
-        <MetaRow label="URL" value={metadata.url} />
-        <MetaRow label="Title" value={metadata.title} />
-        <MetaRow label="Description" value={metadata.description} />
-        <MetaRow label="Canonical URL" value={metadata.canonical} />
-        <MetaRow label="Language" value={metadata.lang} />
-        {metadata.author && <MetaRow label="Author" value={metadata.author} />}
-        <div className="pt-3 border-t border-muted">
-          <div className="grid grid-cols-4 gap-3">
-            <div>
-              <div className="text-xs font-semibold text-muted-foreground">
-                Words
-              </div>
-              <div className="text-sm font-medium">
-                {metadata.wordCount.toLocaleString()}
-              </div>
-            </div>
-            <div>
-              <div className="text-xs font-semibold text-muted-foreground">
-                Chars
-              </div>
-              <div className="text-sm font-medium">
-                {metadata.charCount.toLocaleString()}
-              </div>
-            </div>
-            <div>
-              <div className="text-xs font-semibold text-muted-foreground">
-                Links
-              </div>
-              <div className="text-sm font-medium">
-                {linkCount.toLocaleString()}
-              </div>
-            </div>
-            <div>
-              <div className="text-xs font-semibold text-muted-foreground">
-                Images
-              </div>
-              <div className="text-sm font-medium">
-                {imageCount.toLocaleString()}
-              </div>
-            </div>
+        <div className="space-y-1">
+          <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground">
+            <span>Title</span>
+            {loading ? (
+              <Skeleton className="h-3 w-8" />
+            ) : (
+              <span className="font-mono">
+                {(metadata?.title ?? "").length}
+              </span>
+            )}
           </div>
+          {loading ? (
+            <Skeleton className="h-8 w-full rounded-lg" />
+          ) : (
+            <Input
+              value={metadata?.title ?? ""}
+              readOnly
+              className="text-sm text-foreground"
+            />
+          )}
+        </div>
+        <div className="space-y-1">
+          <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground">
+            <span>Description</span>
+            {loading ? (
+              <Skeleton className="h-3 w-8" />
+            ) : (
+              <span className="font-mono">
+                {(metadata?.description ?? "").length}
+              </span>
+            )}
+          </div>
+          {loading ? (
+            <Skeleton className="h-8 w-full rounded-lg" />
+          ) : (
+            <Input
+              value={metadata?.description ?? ""}
+              readOnly
+              className="text-sm text-foreground"
+            />
+          )}
+        </div>
+        <div className="space-y-1">
+          <div className="text-xs font-semibold text-muted-foreground">URL</div>
+          {loading ? (
+            <Skeleton className="h-8 w-full rounded-lg" />
+          ) : (
+            <Input
+              value={metadata?.url ?? ""}
+              readOnly
+              className="text-sm text-foreground"
+            />
+          )}
+        </div>
+        <div className="space-y-1">
+          <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground">
+            <span>Canonical URL</span>
+            {canonicalStatus === null ? (
+              <Skeleton className="h-3 w-8" />
+            ) : (
+              <span
+                className={
+                  canonicalStatus === "match"
+                    ? "text-green-500"
+                    : "text-red-500"
+                }
+              >
+                {canonicalStatus === "match" ? "✓" : "✗"}
+              </span>
+            )}
+          </div>
+          {loading ? (
+            <Skeleton className="h-8 w-full rounded-lg" />
+          ) : (
+            <Input
+              value={metadata?.canonical ?? ""}
+              readOnly
+              className="text-sm text-foreground"
+            />
+          )}
+        </div>
+        <div className="space-y-1">
+          <div className="text-xs font-semibold text-muted-foreground">
+            Language
+          </div>
+          {loading ? (
+            <Skeleton className="h-8 w-full rounded-lg" />
+          ) : (
+            <Input
+              value={metadata?.lang ?? ""}
+              readOnly
+              className="text-sm text-foreground"
+            />
+          )}
+        </div>
+        <div className="space-y-1">
+          <div className="text-xs font-semibold text-muted-foreground">
+            Robots Tag
+          </div>
+          {loading ? (
+            <Skeleton className="h-8 w-full rounded-lg" />
+          ) : (
+            <Input
+              value={metadata?.robotsContent ?? ""}
+              readOnly
+              className="text-sm text-foreground"
+            />
+          )}
+        </div>
+        <div className="flex items-center justify-between pt-1">
+          {loading ? (
+            <>
+              <Skeleton className="h-7 w-24 rounded-md" />
+              <Skeleton className="h-7 w-24 rounded-md" />
+            </>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={() => openUrl(metadata?.robots.url ?? "")}
+                className="inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted"
+              >
+                <span>robots.txt</span>
+                <span className="text-foreground">↗</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => openUrl(metadata?.sitemaps[0] || "")}
+                className="inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted"
+              >
+                <span>sitemap.xml</span>
+                <span className="text-foreground">↗</span>
+              </button>
+            </>
+          )}
         </div>
       </CardContent>
     </Card>
@@ -123,55 +203,60 @@ function openUrl(url: string) {
   }
 }
 
-function getSitemapLabel(url: string) {
-  try {
-    return new URL(url).pathname;
-  } catch {
-    return url;
-  }
-}
-
-function RobotsCard({ metadata }: { metadata: MetadataInfo }) {
+function CountsCard({
+  metadata,
+  loading,
+  linkCount,
+  imageCount,
+}: {
+  metadata: MetadataInfo | null;
+  loading: boolean;
+  linkCount: number;
+  imageCount: number;
+}) {
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Robots & Sitemap</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-0.5">
-        <button
-          type="button"
-          onClick={() => openUrl(metadata.robots.url)}
-          className="flex items-center gap-2 w-full text-left px-2 py-1.5 rounded-md hover:bg-muted transition-colors"
-        >
-          <span
-            className={
-              metadata.robots.exists ? "text-green-500" : "text-red-500"
-            }
-          >
-            {metadata.robots.exists ? "✓" : "✗"}
-          </span>
-          <span className="text-sm flex-1">robots.txt</span>
-          <span className="text-xs text-muted-foreground">↗</span>
-        </button>
-        {metadata.sitemaps.length > 0 ? (
-          metadata.sitemaps.map((url) => (
-            <button
-              key={url}
-              type="button"
-              onClick={() => openUrl(url)}
-              className="flex items-center gap-2 w-full text-left px-2 py-1.5 rounded-md hover:bg-muted transition-colors"
-            >
-              <span className="text-green-500">✓</span>
-              <span className="text-sm flex-1">{getSitemapLabel(url)}</span>
-              <span className="text-xs text-muted-foreground">↗</span>
-            </button>
-          ))
-        ) : (
-          <div className="flex items-center gap-2 px-2 py-1.5">
-            <span className="text-red-500">✗</span>
-            <span className="text-sm text-muted-foreground">sitemap.xml</span>
-          </div>
-        )}
+      <CardContent className="space-y-2">
+        <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground">
+          <span>Words</span>
+          {loading ? (
+            <Skeleton className="h-3 w-10" />
+          ) : (
+            <span className="text-foreground font-mono">
+              {metadata?.wordCount.toLocaleString() ?? "0"}
+            </span>
+          )}
+        </div>
+        <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground">
+          <span>Characters</span>
+          {loading ? (
+            <Skeleton className="h-3 w-10" />
+          ) : (
+            <span className="text-foreground font-mono">
+              {metadata?.charCount.toLocaleString() ?? "0"}
+            </span>
+          )}
+        </div>
+        <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground">
+          <span>Links</span>
+          {loading ? (
+            <Skeleton className="h-3 w-10" />
+          ) : (
+            <span className="text-foreground font-mono">
+              {linkCount.toLocaleString()}
+            </span>
+          )}
+        </div>
+        <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground">
+          <span>Images</span>
+          {loading ? (
+            <Skeleton className="h-3 w-10" />
+          ) : (
+            <span className="text-foreground font-mono">
+              {imageCount.toLocaleString()}
+            </span>
+          )}
+        </div>
       </CardContent>
     </Card>
   );
@@ -183,7 +268,7 @@ function KeywordsCard({ keywords }: { keywords: string }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Keywords ({keywordList.length})</CardTitle>
+        <CardTitle className="text-muted-foreground">Keywords</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="flex flex-wrap gap-2">
