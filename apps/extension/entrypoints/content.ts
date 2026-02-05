@@ -91,6 +91,7 @@ export default defineContentScript({
                 author: null,
                 robotsContent: null,
                 favicon: null,
+                appleTouchIcon: null,
                 wordCount: 0,
                 charCount: 0,
                 url: "",
@@ -247,9 +248,11 @@ function collectMetadata(): Omit<MetadataInfo, "robots" | "sitemaps"> {
   const robotsContent = metaRobots?.getAttribute("content") || null;
 
   const faviconEl = document.querySelector(
-    'link[rel="icon"], link[rel="shortcut icon"], link[rel="apple-touch-icon"]'
+    'link[rel="icon"], link[rel="shortcut icon"]'
   );
+  const appleTouchEl = document.querySelector('link[rel="apple-touch-icon"]');
   const faviconHref = faviconEl?.getAttribute("href") || "/favicon.ico";
+  const appleTouchHref = appleTouchEl?.getAttribute("href") || null;
   const favicon = (() => {
     try {
       return new URL(faviconHref, document.baseURI).href;
@@ -257,6 +260,15 @@ function collectMetadata(): Omit<MetadataInfo, "robots" | "sitemaps"> {
       return null;
     }
   })();
+  const appleTouchIcon = appleTouchHref
+    ? (() => {
+        try {
+          return new URL(appleTouchHref, document.baseURI).href;
+        } catch {
+          return null;
+        }
+      })()
+    : null;
 
   const ogTitle = document.querySelector('meta[property="og:title"]');
   const ogDescription = document.querySelector(
@@ -286,6 +298,7 @@ function collectMetadata(): Omit<MetadataInfo, "robots" | "sitemaps"> {
     author,
     robotsContent,
     favicon,
+    appleTouchIcon,
     wordCount,
     charCount,
     url: document.URL,
@@ -459,6 +472,7 @@ function collectHeadings(): HeadingInfo[] {
 
 function collectImages(): ImageInfo[] {
   const images: ImageInfo[] = [];
+  const seenSrcs = new Set<string>();
   const imgElements = document.querySelectorAll("img");
 
   for (const img of imgElements) {
@@ -469,6 +483,10 @@ function collectImages(): ImageInfo[] {
     }
 
     const { src } = img;
+
+    if (seenSrcs.has(src)) {
+      continue;
+    }
 
     if (src.startsWith("data:") && !src.startsWith("data:image/")) {
       continue;
@@ -485,11 +503,32 @@ function collectImages(): ImageInfo[] {
       continue;
     }
 
+    seenSrcs.add(src);
+
     const alt = img.getAttribute("alt");
     const hasAlt = img.hasAttribute("alt");
 
     const width = img.naturalWidth || img.width || 0;
     const height = img.naturalHeight || img.height || 0;
+
+    if (width <= 10 && height <= 10) {
+      continue;
+    }
+
+    if (img.getAttribute("aria-hidden") === "true") {
+      continue;
+    }
+
+    const computedStyle = window.getComputedStyle(img);
+    if (
+      computedStyle.display === "none" ||
+      computedStyle.visibility === "hidden" ||
+      computedStyle.opacity === "0"
+    ) {
+      continue;
+    }
+
+    const isBroken = img.complete && img.naturalWidth === 0;
 
     images.push({
       src,
@@ -497,6 +536,7 @@ function collectImages(): ImageInfo[] {
       width,
       height,
       hasAlt,
+      isBroken,
     });
   }
 
@@ -511,10 +551,14 @@ function auditImages(images: ImageInfo[]): Issue[] {
   }
 
   let missingAltCount = 0;
+  const brokenImages: string[] = [];
 
   for (const img of images) {
     if (!img.hasAlt) {
       missingAltCount += 1;
+    }
+    if (img.isBroken) {
+      brokenImages.push(img.src);
     }
   }
 
@@ -525,6 +569,18 @@ function auditImages(images: ImageInfo[]): Issue[] {
       id: "image-missing-alt",
       title: "Missing Alt Text",
       description: `${missingAltCount} image(s) without alt text. Required for screen readers.`,
+    });
+  }
+
+  if (brokenImages.length > 0) {
+    const imageCount = brokenImages.length;
+    const imageWord = imageCount === 1 ? "image" : "images";
+    issues.push({
+      type: "accessibility",
+      severity: "high",
+      id: "image-broken",
+      title: "Broken Images",
+      description: `${imageCount} ${imageWord} failed to load. Ensure all image URLs are valid and accessible.`,
     });
   }
 

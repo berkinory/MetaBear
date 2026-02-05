@@ -1,176 +1,362 @@
-import { LicenseNoIcon } from "@hugeicons/core-free-icons";
+import {
+  Alert01Icon,
+  Download01Icon,
+  Image01Icon,
+  LicenseNoIcon,
+} from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 
-import type { ImageInfo } from "@/types/audit";
+import type { ImageInfo, MetadataInfo } from "@/types/audit";
 
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface ImagesTabProps {
   images: ImageInfo[] | null;
+  metadata: MetadataInfo | null;
 }
 
-export function ImagesTab({ images }: ImagesTabProps) {
-  if (!images || images.length === 0) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-muted-foreground">Images</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col items-center gap-2 py-6 text-muted-foreground">
-            <HugeiconsIcon
-              icon={LicenseNoIcon}
-              strokeWidth={2}
-              className="size-6"
-            />
-            <span className="text-sm">No images found</span>
-          </div>
-        </CardContent>
-      </Card>
-    );
+function formatAlt(text: string): string {
+  const trimmed = text.trim();
+  if (trimmed.length <= 25) {
+    return trimmed;
   }
+  return `${trimmed.slice(0, 25)}...`;
+}
 
-  const imagesWithoutAlt = images.filter((img) => !img.hasAlt);
-  const imagesWithEmptyAlt = images.filter(
-    (img) => img.hasAlt && img.alt === ""
-  );
-  const imagesWithAlt = images.filter((img) => img.hasAlt && img.alt !== "");
+function getImageFormat(src: string): string | null {
+  try {
+    const url = new URL(src);
+    const path = url.pathname.toLowerCase();
+
+    const pathParts = path.split("/").filter(Boolean);
+    const lastPart = pathParts[pathParts.length - 1];
+
+    if (lastPart && lastPart.includes(".")) {
+      const ext = lastPart.split(".").pop();
+      if (
+        ext &&
+        ["svg", "png", "jpg", "jpeg", "webp", "gif", "avif", "ico"].includes(
+          ext
+        )
+      ) {
+        return ext === "jpeg" ? "jpg" : ext;
+      }
+    }
+
+    for (const part of pathParts) {
+      if (part.includes(".")) {
+        const ext = part.split(".").pop();
+        if (
+          ext &&
+          ["svg", "png", "jpg", "jpeg", "webp", "gif", "avif", "ico"].includes(
+            ext
+          )
+        ) {
+          return ext === "jpeg" ? "jpg" : ext;
+        }
+      }
+    }
+  } catch {
+    // Invalid URL
+  }
+  return null;
+}
+
+export function ImagesTab({ images, metadata }: ImagesTabProps) {
+  const isLoading = images === null;
+
+  const validImages = images?.filter((img) => !img.isBroken) ?? [];
+
+  const missingAltCount = validImages.filter(
+    (img) => !img.hasAlt || img.alt === ""
+  ).length;
 
   return (
     <div className="space-y-4">
       <Card>
         <CardHeader>
-          <CardTitle>All Images ({images.length})</CardTitle>
+          <CardTitle className="text-muted-foreground">Icons</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-xs text-muted-foreground mb-3">
-            {imagesWithoutAlt.length > 0 && (
-              <div className="text-destructive">
-                {imagesWithoutAlt.length} missing alt attribute
-              </div>
-            )}
-            {imagesWithEmptyAlt.length > 0 && (
-              <div className="text-yellow-600 dark:text-yellow-400">
-                {imagesWithEmptyAlt.length} decorative (empty alt)
-              </div>
-            )}
-            {imagesWithAlt.length > 0 && (
-              <div className="text-green-600 dark:text-green-400">
-                {imagesWithAlt.length} with alt text
-              </div>
-            )}
+          <div className="grid gap-3 grid-cols-2">
+            <IconCard
+              label="Favicon"
+              url={metadata?.favicon ?? null}
+              loading={metadata === null}
+            />
+            <IconCard
+              label="Apple Touch"
+              url={metadata?.appleTouchIcon ?? null}
+              loading={metadata === null}
+            />
           </div>
         </CardContent>
       </Card>
 
-      {imagesWithoutAlt.length > 0 && (
-        <ImageGroup
-          title={`Missing Alt (${imagesWithoutAlt.length})`}
-          images={imagesWithoutAlt}
-          variant="error"
-        />
-      )}
-
-      {imagesWithEmptyAlt.length > 0 && (
-        <ImageGroup
-          title={`Decorative Images (${imagesWithEmptyAlt.length})`}
-          images={imagesWithEmptyAlt}
-          variant="warning"
-        />
-      )}
-
-      {imagesWithAlt.length > 0 && (
-        <ImageGroup
-          title={`With Alt Text (${imagesWithAlt.length})`}
-          images={imagesWithAlt}
-          variant="success"
-        />
-      )}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle className="text-muted-foreground">Images</CardTitle>
+          {isLoading && (
+            <div className="flex gap-2">
+              <Skeleton className="h-5 w-8 rounded" />
+            </div>
+          )}
+          {!isLoading && validImages.length > 0 && (
+            <div className="flex gap-2">
+              <Badge variant="secondary" className="font-mono">
+                {validImages.length}
+              </Badge>
+              {missingAltCount > 0 && (
+                <Badge variant="destructive">
+                  <span className="font-mono">{missingAltCount}</span>
+                  <span className="font-sans ml-1">missing alt</span>
+                </Badge>
+              )}
+            </div>
+          )}
+        </CardHeader>
+        <CardContent>
+          {isLoading && (
+            <div className="space-y-2">
+              <ImageRowSkeleton />
+              <ImageRowSkeleton />
+              <ImageRowSkeleton />
+            </div>
+          )}
+          {!isLoading && validImages.length === 0 && (
+            <div className="flex flex-col items-center gap-2 py-6 text-muted-foreground">
+              <HugeiconsIcon
+                icon={LicenseNoIcon}
+                strokeWidth={2}
+                className="size-6"
+              />
+              <span className="text-sm">No images found</span>
+            </div>
+          )}
+          {!isLoading && validImages.length > 0 && (
+            <div className="space-y-2">
+              {validImages.map((image, idx) => (
+                <ImageRow key={`${image.src}-${idx}`} image={image} />
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
 
-interface ImageGroupProps {
-  title: string;
-  images: ImageInfo[];
-  variant: "error" | "warning" | "success";
-}
-
-function ImageGroup({ title, images, variant }: ImageGroupProps) {
-  const borderColor = {
-    error: "border-destructive/50",
-    warning: "border-yellow-500/50",
-    success: "border-green-500/50",
-  }[variant];
-
-  return (
-    <Card className={borderColor}>
-      <CardHeader className="pb-3">
-        <CardTitle className="text-sm">{title}</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-2">
-        {images.map((img) => (
-          <ImageRow key={img.src} image={img} variant={variant} />
-        ))}
-      </CardContent>
-    </Card>
+function IconCard({
+  label,
+  url,
+  loading,
+}: {
+  label: string;
+  url: string | null;
+  loading: boolean;
+}) {
+  const content = (
+    <>
+      <div className="size-8 shrink-0 rounded flex items-center justify-center overflow-hidden">
+        {loading && <Skeleton className="size-6 rounded" />}
+        {!loading && url && (
+          <img src={url} alt={label} className="h-full w-full object-contain" />
+        )}
+        {!loading && !url && (
+          <HugeiconsIcon
+            icon={Image01Icon}
+            strokeWidth={1.5}
+            className="size-5 text-muted-foreground"
+          />
+        )}
+      </div>
+      <div className="min-w-0 flex-1">
+        <div className="text-xs font-medium font-sans text-foreground">
+          {label}
+        </div>
+        {loading && <Skeleton className="mt-1 h-3 w-16" />}
+        {!loading && !url && (
+          <div className="text-[10px] text-muted-foreground font-sans">
+            Not found
+          </div>
+        )}
+        {url && !loading && (
+          <button
+            type="button"
+            onClick={async (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              try {
+                const response = await fetch(url);
+                const blob = await response.blob();
+                const blobUrl = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.href = blobUrl;
+                const filename =
+                  url.split("/").pop()?.split("?")[0] ||
+                  label.toLowerCase().replace(/\s+/g, "-");
+                const ext = blob.type.split("/")[1] || "ico";
+                link.download = filename.includes(".")
+                  ? filename
+                  : `${filename}.${ext}`;
+                link.click();
+                URL.revokeObjectURL(blobUrl);
+              } catch (error) {
+                console.error("Download failed:", error);
+              }
+            }}
+            className="mt-1 flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground transition-colors"
+            aria-label={`Download ${label}`}
+          >
+            <span className="font-sans">Download</span>
+          </button>
+        )}
+      </div>
+    </>
   );
+
+  const className =
+    "flex items-center gap-3 rounded-lg bg-muted/20 p-3 hover:bg-white/5 transition-colors select-none";
+
+  if (url) {
+    return (
+      <a
+        href={url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={className}
+      >
+        {content}
+      </a>
+    );
+  }
+
+  return <div className={className}>{content}</div>;
 }
 
-interface ImageRowProps {
-  image: ImageInfo;
-  variant: "error" | "warning" | "success";
-}
+function ImageRow({ image }: { image: ImageInfo }) {
+  const format = getImageFormat(image.src);
+  const hasMissingAlt = !image.hasAlt || image.alt === "";
+  const hasWarning = hasMissingAlt;
 
-function ImageRow({ image, variant }: ImageRowProps) {
-  const bgColor = {
-    error: "bg-destructive/5",
-    warning: "bg-yellow-500/5",
-    success: "bg-green-500/5",
-  }[variant];
+  const altInfo = (() => {
+    if (!image.hasAlt) {
+      return { text: "Missing Alt Text", className: "text-destructive" };
+    }
+    if (image.alt === "") {
+      return { text: "Decorative", className: "text-muted-foreground italic" };
+    }
+    return { text: image.alt ?? "", className: "text-foreground/90" };
+  })();
 
-  return (
-    <div className={`flex items-start gap-3 p-2 rounded-md ${bgColor}`}>
-      <div className="w-8 h-8 flex-shrink-0 bg-muted rounded overflow-hidden border border-border">
+  const content = (
+    <>
+      <div className="size-10 shrink-0 rounded flex items-center justify-center overflow-hidden">
         <img
           src={image.src}
           alt={image.alt || ""}
-          className="w-full h-full object-cover"
+          className="max-h-full max-w-full object-contain"
           loading="lazy"
         />
       </div>
-
-      <div className="flex-1 min-w-0 space-y-1">
-        <div className="text-xs">
-          {!image.hasAlt && (
-            <span className="text-destructive font-medium">
-              No alt attribute
-            </span>
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-2">
+          <span
+            className={`text-sm font-sans truncate ${altInfo.className}`}
+            title={altInfo.text.trim()}
+          >
+            {formatAlt(altInfo.text)}
+          </span>
+          {hasWarning && (
+            <HugeiconsIcon
+              icon={Alert01Icon}
+              strokeWidth={2}
+              className="size-3.5 text-destructive shrink-0"
+            />
           )}
-          {image.hasAlt && image.alt === "" && (
-            <span className="text-yellow-600 dark:text-yellow-400 italic">
-              Empty alt (decorative)
-            </span>
-          )}
-          {image.hasAlt && image.alt !== "" && (
-            <span className="text-foreground">{image.alt}</span>
-          )}
+          <span className="flex-1" />
+          <button
+            type="button"
+            onClick={async (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              try {
+                const response = await fetch(image.src);
+                const blob = await response.blob();
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.href = url;
+                const filename =
+                  image.src.split("/").pop()?.split("?")[0] || "image";
+                const ext = format || blob.type.split("/")[1] || "jpg";
+                link.download = filename.includes(".")
+                  ? filename
+                  : `${filename}.${ext}`;
+                link.click();
+                URL.revokeObjectURL(url);
+              } catch (error) {
+                console.error("Download failed:", error);
+              }
+            }}
+            className="shrink-0 text-muted-foreground hover:text-foreground transition-colors"
+            aria-label="Download image"
+          >
+            <HugeiconsIcon
+              icon={Download01Icon}
+              strokeWidth={2}
+              className="size-4"
+            />
+          </button>
         </div>
+        {(image.width > 0 && image.height > 0) || format ? (
+          <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
+            {image.width > 0 && image.height > 0 && (
+              <span className="font-mono">
+                {image.width}x{image.height}
+              </span>
+            )}
+            {format && (
+              <Badge
+                variant="outline"
+                className="text-[10px] px-1.5 py-0 h-4 uppercase font-sans"
+              >
+                {format}
+              </Badge>
+            )}
+          </div>
+        ) : null}
+      </div>
+    </>
+  );
 
-        <div className="text-[10px] text-muted-foreground flex gap-2">
-          {image.width > 0 && image.height > 0 && (
-            <span>
-              {image.width} × {image.height}
-            </span>
-          )}
-        </div>
+  const className =
+    "flex items-center gap-3 rounded-md px-2 py-2 hover:bg-white/5 transition-colors select-none";
 
-        <div
-          className="text-[10px] text-muted-foreground truncate"
-          title={image.src}
-        >
-          {image.src}
+  return (
+    <a
+      href={image.src}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={`${className} cursor-pointer`}
+    >
+      {content}
+    </a>
+  );
+}
+
+function ImageRowSkeleton() {
+  return (
+    <div className="flex items-center gap-3 rounded-md px-2 py-2">
+      <Skeleton className="size-10 rounded" />
+      <div className="flex-1 space-y-1">
+        <div className="flex items-center gap-2">
+          <Skeleton className="h-4 w-3/4" />
+          <span className="flex-1" />
+          <Skeleton className="size-4 rounded shrink-0" />
         </div>
+        <Skeleton className="h-3 w-1/2" />
       </div>
     </div>
   );
