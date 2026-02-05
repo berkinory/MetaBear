@@ -92,6 +92,8 @@ export default defineContentScript({
                 keywords: null,
                 author: null,
                 robotsContent: null,
+                robotsText: null,
+                sitemapText: null,
                 favicon: null,
                 appleTouchIcon: null,
                 wordCount: 0,
@@ -229,8 +231,15 @@ async function runAudit(): Promise<AuditResult> {
   issues.push(...accessibilityIssues);
 
   const baseMetadata = collectMetadata();
-  const { robots, sitemaps } = await checkRobotsAndSitemap();
-  const metadata = { ...baseMetadata, robots, sitemaps };
+  const { robots, sitemaps, robotsText, sitemapText } =
+    await checkRobotsAndSitemap();
+  const metadata = {
+    ...baseMetadata,
+    robots,
+    sitemaps,
+    robotsText,
+    sitemapText,
+  };
 
   const headings = collectHeadings();
 
@@ -267,7 +276,10 @@ async function runAudit(): Promise<AuditResult> {
   return { accessibility, issues, metadata, headings, images, links, score };
 }
 
-function collectMetadata(): Omit<MetadataInfo, "robots" | "sitemaps"> {
+function collectMetadata(): Omit<
+  MetadataInfo,
+  "robots" | "sitemaps" | "robotsText" | "sitemapText"
+> {
   const title = document.querySelector("title");
   const titleText = title?.textContent?.trim() || null;
 
@@ -733,11 +745,14 @@ function auditLinks(links: LinkInfo[]): Issue[] {
 async function checkRobotsAndSitemap(): Promise<{
   robots: { url: string; exists: boolean };
   sitemaps: string[];
+  robotsText: string | null;
+  sitemapText: string | null;
 }> {
   const { origin } = document.location;
   const robotsUrl = `${origin}/robots.txt`;
   let robotsExists = false;
   let robotsText = "";
+  let sitemapText = "";
   const sitemaps: string[] = [];
 
   try {
@@ -755,6 +770,7 @@ async function checkRobotsAndSitemap(): Promise<{
     const response = await fetch(sitemapUrl);
     if (response.ok) {
       const text = await response.text();
+      sitemapText = text;
       const doc = new DOMParser().parseFromString(text, "application/xml");
       const locs = doc.querySelectorAll("sitemapindex loc");
       if (locs.length > 0) {
@@ -781,5 +797,21 @@ async function checkRobotsAndSitemap(): Promise<{
     }
   }
 
-  return { robots: { url: robotsUrl, exists: robotsExists }, sitemaps };
+  if (!sitemapText && sitemaps.length > 0) {
+    try {
+      const response = await fetch(sitemaps[0]);
+      if (response.ok) {
+        sitemapText = await response.text();
+      }
+    } catch {
+      // sitemap not accessible
+    }
+  }
+
+  return {
+    robots: { url: robotsUrl, exists: robotsExists },
+    sitemaps,
+    robotsText: robotsText || null,
+    sitemapText: sitemapText || null,
+  };
 }
