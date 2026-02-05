@@ -1,3 +1,5 @@
+import type { AxeResults } from "axe-core";
+
 import axe from "axe-core";
 
 import type {
@@ -90,6 +92,8 @@ export default defineContentScript({
                 keywords: null,
                 author: null,
                 robotsContent: null,
+                robotsText: null,
+                sitemapText: null,
                 favicon: null,
                 appleTouchIcon: null,
                 wordCount: 0,
@@ -156,8 +160,8 @@ function togglePanel(): void {
   panelRoot.style.position = "fixed";
   panelRoot.style.top = "12px";
   panelRoot.style.right = "12px";
-  panelRoot.style.width = "360px";
-  panelRoot.style.height = "600px";
+  panelRoot.style.width = "420px";
+  panelRoot.style.height = "640px";
   panelRoot.style.zIndex = "2147483647";
   panelRoot.style.borderRadius = "18px";
   panelRoot.style.overflow = "hidden";
@@ -178,7 +182,36 @@ function togglePanel(): void {
 }
 
 async function runAudit(): Promise<AuditResult> {
-  const accessibility = await axe.run(document);
+  let accessibility: AxeResults;
+
+  try {
+    accessibility = await axe.run(document, {
+      runOnly: {
+        type: "rule",
+        values: [
+          "color-contrast",
+          "label",
+          "button-name",
+          "frame-title",
+          "aria-allowed-attr",
+          "aria-required-attr",
+          "aria-valid-attr-value",
+          "aria-hidden-focus",
+          "meta-viewport",
+          "html-has-lang",
+          "valid-lang",
+        ],
+      },
+    });
+  } catch (error) {
+    console.error("axe.run error:", error);
+    accessibility = {
+      violations: [],
+      passes: [],
+      incomplete: [],
+      inapplicable: [],
+    } as unknown as AxeResults;
+  }
 
   const issues: Issue[] = [];
 
@@ -198,8 +231,15 @@ async function runAudit(): Promise<AuditResult> {
   issues.push(...accessibilityIssues);
 
   const baseMetadata = collectMetadata();
-  const { robots, sitemaps } = await checkRobotsAndSitemap();
-  const metadata = { ...baseMetadata, robots, sitemaps };
+  const { robots, sitemaps, robotsText, sitemapText } =
+    await checkRobotsAndSitemap();
+  const metadata = {
+    ...baseMetadata,
+    robots,
+    sitemaps,
+    robotsText,
+    sitemapText,
+  };
 
   const headings = collectHeadings();
 
@@ -219,6 +259,16 @@ async function runAudit(): Promise<AuditResult> {
   const linkIssues = auditLinks(links);
   issues.push(...linkIssues);
 
+  issues.sort((a, b) => {
+    if (a.severity === "high" && b.severity === "medium") {
+      return -1;
+    }
+    if (a.severity === "medium" && b.severity === "high") {
+      return 1;
+    }
+    return 0;
+  });
+
   const highCount = issues.filter((i) => i.severity === "high").length;
   const mediumCount = issues.filter((i) => i.severity === "medium").length;
   const score = Math.max(0, 100 - highCount * 6 - mediumCount * 5);
@@ -226,7 +276,10 @@ async function runAudit(): Promise<AuditResult> {
   return { accessibility, issues, metadata, headings, images, links, score };
 }
 
-function collectMetadata(): Omit<MetadataInfo, "robots" | "sitemaps"> {
+function collectMetadata(): Omit<
+  MetadataInfo,
+  "robots" | "sitemaps" | "robotsText" | "sitemapText"
+> {
   const title = document.querySelector("title");
   const titleText = title?.textContent?.trim() || null;
 
@@ -404,16 +457,6 @@ function auditSEO(metadata: MetadataInfo): Issue[] {
     }
   }
 
-  if (!metadata.lang) {
-    issues.push({
-      type: "accessibility",
-      severity: "medium",
-      id: "seo-missing-lang",
-      title: "Missing Lang Attribute",
-      description: "No lang on <html>. Required for accessibility and SEO.",
-    });
-  }
-
   const missingOgTags: string[] = [];
   if (!metadata.openGraph.title) {
     missingOgTags.push("og:title");
@@ -492,11 +535,12 @@ function collectImages(): ImageInfo[] {
       continue;
     }
 
-    let isValidUrl = true;
+    let isValidUrl = false;
     try {
       const _url = new URL(src);
+      isValidUrl = !!_url;
     } catch {
-      isValidUrl = false;
+      // Invalid URL
     }
 
     if (!isValidUrl) {
@@ -563,12 +607,25 @@ function auditImages(images: ImageInfo[]): Issue[] {
   }
 
   if (missingAltCount > 0) {
+    const imageWord = missingAltCount === 1 ? "image" : "images";
     issues.push({
       type: "accessibility",
       severity: "medium",
       id: "image-missing-alt",
       title: "Missing Alt Text",
-      description: `${missingAltCount} image(s) without alt text. Required for screen readers.`,
+      description: `${missingAltCount} ${imageWord} without alt text. Required for screen readers.`,
+    });
+  }
+
+  if (brokenImages.length > 0) {
+    const imageCount = brokenImages.length;
+    const imageWord = imageCount === 1 ? "image" : "images";
+    issues.push({
+      type: "accessibility",
+      severity: "high",
+      id: "image-broken",
+      title: "Broken Images",
+      description: `${imageCount} ${imageWord} failed to load. Ensure all image URLs are valid and accessible.`,
     });
   }
 
@@ -637,6 +694,9 @@ function collectLinks(): LinkInfo[] {
     if (!href || href.trim() === "" || href === "#") {
       continue;
     }
+    if (/^javascript:/i.test(href.trim())) {
+      continue;
+    }
 
     const text =
       link.textContent?.trim() || link.getAttribute("aria-label")?.trim() || "";
@@ -681,12 +741,13 @@ function auditLinks(links: LinkInfo[]): Issue[] {
   }
 
   if (emptyTextCount > 0) {
+    const linkWord = emptyTextCount === 1 ? "link" : "links";
     issues.push({
       type: "accessibility",
       severity: "medium",
       id: "link-empty-text",
       title: "Empty Link Text",
-      description: `${emptyTextCount} link(s) with no visible text. Add descriptive text for accessibility.`,
+      description: `${emptyTextCount} ${linkWord} with no visible text. Add descriptive text for accessibility.`,
     });
   }
 
@@ -696,11 +757,14 @@ function auditLinks(links: LinkInfo[]): Issue[] {
 async function checkRobotsAndSitemap(): Promise<{
   robots: { url: string; exists: boolean };
   sitemaps: string[];
+  robotsText: string | null;
+  sitemapText: string | null;
 }> {
   const { origin } = document.location;
   const robotsUrl = `${origin}/robots.txt`;
   let robotsExists = false;
   let robotsText = "";
+  let sitemapText = "";
   const sitemaps: string[] = [];
 
   try {
@@ -718,6 +782,7 @@ async function checkRobotsAndSitemap(): Promise<{
     const response = await fetch(sitemapUrl);
     if (response.ok) {
       const text = await response.text();
+      sitemapText = text;
       const doc = new DOMParser().parseFromString(text, "application/xml");
       const locs = doc.querySelectorAll("sitemapindex loc");
       if (locs.length > 0) {
@@ -744,5 +809,21 @@ async function checkRobotsAndSitemap(): Promise<{
     }
   }
 
-  return { robots: { url: robotsUrl, exists: robotsExists }, sitemaps };
+  if (!sitemapText && sitemaps.length > 0) {
+    try {
+      const response = await fetch(sitemaps[0]);
+      if (response.ok) {
+        sitemapText = await response.text();
+      }
+    } catch {
+      // sitemap not accessible
+    }
+  }
+
+  return {
+    robots: { url: robotsUrl, exists: robotsExists },
+    sitemaps,
+    robotsText: robotsText || null,
+    sitemapText: sitemapText || null,
+  };
 }

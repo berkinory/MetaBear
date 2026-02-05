@@ -42,6 +42,8 @@ export interface MetadataInfo {
   keywords: string | null;
   author: string | null;
   robotsContent: string | null;
+  robotsText: string | null;
+  sitemapText: string | null;
   favicon: string | null;
   appleTouchIcon: string | null;
   wordCount: number;

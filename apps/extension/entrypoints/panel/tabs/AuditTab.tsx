@@ -48,10 +48,10 @@ function cleanUrl(url: string): string {
 
 function formatUrl(url: string): string {
   const cleaned = cleanUrl(url);
-  if (cleaned.length <= 30) {
+  if (cleaned.length <= 45) {
     return cleaned;
   }
-  return `${cleaned.slice(0, 30)}...`;
+  return `${cleaned.slice(0, 45)}...`;
 }
 
 export function AuditTab({
