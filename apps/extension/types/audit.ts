@@ -23,6 +23,7 @@ export interface ImageInfo {
   width: number;
   height: number;
   hasAlt: boolean;
+  isBroken: boolean;
 }
 
 export interface LinkInfo {
@@ -42,6 +43,7 @@ export interface MetadataInfo {
   author: string | null;
   robotsContent: string | null;
   favicon: string | null;
+  appleTouchIcon: string | null;
   wordCount: number;
   charCount: number;
   url: string;

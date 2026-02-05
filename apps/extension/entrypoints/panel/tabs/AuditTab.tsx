@@ -358,6 +358,44 @@ const copyToClipboard = async (text: string) => {
 const buildPrompt = (issue: Issue) =>
   `This is a comment from MetaBear browser extension: ${issue.title}. ${issue.description} How can I resolve this? If you propose a fix, please make it concise.`;
 
+function parseDescription(description: string) {
+  const parts: React.ReactNode[] = [];
+  const linkRegex = /<<([^|]+)\|([^>]+)>>/g;
+  let lastIndex = 0;
+  let match;
+  let partIndex = 0;
+
+  while ((match = linkRegex.exec(description)) !== null) {
+    if (match.index > lastIndex) {
+      const textContent = description.slice(lastIndex, match.index);
+      parts.push(<span key={`text-${partIndex}`}>{textContent}</span>);
+      partIndex += 1;
+    }
+    const [, text, url] = match;
+    parts.push(
+      <a
+        key={`link-${partIndex}`}
+        href={url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-blue-400 hover:underline font-medium"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {text}
+      </a>
+    );
+    partIndex += 1;
+    lastIndex = match.index + match[0].length;
+  }
+
+  if (lastIndex < description.length) {
+    const textContent = description.slice(lastIndex);
+    parts.push(<span key={`text-${partIndex}`}>{textContent}</span>);
+  }
+
+  return parts.length > 0 ? parts : description;
+}
+
 function IssuesCard({
   loading,
   issues,
@@ -478,7 +516,7 @@ function IssuesCard({
                   {issue.title}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  {issue.description}
+                  {parseDescription(issue.description)}
                 </p>
               </CardContent>
             </Card>
