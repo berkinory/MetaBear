@@ -629,6 +629,18 @@ function auditImages(images: ImageInfo[]): Issue[] {
     });
   }
 
+  if (brokenImages.length > 0) {
+    const imageCount = brokenImages.length;
+    const imageWord = imageCount === 1 ? "image" : "images";
+    issues.push({
+      type: "accessibility",
+      severity: "high",
+      id: "image-broken",
+      title: "Broken Images",
+      description: `${imageCount} ${imageWord} failed to load. Ensure all image URLs are valid and accessible.`,
+    });
+  }
+
   return issues;
 }
 
