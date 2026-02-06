@@ -546,19 +546,71 @@ function collectHeadings(): HeadingInfo[] {
   return headings;
 }
 
+const resolveImageUrl = (raw: string | null): string | null => {
+  if (!raw) {
+    return null;
+  }
+  const trimmed = raw.trim();
+  if (trimmed === "") {
+    return null;
+  }
+  if (trimmed.startsWith("data:") || trimmed.startsWith("blob:")) {
+    return trimmed;
+  }
+  try {
+    return new URL(trimmed, document.baseURI).href;
+  } catch {
+    return null;
+  }
+};
+
+const pickSrcFromSet = (raw: string | null): string | null => {
+  if (!raw) {
+    return null;
+  }
+  const [firstCandidate] = raw.split(",");
+  const trimmedCandidate = firstCandidate?.trim();
+  if (!trimmedCandidate) {
+    return null;
+  }
+  const [url] = trimmedCandidate.split(/\s+/);
+  return url ? url.trim() : null;
+};
+
 function collectImages(): ImageInfo[] {
   const images: ImageInfo[] = [];
   const seenSrcs = new Set<string>();
   const imgElements = document.querySelectorAll("img");
 
   for (const img of imgElements) {
-    const srcAttr =
-      img.getAttribute("src") || img.getAttribute("data-src") || "";
-    if (!srcAttr || srcAttr.trim() === "") {
+    const lazySrcAttr =
+      img.getAttribute("data-src") ||
+      img.getAttribute("data-lazy-src") ||
+      img.getAttribute("data-original") ||
+      img.getAttribute("data-actualsrc");
+    const lazySrcsetAttr =
+      img.getAttribute("data-srcset") || img.getAttribute("data-lazy-srcset");
+    const rawSrcset = lazySrcsetAttr || img.getAttribute("srcset");
+    const rawSrcsetUrl = pickSrcFromSet(rawSrcset);
+    const rawSrcAttr = img.getAttribute("src");
+
+    const candidateSrc =
+      resolveImageUrl(lazySrcAttr) ||
+      resolveImageUrl(rawSrcsetUrl) ||
+      resolveImageUrl(rawSrcAttr);
+
+    const currentSrc = img.currentSrc || img.src || "";
+    const currentIsPlaceholder =
+      currentSrc.trim() === "" ||
+      currentSrc === document.baseURI ||
+      currentSrc.startsWith("data:");
+    const src = currentIsPlaceholder
+      ? candidateSrc || resolveImageUrl(currentSrc)
+      : resolveImageUrl(currentSrc);
+
+    if (!src) {
       continue;
     }
-
-    const { src } = img;
 
     if (seenSrcs.has(src)) {
       continue;
@@ -587,15 +639,7 @@ function collectImages(): ImageInfo[] {
       continue;
     }
 
-    let isValidUrl = false;
-    try {
-      const _url = new URL(src);
-      isValidUrl = !!_url;
-    } catch {
-      // Invalid URL
-    }
-
-    if (!isValidUrl) {
+    if (!resolveImageUrl(src)) {
       continue;
     }
 
@@ -604,10 +648,15 @@ function collectImages(): ImageInfo[] {
     const alt = img.getAttribute("alt");
     const hasAlt = img.hasAttribute("alt");
 
-    const width = img.naturalWidth || img.width || 0;
-    const height = img.naturalHeight || img.height || 0;
+    const widthAttr =
+      Number.parseInt(img.getAttribute("width") || "0", 10) || 0;
+    const heightAttr =
+      Number.parseInt(img.getAttribute("height") || "0", 10) || 0;
+    const width = img.naturalWidth || img.width || widthAttr || 0;
+    const height = img.naturalHeight || img.height || heightAttr || 0;
+    const hasLazySource = Boolean(lazySrcAttr || rawSrcset);
 
-    if (width <= 10 && height <= 10) {
+    if (!hasLazySource && width <= 10 && height <= 10) {
       continue;
     }
 

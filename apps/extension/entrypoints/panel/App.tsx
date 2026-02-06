@@ -340,10 +340,18 @@ export default function App() {
               )}
               {activeTab === "headings" && <HeadingsTab headings={headings} />}
               {activeTab === "images" && (
-                <ImagesTab images={images} metadata={metadata} />
+                <ImagesTab
+                  images={images}
+                  metadata={metadata}
+                  scrollRef={scrollRef}
+                />
               )}
               {activeTab === "links" && (
-                <LinksTab links={links} baseUrl={metadata?.url ?? null} />
+                <LinksTab
+                  links={links}
+                  baseUrl={metadata?.url ?? null}
+                  scrollRef={scrollRef}
+                />
               )}
               {activeTab === "social" && <SocialTab metadata={metadata} />}
             </motion.div>

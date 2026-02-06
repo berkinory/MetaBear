@@ -5,8 +5,7 @@ import {
   LicenseNoIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { easeOut } from "motion";
-import { motion } from "motion/react";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import { useState } from "react";
 
 import type { ImageInfo, MetadataInfo } from "@/types/audit";
@@ -17,6 +16,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 interface ImagesTabProps {
   images: ImageInfo[] | null;
   metadata: MetadataInfo | null;
+  scrollRef: React.RefObject<HTMLDivElement | null>;
 }
 
 const IMAGE_FORMATS = new Set([
@@ -29,15 +29,6 @@ const IMAGE_FORMATS = new Set([
   "avif",
   "ico",
 ]);
-
-const listVariants = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.04 } },
-};
-const itemVariants = {
-  hidden: { opacity: 0, y: 6 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.25, ease: easeOut } },
-};
 
 function formatAlt(text: string): string {
   const trimmed = text.trim();
@@ -100,7 +91,7 @@ async function downloadFromUrl({
   URL.revokeObjectURL(blobUrl);
 }
 
-export function ImagesTab({ images, metadata }: ImagesTabProps) {
+export function ImagesTab({ images, metadata, scrollRef }: ImagesTabProps) {
   const isLoading = images === null || metadata === null;
 
   const validImages = images?.filter((img) => !img.isBroken) ?? [];
@@ -108,6 +99,12 @@ export function ImagesTab({ images, metadata }: ImagesTabProps) {
   const missingAltCount = validImages.filter(
     (img) => !img.hasAlt || img.alt === ""
   ).length;
+  const rowVirtualizer = useVirtualizer({
+    count: validImages.length,
+    getScrollElement: () => scrollRef.current,
+    estimateSize: () => 92,
+    overscan: 6,
+  });
 
   return (
     <div className="space-y-4">
@@ -173,18 +170,24 @@ export function ImagesTab({ images, metadata }: ImagesTabProps) {
             </div>
           )}
           {!isLoading && validImages.length > 0 && (
-            <motion.div
-              className="space-y-2"
-              variants={listVariants}
-              initial="hidden"
-              animate="visible"
+            <div
+              className="relative pr-1"
+              style={{ height: rowVirtualizer.getTotalSize() }}
             >
-              {validImages.map((image, idx) => (
-                <motion.div key={`${image.src}-${idx}`} variants={itemVariants}>
-                  <ImageRow image={image} />
-                </motion.div>
-              ))}
-            </motion.div>
+              {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+                const image = validImages[virtualRow.index];
+                return (
+                  <div
+                    key={`${image.src}-${virtualRow.index}`}
+                    ref={rowVirtualizer.measureElement}
+                    className="absolute left-0 top-0 w-full pb-2"
+                    style={{ transform: `translateY(${virtualRow.start}px)` }}
+                  >
+                    <ImageRow image={image} />
+                  </div>
+                );
+              })}
+            </div>
           )}
         </CardContent>
       </Card>
