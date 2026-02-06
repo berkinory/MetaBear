@@ -226,7 +226,6 @@ export function SocialTab({ metadata }: SocialTabProps) {
           <TwitterPreviewCard
             imageUrl={twitter.image}
             title={twitter.title}
-            fallbackImageUrl={openGraph.image}
             fallbackTitle={openGraph.title}
           />
         </motion.div>
@@ -337,6 +336,7 @@ function OpenGraphCard({
           multiline
           rows={3}
         />
+        <MetaRow label="og:image" value={openGraph.image} />
         <MetaRow label="og:url" value={openGraph.url} />
         <MetaRow label="og:type" value={openGraph.type} />
         <MetaRow label="og:locale" value={openGraph.locale} />
@@ -381,6 +381,7 @@ function TwitterCard({ twitter }: { twitter: MetadataInfo["twitter"] }) {
           multiline
           rows={3}
         />
+        <MetaRow label="twitter:image" value={twitter.image} />
         <MetaRow label="twitter:card" value={twitter.card} />
       </CardContent>
     </Card>
@@ -438,18 +439,15 @@ function OpenGraphPreviewCard({
 function TwitterPreviewCard({
   imageUrl,
   title,
-  fallbackImageUrl,
   fallbackTitle,
 }: {
   imageUrl: string | null;
   title: string | null;
-  fallbackImageUrl: string | null;
   fallbackTitle: string | null;
 }) {
-  const resolvedImageUrl = imageUrl ?? fallbackImageUrl;
   const resolvedTitle = title ?? fallbackTitle;
 
-  if (!resolvedImageUrl) {
+  if (!imageUrl) {
     return (
       <div className="flex flex-col items-center gap-2 py-6 text-muted-foreground">
         <HugeiconsIcon
@@ -470,13 +468,13 @@ function TwitterPreviewCard({
         Twitter (X)
       </div>
       <a
-        href={resolvedImageUrl}
+        href={imageUrl}
         target="_blank"
         rel="noopener noreferrer"
         className="relative block overflow-hidden rounded-2xl border border-white/10 bg-[#0f1114] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/20 hover:border-white/15"
       >
         <img
-          src={resolvedImageUrl}
+          src={imageUrl}
           alt={title ?? "Twitter image"}
           className="h-48 w-full object-cover transition-opacity duration-300"
           style={{ opacity: imgLoaded ? 1 : 0 }}
