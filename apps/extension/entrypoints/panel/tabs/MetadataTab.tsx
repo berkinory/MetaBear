@@ -322,21 +322,18 @@ function RobotsCard({
       return <div className="text-muted-foreground">robots.txt not found.</div>;
     }
 
-    return rawValue.split("\n").map((line) => {
+    return rawValue.split("\n").map((line, index) => {
       const trimmed = line.trim();
       const match = trimmed.match(/^(Allow|Disallow)\s*:(.*)$/i);
       if (!match) {
-        return <div key={`robots-${line}`}>{line || " "}</div>;
+        return <div key={`robots-${index}`}>{line || " "}</div>;
       }
 
       const label = match[1].toLowerCase();
       const value = match[2] ?? "";
 
       return (
-        <div
-          key={`robots-${label}-${value.trim()}`}
-          className="flex flex-wrap gap-2"
-        >
+        <div key={`robots-${index}-${label}`} className="flex flex-wrap gap-2">
           <span
             className={label === "allow" ? "text-emerald-400" : "text-red-400"}
           >

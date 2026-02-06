@@ -3,6 +3,7 @@ import {
   BrowserIcon,
   Copy01Icon,
   DashboardSpeed01Icon,
+  FileExportIcon,
   LicenseNoIcon,
   SeoIcon,
   SecurityIcon,
@@ -24,6 +25,15 @@ import type { AuditResult, Issue, MetadataInfo } from "@/types/audit";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Tooltip,
@@ -48,10 +58,18 @@ function cleanUrl(url: string): string {
 
 function formatUrl(url: string): string {
   const cleaned = cleanUrl(url);
-  if (cleaned.length <= 45) {
+  if (cleaned.length <= 30) {
     return cleaned;
   }
-  return `${cleaned.slice(0, 45)}...`;
+  return `${cleaned.slice(0, 30)}...`;
+}
+
+function toFileSafe(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9-_]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
 }
 
 export function AuditTab({
@@ -115,7 +133,10 @@ export function AuditTab({
 
   return (
     <div className="space-y-4">
-      <SiteRow loading={loading} metadata={result?.metadata ?? null} />
+      <div className="flex items-center justify-between gap-2">
+        <SiteRow loading={loading} metadata={result?.metadata ?? null} />
+        <ExportDialog disabled={loading || !result} result={result} />
+      </div>
       <ScoreCard
         loading={loading}
         score={result?.score ?? null}
@@ -123,6 +144,183 @@ export function AuditTab({
       />
       <IssuesCard loading={loading} issues={result?.issues ?? null} />
     </div>
+  );
+}
+
+function ExportDialog({
+  disabled,
+  result,
+}: {
+  disabled: boolean;
+  result: AuditResult | null;
+}) {
+  const [open, setOpen] = useState(false);
+  const [options, setOptions] = useState({
+    score: true,
+    issues: true,
+    metaTags: true,
+    headings: true,
+    images: true,
+    links: true,
+    openGraph: true,
+  });
+
+  const hasSelection = Object.values(options).some(Boolean);
+  const handleCheckedChange = (key: keyof typeof options, value: boolean) => {
+    setOptions((current) => ({ ...current, [key]: value }));
+  };
+
+  const handleExport = () => {
+    if (!result || !hasSelection) {
+      return;
+    }
+
+    const payload: Record<string, unknown> = {
+      exportedAt: new Date().toISOString(),
+      url: result.metadata?.url ?? null,
+    };
+
+    if (options.score) {
+      payload.seoScore = {
+        score: result.score,
+        issuesCount: result.issues.length,
+      };
+    }
+
+    if (options.issues) {
+      payload.issues = result.issues.map(({ id: _id, ...issue }) => issue);
+    }
+
+    if (options.metaTags) {
+      payload.metaTags = {
+        title: result.metadata.title,
+        description: result.metadata.description,
+        canonical: result.metadata.canonical,
+        lang: result.metadata.lang,
+        keywords: result.metadata.keywords,
+        author: result.metadata.author,
+        robotsContent: result.metadata.robotsContent,
+        favicon: result.metadata.favicon,
+        appleTouchIcon: result.metadata.appleTouchIcon,
+        wordCount: result.metadata.wordCount,
+        charCount: result.metadata.charCount,
+        imagesCount: result.images.length,
+        linksCount: result.links.length,
+        url: result.metadata.url,
+        robots: {
+          ...result.metadata.robots,
+          text: result.metadata.robotsText,
+        },
+        sitemap: {
+          text: result.metadata.sitemapText,
+          urls: result.metadata.sitemaps,
+        },
+      };
+    }
+
+    if (options.headings) {
+      payload.headings = result.headings;
+    }
+
+    if (options.images) {
+      payload.images = result.images;
+    }
+
+    if (options.links) {
+      payload.links = result.links;
+    }
+
+    if (options.openGraph) {
+      payload.openGraph = {
+        ...result.metadata.openGraph,
+        twitter: result.metadata.twitter,
+      };
+    }
+
+    const blob = new Blob([JSON.stringify(payload, null, 2)], {
+      type: "application/json",
+    });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    const host = result.metadata?.url
+      ? toFileSafe(cleanUrl(result.metadata.url))
+      : "audit";
+    anchor.href = url;
+    anchor.download = `metabear-${host}.json`;
+    anchor.click();
+    URL.revokeObjectURL(url);
+    setOpen(false);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={disabled}
+          className="gap-2"
+        >
+          <HugeiconsIcon
+            icon={FileExportIcon}
+            strokeWidth={2}
+            className="size-4"
+          />
+          Export
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Export</DialogTitle>
+        </DialogHeader>
+        <Card className="border border-white/10 bg-white/5">
+          <CardContent className="py-3">
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                { key: "score", label: "SEO Score" },
+                { key: "issues", label: "Issues" },
+                { key: "metaTags", label: "Meta Tags" },
+                { key: "headings", label: "Headings" },
+                { key: "images", label: "Images" },
+                { key: "links", label: "Links" },
+                { key: "openGraph", label: "OpenGraph" },
+              ].map((item) => {
+                const id = `export-${item.key}`;
+                const checked = options[item.key as keyof typeof options];
+                return (
+                  <label
+                    key={item.key}
+                    htmlFor={id}
+                    className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-foreground"
+                  >
+                    <Checkbox
+                      id={id}
+                      checked={checked}
+                      onCheckedChange={(value) =>
+                        handleCheckedChange(
+                          item.key as keyof typeof options,
+                          value === true
+                        )
+                      }
+                    />
+                    <span>{item.label}</span>
+                  </label>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+        <DialogFooter>
+          <Button
+            variant="secondary"
+            onClick={handleExport}
+            disabled={!hasSelection}
+          >
+            Export JSON
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 
