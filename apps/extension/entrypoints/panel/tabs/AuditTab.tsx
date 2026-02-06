@@ -192,11 +192,11 @@ function ExportDialog({
       return;
     }
 
-    const { metadata } = result;
-    const payload: Record<string, unknown> = {
-      exportedAt: new Date().toISOString(),
-      url: metadata?.url ?? null,
-    };
+     const { metadata } = result;
+     const payload: Record<string, unknown> = {
+       exportedAt: new Date().toISOString(),
+       url: metadata.url,
+     };
 
     if (options.score) {
       payload.seoScore = {
