@@ -22,7 +22,6 @@ import { useEffect, useRef, useState } from "react";
 
 import type { AuditResult, Issue, MetadataInfo } from "@/types/audit";
 
-import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -42,6 +41,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
 
 const ISSUE_ICON_BY_TYPE: Record<Issue["type"], typeof SeoIcon> = {
   accessibility: UniversalAccessIcon,
