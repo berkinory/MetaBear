@@ -15,7 +15,6 @@ import type { MetadataInfo } from "@/types/audit";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 
@@ -44,6 +43,19 @@ export function SocialTab({ metadata }: SocialTabProps) {
   const pageDescription = metadata?.description ?? null;
   const pageUrl = metadata?.url ?? null;
   const pageFavicon = metadata?.favicon ?? null;
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center gap-2 py-6 text-muted-foreground">
+        <HugeiconsIcon
+          icon={LicenseNoIcon}
+          strokeWidth={2}
+          className="size-6"
+        />
+        <span className="text-sm">No audit data yet.</span>
+      </div>
+    );
+  }
 
   return (
     <Tabs defaultValue="tags" className="flex flex-col gap-3">
@@ -112,8 +124,8 @@ export function SocialTab({ metadata }: SocialTabProps) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.2, ease: "easeOut" }}
         >
-          <OpenGraphCard openGraph={openGraph} loading={isLoading} />
-          <TwitterCard twitter={twitter} loading={isLoading} />
+          <OpenGraphCard openGraph={openGraph} />
+          <TwitterCard twitter={twitter} />
         </motion.div>
       </TabsContent>
       <TabsContent value="og-image" className="min-h-[160px]">
@@ -124,7 +136,6 @@ export function SocialTab({ metadata }: SocialTabProps) {
           transition={{ duration: 0.2, ease: "easeOut" }}
         >
           <OpenGraphPreviewCard
-            loading={isLoading}
             imageUrl={openGraph.image}
             title={openGraph.title}
           />
@@ -138,7 +149,6 @@ export function SocialTab({ metadata }: SocialTabProps) {
           transition={{ duration: 0.2, ease: "easeOut" }}
         >
           <TwitterPreviewCard
-            loading={isLoading}
             imageUrl={twitter.image}
             title={twitter.title}
             fallbackImageUrl={openGraph.image}
@@ -154,7 +164,6 @@ export function SocialTab({ metadata }: SocialTabProps) {
           transition={{ duration: 0.2, ease: "easeOut" }}
         >
           <GooglePreviewCard
-            loading={isLoading}
             title={pageTitle ?? openGraph.title}
             description={pageDescription ?? openGraph.description}
             url={pageUrl ?? openGraph.url}
@@ -171,7 +180,6 @@ export function SocialTab({ metadata }: SocialTabProps) {
           transition={{ duration: 0.2, ease: "easeOut" }}
         >
           <FacebookPreviewCard
-            loading={isLoading}
             title={openGraph.title}
             description={openGraph.description}
             imageUrl={openGraph.image}
@@ -216,29 +224,10 @@ function MetaRow({
 
 function OpenGraphCard({
   openGraph,
-  loading,
 }: {
   openGraph: MetadataInfo["openGraph"];
-  loading: boolean;
 }) {
   const hasAnyOG = Object.values(openGraph).some((v) => v !== null);
-
-  if (loading) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-muted-foreground">Open Graph</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <Skeleton className="h-8 w-full rounded-lg" />
-          <Skeleton className="h-20 w-full rounded-lg" />
-          <Skeleton className="h-8 w-full rounded-lg" />
-          <Skeleton className="h-8 w-full rounded-lg" />
-          <Skeleton className="h-8 w-full rounded-lg" />
-        </CardContent>
-      </Card>
-    );
-  }
 
   if (!hasAnyOG) {
     return (
@@ -283,27 +272,10 @@ function OpenGraphCard({
 
 function TwitterCard({
   twitter,
-  loading,
 }: {
   twitter: MetadataInfo["twitter"];
-  loading: boolean;
 }) {
   const hasAnyTwitter = Object.values(twitter).some((v) => v !== null);
-
-  if (loading) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-muted-foreground">Twitter</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <Skeleton className="h-8 w-full rounded-lg" />
-          <Skeleton className="h-20 w-full rounded-lg" />
-          <Skeleton className="h-8 w-full rounded-lg" />
-        </CardContent>
-      </Card>
-    );
-  }
 
   if (!hasAnyTwitter) {
     return (
@@ -345,18 +317,12 @@ function TwitterCard({
 }
 
 function OpenGraphPreviewCard({
-  loading,
   imageUrl,
   title,
 }: {
-  loading: boolean;
   imageUrl: string | null;
   title: string | null;
 }) {
-  if (loading) {
-    return <Skeleton className="h-48 w-full rounded-2xl" />;
-  }
-
   if (!imageUrl) {
     return (
       <div className="flex flex-col items-center gap-2 py-6 text-muted-foreground">
@@ -395,22 +361,16 @@ function OpenGraphPreviewCard({
 }
 
 function TwitterPreviewCard({
-  loading,
   imageUrl,
   title,
   fallbackImageUrl,
   fallbackTitle,
 }: {
-  loading: boolean;
   imageUrl: string | null;
   title: string | null;
   fallbackImageUrl: string | null;
   fallbackTitle: string | null;
 }) {
-  if (loading) {
-    return <Skeleton className="h-48 w-full rounded-2xl" />;
-  }
-
   const resolvedImageUrl = imageUrl ?? fallbackImageUrl;
   const resolvedTitle = title ?? fallbackTitle;
 
@@ -459,24 +419,18 @@ function TwitterPreviewCard({
 }
 
 function FacebookPreviewCard({
-  loading,
   title,
   description,
   imageUrl,
   url,
   siteName,
 }: {
-  loading: boolean;
   title: string | null;
   description: string | null;
   imageUrl: string | null;
   url: string | null;
   siteName: string | null;
 }) {
-  if (loading) {
-    return <Skeleton className="h-64 w-full rounded-2xl" />;
-  }
-
   const host = getHost(url ?? "");
   const displaySite = siteName || host || "Website";
 
@@ -557,30 +511,18 @@ function formatFacebookDate(date: Date): string {
 }
 
 function GooglePreviewCard({
-  loading,
   title,
   description,
   url,
   favicon,
   siteName,
 }: {
-  loading: boolean;
   title: string | null;
   description: string | null;
   url: string | null;
   favicon: string | null;
   siteName: string | null;
 }) {
-  if (loading) {
-    return (
-      <div className="space-y-3">
-        <Skeleton className="h-10 w-40 rounded-lg" />
-        <Skeleton className="h-7 w-full rounded-lg" />
-        <Skeleton className="h-12 w-full rounded-lg" />
-      </div>
-    );
-  }
-
   const titleText = title ?? "";
   const descriptionText = description ?? "";
   const urlText = url ?? "";

@@ -10,7 +10,6 @@ import type { ImageInfo, MetadataInfo } from "@/types/audit";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
 
 interface ImagesTabProps {
   images: ImageInfo[] | null;
@@ -65,7 +64,7 @@ function getImageFormat(src: string): string | null {
 }
 
 export function ImagesTab({ images, metadata }: ImagesTabProps) {
-  const isLoading = images === null;
+  const isLoading = images === null || metadata === null;
 
   const validImages = images?.filter((img) => !img.isBroken) ?? [];
 
@@ -84,12 +83,12 @@ export function ImagesTab({ images, metadata }: ImagesTabProps) {
             <IconCard
               label="Favicon"
               url={metadata?.favicon ?? null}
-              loading={metadata === null}
+              loading={isLoading}
             />
             <IconCard
               label="Apple Touch"
               url={metadata?.appleTouchIcon ?? null}
-              loading={metadata === null}
+              loading={isLoading}
             />
           </div>
         </CardContent>
@@ -98,11 +97,6 @@ export function ImagesTab({ images, metadata }: ImagesTabProps) {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-muted-foreground">Images</CardTitle>
-          {isLoading && (
-            <div className="flex gap-2">
-              <Skeleton className="h-5 w-8 rounded" />
-            </div>
-          )}
           {!isLoading && validImages.length > 0 && (
             <div className="flex gap-2">
               <Badge variant="secondary" className="font-mono">
@@ -122,10 +116,13 @@ export function ImagesTab({ images, metadata }: ImagesTabProps) {
         </CardHeader>
         <CardContent>
           {isLoading && (
-            <div className="space-y-2">
-              <ImageRowSkeleton />
-              <ImageRowSkeleton />
-              <ImageRowSkeleton />
+            <div className="flex flex-col items-center gap-2 py-6 text-muted-foreground">
+              <HugeiconsIcon
+                icon={LicenseNoIcon}
+                strokeWidth={2}
+                className="size-6"
+              />
+              <span className="text-sm">No audit data yet.</span>
             </div>
           )}
           {!isLoading && validImages.length === 0 && (
@@ -163,9 +160,15 @@ function IconCard({
   const content = (
     <>
       <div className="size-8 shrink-0 rounded flex items-center justify-center overflow-hidden">
-        {loading && <Skeleton className="size-6 rounded" />}
         {!loading && url && (
           <img src={url} alt={label} className="h-full w-full object-contain" />
+        )}
+        {loading && (
+          <HugeiconsIcon
+            icon={Image01Icon}
+            strokeWidth={1.5}
+            className="size-5 text-muted-foreground/70"
+          />
         )}
         {!loading && !url && (
           <HugeiconsIcon
@@ -179,7 +182,11 @@ function IconCard({
         <div className="text-xs font-medium font-sans text-foreground">
           {label}
         </div>
-        {loading && <Skeleton className="mt-1 h-3 w-16" />}
+        {loading && (
+          <div className="text-[10px] text-muted-foreground font-sans">
+            No audit data yet.
+          </div>
+        )}
         {!loading && !url && (
           <div className="text-[10px] text-muted-foreground font-sans">
             Not found
@@ -346,21 +353,5 @@ function ImageRow({ image }: { image: ImageInfo }) {
     >
       {content}
     </a>
-  );
-}
-
-function ImageRowSkeleton() {
-  return (
-    <div className="flex items-center gap-3 rounded-md px-2 py-2">
-      <Skeleton className="size-10 rounded" />
-      <div className="flex-1 space-y-1">
-        <div className="flex items-center gap-2">
-          <Skeleton className="h-4 w-3/4" />
-          <span className="flex-1" />
-          <Skeleton className="size-4 rounded shrink-0" />
-        </div>
-        <Skeleton className="h-3 w-1/2" />
-      </div>
-    </div>
   );
 }

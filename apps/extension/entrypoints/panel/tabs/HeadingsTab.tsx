@@ -5,7 +5,6 @@ import type { HeadingInfo } from "@/types/audit";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
 
 interface HeadingsTabProps {
   headings: HeadingInfo[] | null;
@@ -14,27 +13,38 @@ interface HeadingsTabProps {
 export function HeadingsTab({ headings }: HeadingsTabProps) {
   const isLoading = headings === null;
 
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-muted-foreground">Headings</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col items-center gap-2 py-6 text-muted-foreground">
+            <HugeiconsIcon
+              icon={LicenseNoIcon}
+              strokeWidth={2}
+              className="size-6"
+            />
+            <span className="text-sm">No audit data yet.</span>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="text-muted-foreground">Headings</CardTitle>
-        {isLoading && <Skeleton className="h-5 w-8 rounded" />}
-        {!isLoading && headings.length > 0 && (
+        {headings.length > 0 && (
           <Badge variant="secondary" className="font-mono">
             {headings.length}
           </Badge>
         )}
       </CardHeader>
       <CardContent>
-        {isLoading && (
-          <div className="space-y-2">
-            <HeadingRowSkeleton />
-            <HeadingRowSkeleton />
-            <HeadingRowSkeleton />
-            <HeadingRowSkeleton />
-          </div>
-        )}
-        {!isLoading && headings.length === 0 && (
+        {headings.length === 0 && (
           <div className="flex flex-col items-center gap-2 py-6 text-muted-foreground">
             <HugeiconsIcon
               icon={LicenseNoIcon}
@@ -44,7 +54,7 @@ export function HeadingsTab({ headings }: HeadingsTabProps) {
             <span className="text-sm">No headings found</span>
           </div>
         )}
-        {!isLoading && headings.length > 0 && (
+        {headings.length > 0 && (
           <div className="space-y-2">
             {headings.map((heading, idx) => (
               <HeadingRow
@@ -120,14 +130,5 @@ function HeadingRow({
         {heading.text}
       </span>
     </button>
-  );
-}
-
-function HeadingRowSkeleton() {
-  return (
-    <div className="flex items-start gap-2 rounded-md px-2 py-1">
-      <Skeleton className="h-5 w-7 rounded" />
-      <Skeleton className="h-4 w-full" />
-    </div>
   );
 }

@@ -6,7 +6,6 @@ import type { LinkInfo } from "@/types/audit";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
 
 interface LinksTabProps {
   links: LinkInfo[] | null;
@@ -29,6 +28,48 @@ export function LinksTab({ links, baseUrl }: LinksTabProps) {
   const sortedLinks = links
     ? [...links].toSorted((a, b) => Number(b.isExternal) - Number(a.isExternal))
     : null;
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-muted-foreground">Overview</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <div className="flex justify-between items-center text-xs font-semibold text-muted-foreground">
+              <span>Total</span>
+              <span className="text-muted-foreground/70">—</span>
+            </div>
+            <div className="flex justify-between items-center text-xs font-semibold text-muted-foreground">
+              <span>Internal</span>
+              <span className="text-muted-foreground/70">—</span>
+            </div>
+            <div className="flex justify-between items-center text-xs font-semibold text-muted-foreground">
+              <span>External</span>
+              <span className="text-muted-foreground/70">—</span>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-muted-foreground">All Links</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col items-center gap-2 py-6 text-muted-foreground">
+              <HugeiconsIcon
+                icon={LicenseNoIcon}
+                strokeWidth={2}
+                className="size-6"
+              />
+              <span className="text-sm">No audit data yet.</span>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   let listContent = (
     <Card>
       <CardContent>
@@ -44,23 +85,7 @@ export function LinksTab({ links, baseUrl }: LinksTabProps) {
     </Card>
   );
 
-  if (isLoading) {
-    listContent = (
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-muted-foreground">All Links</CardTitle>
-          <Skeleton className="h-5 w-8 rounded" />
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            <LinkRowSkeleton />
-            <LinkRowSkeleton />
-            <LinkRowSkeleton />
-          </div>
-        </CardContent>
-      </Card>
-    );
-  } else if (links && links.length > 0) {
+  if (links && links.length > 0) {
     listContent = (
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
@@ -104,33 +129,21 @@ export function LinksTab({ links, baseUrl }: LinksTabProps) {
         <CardContent className="space-y-2">
           <div className="flex justify-between items-center text-xs font-semibold text-muted-foreground">
             <span>Total</span>
-            {isLoading ? (
-              <Skeleton className="h-4 w-6 rounded" />
-            ) : (
-              <span className="text-foreground font-mono">
-                {links?.length ?? 0}
-              </span>
-            )}
+            <span className="text-foreground font-mono">
+              {links?.length ?? 0}
+            </span>
           </div>
           <div className="flex justify-between items-center text-xs font-semibold text-muted-foreground">
             <span>Internal</span>
-            {isLoading ? (
-              <Skeleton className="h-4 w-6 rounded" />
-            ) : (
-              <span className="text-foreground font-mono">
-                {internalLinks.length}
-              </span>
-            )}
+            <span className="text-foreground font-mono">
+              {internalLinks.length}
+            </span>
           </div>
           <div className="flex justify-between items-center text-xs font-semibold text-muted-foreground">
             <span>External</span>
-            {isLoading ? (
-              <Skeleton className="h-4 w-6 rounded" />
-            ) : (
-              <span className="text-foreground font-mono">
-                {externalLinks.length}
-              </span>
-            )}
+            <span className="text-foreground font-mono">
+              {externalLinks.length}
+            </span>
           </div>
         </CardContent>
       </Card>
@@ -246,20 +259,5 @@ function LinkRow({
         )}
       </div>
     </a>
-  );
-}
-
-function LinkRowSkeleton() {
-  return (
-    <div className="flex items-center gap-2 rounded-md px-2 py-2">
-      <Skeleton className="size-4 rounded" />
-      <div className="min-w-0 w-0 flex-1 space-y-2">
-        <div className="flex items-center gap-2">
-          <Skeleton className="h-4 w-16 rounded" />
-          <Skeleton className="h-4 w-40 rounded" />
-        </div>
-        <Skeleton className="h-3 w-full rounded" />
-      </div>
-    </div>
   );
 }

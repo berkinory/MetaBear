@@ -51,12 +51,14 @@ const handleClose = () => {
 
 export default function App() {
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("audit");
   const [result, setResult] = useState<AuditResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isRestricted, setIsRestricted] = useState(false);
   const didRunRef = useRef(false);
 
   const runAudit = async () => {
+    setActiveTab("audit");
     setLoading(true);
     setError(null);
     setIsRestricted(false);
@@ -103,6 +105,20 @@ export default function App() {
     runAudit();
   }, []);
 
+  useEffect(() => {
+    if (loading) {
+      setActiveTab("audit");
+    }
+  }, [loading]);
+
+  const handleTabChange = (value: string) => {
+    if (loading) {
+      setActiveTab("audit");
+      return;
+    }
+    setActiveTab(value);
+  };
+
   return (
     <div
       className="font-sans flex h-full w-full flex-col overflow-hidden rounded-3xl pb-1 shadow-[0_0_0_1px_rgba(255,255,255,0.1),0_4px_24px_rgba(0,0,0,0.4)]"
@@ -132,7 +148,11 @@ export default function App() {
           />
         </button>
       </header>
-      <Tabs defaultValue="audit" className="min-h-0 flex-1 flex flex-col gap-0">
+      <Tabs
+        value={activeTab}
+        onValueChange={handleTabChange}
+        className="min-h-0 flex-1 flex flex-col gap-0"
+      >
         <TabsList
           variant="line"
           className="grid h-auto w-full grid-cols-3 gap-1 bg-transparent p-2"
@@ -150,6 +170,7 @@ export default function App() {
           </TabsTrigger>
           <TabsTrigger
             value="metadata"
+            disabled={loading}
             className="flex h-8 items-center justify-center gap-1.5 rounded-md px-2 text-xs text-white/60 transition-colors hover:bg-white/10 data-[state=active]:bg-white/20 data-[state=active]:!text-white"
           >
             <HugeiconsIcon
@@ -161,6 +182,7 @@ export default function App() {
           </TabsTrigger>
           <TabsTrigger
             value="headings"
+            disabled={loading}
             className="flex h-8 items-center justify-center gap-1.5 rounded-md px-2 text-xs text-white/60 transition-colors hover:bg-white/10 data-[state=active]:bg-white/20 data-[state=active]:!text-white"
           >
             <HugeiconsIcon
@@ -172,6 +194,7 @@ export default function App() {
           </TabsTrigger>
           <TabsTrigger
             value="images"
+            disabled={loading}
             className="flex h-8 items-center justify-center gap-1.5 rounded-md px-2 text-xs text-white/60 transition-colors hover:bg-white/10 data-[state=active]:bg-white/20 data-[state=active]:!text-white"
           >
             <HugeiconsIcon
@@ -183,6 +206,7 @@ export default function App() {
           </TabsTrigger>
           <TabsTrigger
             value="links"
+            disabled={loading}
             className="flex h-8 items-center justify-center gap-1.5 rounded-md px-2 text-xs text-white/60 transition-colors hover:bg-white/10 data-[state=active]:bg-white/20 data-[state=active]:!text-white"
           >
             <HugeiconsIcon
@@ -194,6 +218,7 @@ export default function App() {
           </TabsTrigger>
           <TabsTrigger
             value="social"
+            disabled={loading}
             className="flex h-8 items-center justify-center gap-1.5 rounded-md px-2 text-xs text-white/60 transition-colors hover:bg-white/10 data-[state=active]:bg-white/20 data-[state=active]:!text-white"
           >
             <HugeiconsIcon

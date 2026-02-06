@@ -12,7 +12,6 @@ import type { MetadataInfo } from "@/types/audit";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 
@@ -27,14 +26,31 @@ export function MetadataTab({
   linkCount,
   imageCount,
 }: MetadataTabProps) {
-  const isLoading = !metadata;
+  if (!metadata) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-muted-foreground">Metadata</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col items-center gap-2 py-6 text-muted-foreground">
+            <HugeiconsIcon
+              icon={LicenseNoIcon}
+              strokeWidth={2}
+              className="size-6"
+            />
+            <span className="text-sm">No audit data yet.</span>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <div className="space-y-4">
-      <BasicMetaCard metadata={metadata} loading={isLoading} />
+      <BasicMetaCard metadata={metadata} />
       <CountsCard
         metadata={metadata}
-        loading={isLoading}
         linkCount={linkCount}
         imageCount={imageCount}
       />
@@ -44,7 +60,6 @@ export function MetadataTab({
         sitemapText={metadata?.sitemapText ?? null}
         robotsUrl={metadata?.robots.url ?? null}
         sitemapUrl={metadata?.sitemaps[0] ?? null}
-        loading={isLoading}
       />
     </div>
   );
@@ -52,15 +67,10 @@ export function MetadataTab({
 
 function BasicMetaCard({
   metadata,
-  loading,
 }: {
-  metadata: MetadataInfo | null;
-  loading: boolean;
+  metadata: MetadataInfo;
 }) {
   const canonicalStatus = (() => {
-    if (loading) {
-      return null;
-    }
     if (!metadata?.canonical || !metadata?.url) {
       return "missing";
     }
@@ -72,113 +82,75 @@ function BasicMetaCard({
         <div className="space-y-1">
           <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground">
             <span>Title</span>
-            {loading ? (
-              <Skeleton className="h-3 w-8" />
-            ) : (
-              <span className="font-mono">
-                {(metadata?.title ?? "").length}
-              </span>
-            )}
+            <span className="font-mono">{(metadata?.title ?? "").length}</span>
           </div>
-          {loading ? (
-            <Skeleton className="h-14 w-full rounded-lg" />
-          ) : (
-            <Textarea
-              value={metadata?.title ?? ""}
-              readOnly
-              rows={2}
-              className="resize-none text-sm text-foreground"
-            />
-          )}
+          <Textarea
+            value={metadata?.title ?? ""}
+            readOnly
+            rows={2}
+            className="resize-none text-sm text-foreground"
+          />
         </div>
         <div className="space-y-1">
           <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground">
             <span>Description</span>
-            {loading ? (
-              <Skeleton className="h-3 w-8" />
-            ) : (
-              <span className="font-mono">
-                {(metadata?.description ?? "").length}
-              </span>
-            )}
+            <span className="font-mono">
+              {(metadata?.description ?? "").length}
+            </span>
           </div>
-          {loading ? (
-            <Skeleton className="h-20 w-full rounded-lg" />
-          ) : (
-            <Textarea
-              value={metadata?.description ?? ""}
-              readOnly
-              rows={3}
-              className="resize-none text-sm text-foreground"
-            />
-          )}
+          <Textarea
+            value={metadata?.description ?? ""}
+            readOnly
+            rows={3}
+            className="resize-none text-sm text-foreground"
+          />
         </div>
         <div className="space-y-1">
           <div className="text-xs font-semibold text-muted-foreground">URL</div>
-          {loading ? (
-            <Skeleton className="h-8 w-full rounded-lg" />
-          ) : (
-            <Input
-              value={metadata?.url ?? ""}
-              readOnly
-              className="text-sm text-foreground"
-            />
-          )}
+          <Input
+            value={metadata?.url ?? ""}
+            readOnly
+            className="text-sm text-foreground"
+          />
         </div>
         <div className="space-y-1">
           <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground">
             <span>Canonical URL</span>
-            {canonicalStatus === null ? (
-              <Skeleton className="h-3 w-8" />
-            ) : (
-              <span
-                className={
-                  canonicalStatus === "match"
-                    ? "text-green-500"
-                    : "text-red-500"
-                }
-              >
-                {canonicalStatus === "match" ? "✓" : "✗"}
-              </span>
-            )}
+            <span
+              className={
+                canonicalStatus === "match"
+                  ? "text-green-500"
+                  : "text-red-500"
+              }
+            >
+              {canonicalStatus === "match" ? "✓" : "✗"}
+            </span>
           </div>
-          {loading ? (
-            <Skeleton className="h-8 w-full rounded-lg" />
-          ) : (
-            <Input
-              value={metadata?.canonical ?? ""}
-              readOnly
-              className="text-sm text-foreground"
-            />
-          )}
+          <Input
+            value={metadata?.canonical ?? ""}
+            readOnly
+            className="text-sm text-foreground"
+          />
         </div>
         <div className="space-y-1">
           <div className="text-xs font-semibold text-muted-foreground">
             Language
           </div>
-          {loading ? (
-            <Skeleton className="h-8 w-full rounded-lg" />
-          ) : (
-            <Input
-              value={metadata?.lang ?? ""}
-              readOnly
-              className="text-sm text-foreground"
-            />
-          )}
+          <Input
+            value={metadata?.lang ?? ""}
+            readOnly
+            className="text-sm text-foreground"
+          />
         </div>
         <div className="space-y-1">
           <div className="text-xs font-semibold text-muted-foreground">
             Robots Tag
           </div>
-          {loading ? (
-            <Skeleton className="h-8 w-full rounded-lg" />
-          ) : (
-            <Input
-              value={metadata?.robotsContent ?? ""}
-              readOnly
-              className="text-sm text-foreground"
-            />
-          )}
+          <Input
+            value={metadata?.robotsContent ?? ""}
+            readOnly
+            className="text-sm text-foreground"
+          />
         </div>
         <div className="pt-1" />
       </CardContent>
@@ -224,12 +196,10 @@ const copyToClipboard = async (text: string) => {
 
 function CountsCard({
   metadata,
-  loading,
   linkCount,
   imageCount,
 }: {
-  metadata: MetadataInfo | null;
-  loading: boolean;
+  metadata: MetadataInfo;
   linkCount: number;
   imageCount: number;
 }) {
@@ -238,43 +208,27 @@ function CountsCard({
       <CardContent className="space-y-2">
         <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground">
           <span>Words</span>
-          {loading ? (
-            <Skeleton className="h-3 w-10" />
-          ) : (
-            <span className="text-foreground font-mono">
-              {metadata?.wordCount.toLocaleString() ?? "0"}
-            </span>
-          )}
+          <span className="text-foreground font-mono">
+            {metadata?.wordCount.toLocaleString() ?? "0"}
+          </span>
         </div>
         <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground">
           <span>Characters</span>
-          {loading ? (
-            <Skeleton className="h-3 w-10" />
-          ) : (
-            <span className="text-foreground font-mono">
-              {metadata?.charCount.toLocaleString() ?? "0"}
-            </span>
-          )}
+          <span className="text-foreground font-mono">
+            {metadata?.charCount.toLocaleString() ?? "0"}
+          </span>
         </div>
         <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground">
           <span>Links</span>
-          {loading ? (
-            <Skeleton className="h-3 w-10" />
-          ) : (
-            <span className="text-foreground font-mono">
-              {linkCount.toLocaleString()}
-            </span>
-          )}
+          <span className="text-foreground font-mono">
+            {linkCount.toLocaleString()}
+          </span>
         </div>
         <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground">
           <span>Images</span>
-          {loading ? (
-            <Skeleton className="h-3 w-10" />
-          ) : (
-            <span className="text-foreground font-mono">
-              {imageCount.toLocaleString()}
-            </span>
-          )}
+          <span className="text-foreground font-mono">
+            {imageCount.toLocaleString()}
+          </span>
         </div>
       </CardContent>
     </Card>
@@ -310,13 +264,11 @@ function RobotsCard({
   sitemapText,
   robotsUrl,
   sitemapUrl,
-  loading,
 }: {
   robotsText: string | null;
   sitemapText: string | null;
   robotsUrl: string | null;
   sitemapUrl: string | null;
-  loading: boolean;
 }) {
   const rawValue = robotsText ?? "";
   const sitemapValue = sitemapText ?? "";
@@ -462,15 +414,6 @@ function RobotsCard({
   };
 
   const renderHeaderActions = () => {
-    if (loading) {
-      return (
-        <div className="flex items-center gap-2">
-          <Skeleton className="h-6 w-6 rounded-md" />
-          <Skeleton className="h-7 w-20 rounded-md" />
-        </div>
-      );
-    }
-
     if (activeTab === "robots") {
       if (!hasRobots) {
         return null;
@@ -535,9 +478,6 @@ function RobotsCard({
   };
 
   const renderRobotsContent = () => {
-    if (loading) {
-      return <Skeleton className="h-40 w-full rounded-lg" />;
-    }
     if (!hasRobots) {
       return (
         <div className="flex flex-col items-center gap-2 py-6 text-muted-foreground">
@@ -558,9 +498,6 @@ function RobotsCard({
   };
 
   const renderSitemapContent = () => {
-    if (loading) {
-      return <Skeleton className="h-40 w-full rounded-lg" />;
-    }
     if (!hasSitemap) {
       return (
         <div className="flex flex-col items-center gap-2 py-6 text-muted-foreground">
