@@ -9,7 +9,9 @@ import {
   NewTwitterIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+import { easeOut } from "motion";
 import { motion } from "motion/react";
+import { useState } from "react";
 
 import type { MetadataInfo } from "@/types/audit";
 
@@ -23,6 +25,23 @@ interface SocialTabProps {
 }
 
 export function SocialTab({ metadata }: SocialTabProps) {
+  const tabTriggerClassName =
+    "flex h-8 w-8 flex-none items-center justify-center rounded-md px-0 text-white/60 transition-colors hover:bg-white/10 data-[state=active]:!text-white relative overflow-hidden";
+  const tabIndicatorTransition = {
+    type: "spring",
+    stiffness: 520,
+    damping: 38,
+    mass: 0.7,
+  } as const;
+  const contentMotion = {
+    initial: { opacity: 0, y: 10 },
+    animate: { opacity: 1, y: 0 },
+    transition: {
+      duration: 0.3,
+      ease: easeOut,
+    },
+  };
+  const [activeTab, setActiveTab] = useState("tags");
   const isLoading = !metadata;
   const openGraph = metadata?.openGraph ?? {
     title: null,
@@ -58,71 +77,125 @@ export function SocialTab({ metadata }: SocialTabProps) {
   }
 
   return (
-    <Tabs defaultValue="tags" className="flex flex-col gap-3">
+    <Tabs
+      value={activeTab}
+      onValueChange={setActiveTab}
+      defaultValue="tags"
+      className="flex flex-col gap-3"
+    >
       <TabsList variant="line" className="w-fit mx-auto justify-center">
         <TabsTrigger
           value="tags"
-          className="flex h-8 w-8 flex-none items-center justify-center rounded-md px-0 text-white/60 transition-colors hover:bg-white/10 data-[state=active]:bg-white/20 data-[state=active]:!text-white"
+          className={tabTriggerClassName}
           aria-label="Tags"
           title="Tags"
         >
-          <HugeiconsIcon
-            icon={DocumentCodeIcon}
-            strokeWidth={2}
-            className="size-4"
-          />
+          {activeTab === "tags" && (
+            <motion.span
+              layoutId="social-tab-indicator"
+              className="absolute inset-0 rounded-md bg-white/20"
+              transition={tabIndicatorTransition}
+            />
+          )}
+          <span className="relative z-10">
+            <HugeiconsIcon
+              icon={DocumentCodeIcon}
+              strokeWidth={2}
+              className="size-4"
+            />
+          </span>
         </TabsTrigger>
         <TabsTrigger
           value="og-image"
-          className="flex h-8 w-8 flex-none items-center justify-center rounded-md px-0 text-white/60 transition-colors hover:bg-white/10 data-[state=active]:bg-white/20 data-[state=active]:!text-white"
+          className={tabTriggerClassName}
           aria-label="Open Graph Image"
           title="Open Graph Image"
         >
-          <HugeiconsIcon
-            icon={Image01Icon}
-            strokeWidth={2}
-            className="size-4"
-          />
+          {activeTab === "og-image" && (
+            <motion.span
+              layoutId="social-tab-indicator"
+              className="absolute inset-0 rounded-md bg-white/20"
+              transition={tabIndicatorTransition}
+            />
+          )}
+          <span className="relative z-10">
+            <HugeiconsIcon
+              icon={Image01Icon}
+              strokeWidth={2}
+              className="size-4"
+            />
+          </span>
         </TabsTrigger>
         <TabsTrigger
           value="twitter-image"
-          className="flex h-8 w-8 flex-none items-center justify-center rounded-md px-0 text-white/60 transition-colors hover:bg-white/10 data-[state=active]:bg-white/20 data-[state=active]:!text-white"
+          className={tabTriggerClassName}
           aria-label="Twitter Image"
           title="Twitter Image"
         >
-          <HugeiconsIcon
-            icon={NewTwitterIcon}
-            strokeWidth={2}
-            className="size-4"
-          />
+          {activeTab === "twitter-image" && (
+            <motion.span
+              layoutId="social-tab-indicator"
+              className="absolute inset-0 rounded-md bg-white/20"
+              transition={tabIndicatorTransition}
+            />
+          )}
+          <span className="relative z-10">
+            <HugeiconsIcon
+              icon={NewTwitterIcon}
+              strokeWidth={2}
+              className="size-4"
+            />
+          </span>
         </TabsTrigger>
         <TabsTrigger
           value="google"
-          className="flex h-8 w-8 flex-none items-center justify-center rounded-md px-0 text-white/60 transition-colors hover:bg-white/10 data-[state=active]:bg-white/20 data-[state=active]:!text-white"
+          className={tabTriggerClassName}
           aria-label="Google"
           title="Google"
         >
-          <HugeiconsIcon icon={GoogleIcon} strokeWidth={2} className="size-4" />
+          {activeTab === "google" && (
+            <motion.span
+              layoutId="social-tab-indicator"
+              className="absolute inset-0 rounded-md bg-white/20"
+              transition={tabIndicatorTransition}
+            />
+          )}
+          <span className="relative z-10">
+            <HugeiconsIcon
+              icon={GoogleIcon}
+              strokeWidth={2}
+              className="size-4"
+            />
+          </span>
         </TabsTrigger>
         <TabsTrigger
           value="facebook"
-          className="flex h-8 w-8 flex-none items-center justify-center rounded-md px-0 text-white/60 transition-colors hover:bg-white/10 data-[state=active]:bg-white/20 data-[state=active]:!text-white"
+          className={tabTriggerClassName}
           aria-label="Facebook"
           title="Facebook"
         >
-          <HugeiconsIcon
-            icon={Facebook02Icon}
-            strokeWidth={2}
-            className="size-4"
-          />
+          {activeTab === "facebook" && (
+            <motion.span
+              layoutId="social-tab-indicator"
+              className="absolute inset-0 rounded-md bg-white/20"
+              transition={tabIndicatorTransition}
+            />
+          )}
+          <span className="relative z-10">
+            <HugeiconsIcon
+              icon={Facebook02Icon}
+              strokeWidth={2}
+              className="size-4"
+            />
+          </span>
         </TabsTrigger>
       </TabsList>
       <TabsContent value="tags" className="min-h-[160px]">
         <motion.div
           className="space-y-4"
-          initial={{ opacity: 0, y: 6 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.2, ease: "easeOut" }}
+          initial={contentMotion.initial}
+          animate={contentMotion.animate}
+          transition={contentMotion.transition}
         >
           <OpenGraphCard openGraph={openGraph} />
           <TwitterCard twitter={twitter} />
@@ -131,9 +204,9 @@ export function SocialTab({ metadata }: SocialTabProps) {
       <TabsContent value="og-image" className="min-h-[160px]">
         <motion.div
           className="space-y-4"
-          initial={{ opacity: 0, y: 6 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.2, ease: "easeOut" }}
+          initial={contentMotion.initial}
+          animate={contentMotion.animate}
+          transition={contentMotion.transition}
         >
           <OpenGraphPreviewCard
             imageUrl={openGraph.image}
@@ -144,9 +217,9 @@ export function SocialTab({ metadata }: SocialTabProps) {
       <TabsContent value="twitter-image" className="min-h-[160px]">
         <motion.div
           className="space-y-4"
-          initial={{ opacity: 0, y: 6 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.2, ease: "easeOut" }}
+          initial={contentMotion.initial}
+          animate={contentMotion.animate}
+          transition={contentMotion.transition}
         >
           <TwitterPreviewCard
             imageUrl={twitter.image}
@@ -159,9 +232,9 @@ export function SocialTab({ metadata }: SocialTabProps) {
       <TabsContent value="google" className="min-h-[160px]">
         <motion.div
           className="space-y-4"
-          initial={{ opacity: 0, y: 6 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.2, ease: "easeOut" }}
+          initial={contentMotion.initial}
+          animate={contentMotion.animate}
+          transition={contentMotion.transition}
         >
           <GooglePreviewCard
             title={pageTitle ?? openGraph.title}
@@ -175,9 +248,9 @@ export function SocialTab({ metadata }: SocialTabProps) {
       <TabsContent value="facebook" className="min-h-[160px]">
         <motion.div
           className="space-y-4"
-          initial={{ opacity: 0, y: 6 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.2, ease: "easeOut" }}
+          initial={contentMotion.initial}
+          animate={contentMotion.animate}
+          transition={contentMotion.transition}
         >
           <FacebookPreviewCard
             title={openGraph.title}
@@ -270,11 +343,7 @@ function OpenGraphCard({
   );
 }
 
-function TwitterCard({
-  twitter,
-}: {
-  twitter: MetadataInfo["twitter"];
-}) {
+function TwitterCard({ twitter }: { twitter: MetadataInfo["twitter"] }) {
   const hasAnyTwitter = Object.values(twitter).some((v) => v !== null);
 
   if (!hasAnyTwitter) {

@@ -8,6 +8,7 @@ import {
   TextFontIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+import { easeOut } from "motion";
 import { motion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 
@@ -56,6 +57,22 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const [isRestricted, setIsRestricted] = useState(false);
   const didRunRef = useRef(false);
+  const tabTriggerClassName =
+    "flex h-8 items-center justify-center rounded-md px-2 text-xs text-white/60 transition-colors hover:bg-white/10 data-[state=active]:!text-white relative overflow-hidden";
+  const tabIndicatorTransition = {
+    type: "spring",
+    stiffness: 520,
+    damping: 38,
+    mass: 0.7,
+  } as const;
+  const contentMotion = {
+    initial: { opacity: 0, y: 10 },
+    animate: { opacity: 1, y: 0 },
+    transition: {
+      duration: 0.3,
+      ease: easeOut,
+    },
+  };
 
   const runAudit = async () => {
     setActiveTab("audit");
@@ -157,169 +174,177 @@ export default function App() {
           variant="line"
           className="grid h-auto w-full grid-cols-3 gap-1 bg-transparent p-2"
         >
-          <TabsTrigger
-            value="audit"
-            className="flex h-8 items-center justify-center gap-1.5 rounded-md px-2 text-xs text-white/60 transition-colors hover:bg-white/10 data-[state=active]:bg-white/20 data-[state=active]:!text-white"
-          >
-            <HugeiconsIcon
-              icon={Audit02Icon}
-              strokeWidth={2}
-              className="size-3.5"
-            />
-            <span>Audit</span>
+          <TabsTrigger value="audit" className={tabTriggerClassName}>
+            {activeTab === "audit" && (
+              <motion.span
+                layoutId="tab-indicator"
+                className="absolute inset-0 rounded-md bg-white/20"
+                transition={tabIndicatorTransition}
+              />
+            )}
+            <span className="relative z-10 flex items-center gap-1.5">
+              <HugeiconsIcon
+                icon={Audit02Icon}
+                strokeWidth={2}
+                className="size-3.5"
+              />
+              <span>Audit</span>
+            </span>
           </TabsTrigger>
           <TabsTrigger
             value="metadata"
             disabled={loading}
-            className="flex h-8 items-center justify-center gap-1.5 rounded-md px-2 text-xs text-white/60 transition-colors hover:bg-white/10 data-[state=active]:bg-white/20 data-[state=active]:!text-white"
+            className={tabTriggerClassName}
           >
-            <HugeiconsIcon
-              icon={CodeSimpleIcon}
-              strokeWidth={2}
-              className="size-3.5"
-            />
-            <span>Meta</span>
+            {activeTab === "metadata" && (
+              <motion.span
+                layoutId="tab-indicator"
+                className="absolute inset-0 rounded-md bg-white/20"
+                transition={tabIndicatorTransition}
+              />
+            )}
+            <span className="relative z-10 flex items-center gap-1.5">
+              <HugeiconsIcon
+                icon={CodeSimpleIcon}
+                strokeWidth={2}
+                className="size-3.5"
+              />
+              <span>Meta</span>
+            </span>
           </TabsTrigger>
           <TabsTrigger
             value="headings"
             disabled={loading}
-            className="flex h-8 items-center justify-center gap-1.5 rounded-md px-2 text-xs text-white/60 transition-colors hover:bg-white/10 data-[state=active]:bg-white/20 data-[state=active]:!text-white"
+            className={tabTriggerClassName}
           >
-            <HugeiconsIcon
-              icon={TextFontIcon}
-              strokeWidth={2}
-              className="size-3.5"
-            />
-            <span>Headings</span>
+            {activeTab === "headings" && (
+              <motion.span
+                layoutId="tab-indicator"
+                className="absolute inset-0 rounded-md bg-white/20"
+                transition={tabIndicatorTransition}
+              />
+            )}
+            <span className="relative z-10 flex items-center gap-1.5">
+              <HugeiconsIcon
+                icon={TextFontIcon}
+                strokeWidth={2}
+                className="size-3.5"
+              />
+              <span>Headings</span>
+            </span>
           </TabsTrigger>
           <TabsTrigger
             value="images"
             disabled={loading}
-            className="flex h-8 items-center justify-center gap-1.5 rounded-md px-2 text-xs text-white/60 transition-colors hover:bg-white/10 data-[state=active]:bg-white/20 data-[state=active]:!text-white"
+            className={tabTriggerClassName}
           >
-            <HugeiconsIcon
-              icon={Image02Icon}
-              strokeWidth={2}
-              className="size-3.5"
-            />
-            <span>Images</span>
+            {activeTab === "images" && (
+              <motion.span
+                layoutId="tab-indicator"
+                className="absolute inset-0 rounded-md bg-white/20"
+                transition={tabIndicatorTransition}
+              />
+            )}
+            <span className="relative z-10 flex items-center gap-1.5">
+              <HugeiconsIcon
+                icon={Image02Icon}
+                strokeWidth={2}
+                className="size-3.5"
+              />
+              <span>Images</span>
+            </span>
           </TabsTrigger>
           <TabsTrigger
             value="links"
             disabled={loading}
-            className="flex h-8 items-center justify-center gap-1.5 rounded-md px-2 text-xs text-white/60 transition-colors hover:bg-white/10 data-[state=active]:bg-white/20 data-[state=active]:!text-white"
+            className={tabTriggerClassName}
           >
-            <HugeiconsIcon
-              icon={Link04Icon}
-              strokeWidth={2}
-              className="size-3.5"
-            />
-            <span>Links</span>
+            {activeTab === "links" && (
+              <motion.span
+                layoutId="tab-indicator"
+                className="absolute inset-0 rounded-md bg-white/20"
+                transition={tabIndicatorTransition}
+              />
+            )}
+            <span className="relative z-10 flex items-center gap-1.5">
+              <HugeiconsIcon
+                icon={Link04Icon}
+                strokeWidth={2}
+                className="size-3.5"
+              />
+              <span>Links</span>
+            </span>
           </TabsTrigger>
           <TabsTrigger
             value="social"
             disabled={loading}
-            className="flex h-8 items-center justify-center gap-1.5 rounded-md px-2 text-xs text-white/60 transition-colors hover:bg-white/10 data-[state=active]:bg-white/20 data-[state=active]:!text-white"
+            className={tabTriggerClassName}
           >
-            <HugeiconsIcon
-              icon={Share01Icon}
-              strokeWidth={2}
-              className="size-3.5"
-            />
-            <span>Social</span>
+            {activeTab === "social" && (
+              <motion.span
+                layoutId="tab-indicator"
+                className="absolute inset-0 rounded-md bg-white/20"
+                transition={tabIndicatorTransition}
+              />
+            )}
+            <span className="relative z-10 flex items-center gap-1.5">
+              <HugeiconsIcon
+                icon={Share01Icon}
+                strokeWidth={2}
+                className="size-3.5"
+              />
+              <span>Social</span>
+            </span>
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="audit" className="flex-1 pt-1">
-          <ScrollArea className="h-full">
+        <TabsContent value={activeTab} className="flex-1 pt-1">
+          <ScrollArea
+            className={
+              activeTab === "links" ? "h-full overflow-x-hidden" : "h-full"
+            }
+          >
             <motion.div
-              className="p-4"
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.2, ease: "easeOut" }}
+              key={activeTab}
+              className={activeTab === "links" ? "p-4 max-w-full" : "p-4"}
+              initial={contentMotion.initial}
+              animate={contentMotion.animate}
+              transition={contentMotion.transition}
             >
-              <AuditTab
-                error={error}
-                loading={loading}
-                result={result}
-                isRestricted={isRestricted}
-                onRetry={runAudit}
-              />
-            </motion.div>
-          </ScrollArea>
-        </TabsContent>
-
-        <TabsContent value="metadata" className="flex-1 pt-1">
-          <ScrollArea className="h-full">
-            <motion.div
-              className="p-4"
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.2, ease: "easeOut" }}
-            >
-              <MetadataTab
-                metadata={result?.metadata || null}
-                linkCount={result?.links.length ?? 0}
-                imageCount={result?.images.length ?? 0}
-              />
-            </motion.div>
-          </ScrollArea>
-        </TabsContent>
-
-        <TabsContent value="headings" className="flex-1 pt-1">
-          <ScrollArea className="h-full">
-            <motion.div
-              className="p-4"
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.2, ease: "easeOut" }}
-            >
-              <HeadingsTab headings={result?.headings || null} />
-            </motion.div>
-          </ScrollArea>
-        </TabsContent>
-
-        <TabsContent value="images" className="flex-1 pt-1">
-          <ScrollArea className="h-full">
-            <motion.div
-              className="p-4"
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.2, ease: "easeOut" }}
-            >
-              <ImagesTab
-                images={result?.images || null}
-                metadata={result?.metadata || null}
-              />
-            </motion.div>
-          </ScrollArea>
-        </TabsContent>
-
-        <TabsContent value="links" className="flex-1 pt-1">
-          <ScrollArea className="h-full overflow-x-hidden">
-            <motion.div
-              className="p-4 max-w-full"
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.2, ease: "easeOut" }}
-            >
-              <LinksTab
-                links={result?.links || null}
-                baseUrl={result?.metadata.url ?? null}
-              />
-            </motion.div>
-          </ScrollArea>
-        </TabsContent>
-
-        <TabsContent value="social" className="flex-1 pt-1">
-          <ScrollArea className="h-full">
-            <motion.div
-              className="p-4"
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.2, ease: "easeOut" }}
-            >
-              <SocialTab metadata={result?.metadata || null} />
+              {activeTab === "audit" && (
+                <AuditTab
+                  error={error}
+                  loading={loading}
+                  result={result}
+                  isRestricted={isRestricted}
+                  onRetry={runAudit}
+                />
+              )}
+              {activeTab === "metadata" && (
+                <MetadataTab
+                  metadata={result?.metadata || null}
+                  linkCount={result?.links.length ?? 0}
+                  imageCount={result?.images.length ?? 0}
+                />
+              )}
+              {activeTab === "headings" && (
+                <HeadingsTab headings={result?.headings || null} />
+              )}
+              {activeTab === "images" && (
+                <ImagesTab
+                  images={result?.images || null}
+                  metadata={result?.metadata || null}
+                />
+              )}
+              {activeTab === "links" && (
+                <LinksTab
+                  links={result?.links || null}
+                  baseUrl={result?.metadata.url ?? null}
+                />
+              )}
+              {activeTab === "social" && (
+                <SocialTab metadata={result?.metadata || null} />
+              )}
             </motion.div>
           </ScrollArea>
         </TabsContent>

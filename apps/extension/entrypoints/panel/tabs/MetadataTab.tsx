@@ -4,6 +4,7 @@ import {
   Tick02Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+import { easeOut } from "motion";
 import { motion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 
@@ -65,11 +66,7 @@ export function MetadataTab({
   );
 }
 
-function BasicMetaCard({
-  metadata,
-}: {
-  metadata: MetadataInfo;
-}) {
+function BasicMetaCard({ metadata }: { metadata: MetadataInfo }) {
   const canonicalStatus = (() => {
     if (!metadata?.canonical || !metadata?.url) {
       return "missing";
@@ -118,9 +115,7 @@ function BasicMetaCard({
             <span>Canonical URL</span>
             <span
               className={
-                canonicalStatus === "match"
-                  ? "text-green-500"
-                  : "text-red-500"
+                canonicalStatus === "match" ? "text-green-500" : "text-red-500"
               }
             >
               {canonicalStatus === "match" ? "✓" : "✗"}
@@ -270,6 +265,22 @@ function RobotsCard({
   robotsUrl: string | null;
   sitemapUrl: string | null;
 }) {
+  const tabTriggerClassName =
+    "flex h-8 flex-none items-center justify-center rounded-md px-2 text-xs text-white/60 transition-colors hover:bg-white/10 data-[state=active]:!text-white relative overflow-hidden";
+  const tabIndicatorTransition = {
+    type: "spring",
+    stiffness: 520,
+    damping: 38,
+    mass: 0.7,
+  } as const;
+  const contentMotion = {
+    initial: { opacity: 0, y: 10 },
+    animate: { opacity: 1, y: 0 },
+    transition: {
+      duration: 0.3,
+      ease: easeOut,
+    },
+  };
   const rawValue = robotsText ?? "";
   const sitemapValue = sitemapText ?? "";
   const [activeTab, setActiveTab] = useState("robots");
@@ -532,35 +543,43 @@ function RobotsCard({
         >
           <div className="flex items-center justify-between gap-2">
             <TabsList variant="line" className="w-full justify-start">
-              <TabsTrigger
-                value="robots"
-                className="flex h-8 flex-none items-center justify-center gap-1.5 rounded-md px-2 text-xs text-white/60 transition-colors hover:bg-white/10 data-[state=active]:bg-white/20 data-[state=active]:!text-white"
-              >
-                Robots
+              <TabsTrigger value="robots" className={tabTriggerClassName}>
+                {activeTab === "robots" && (
+                  <motion.span
+                    layoutId="metadata-tab-indicator"
+                    className="absolute inset-0 rounded-md bg-white/20"
+                    transition={tabIndicatorTransition}
+                  />
+                )}
+                <span className="relative z-10">Robots</span>
               </TabsTrigger>
-              <TabsTrigger
-                value="sitemap"
-                className="flex h-8 flex-none items-center justify-center gap-1.5 rounded-md px-2 text-xs text-white/60 transition-colors hover:bg-white/10 data-[state=active]:bg-white/20 data-[state=active]:!text-white"
-              >
-                Sitemap
+              <TabsTrigger value="sitemap" className={tabTriggerClassName}>
+                {activeTab === "sitemap" && (
+                  <motion.span
+                    layoutId="metadata-tab-indicator"
+                    className="absolute inset-0 rounded-md bg-white/20"
+                    transition={tabIndicatorTransition}
+                  />
+                )}
+                <span className="relative z-10">Sitemap</span>
               </TabsTrigger>
             </TabsList>
             {renderHeaderActions()}
           </div>
           <TabsContent value="robots" className="min-h-[160px]">
             <motion.div
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.2, ease: "easeOut" }}
+              initial={contentMotion.initial}
+              animate={contentMotion.animate}
+              transition={contentMotion.transition}
             >
               {renderRobotsContent()}
             </motion.div>
           </TabsContent>
           <TabsContent value="sitemap" className="min-h-[160px]">
             <motion.div
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.2, ease: "easeOut" }}
+              initial={contentMotion.initial}
+              animate={contentMotion.animate}
+              transition={contentMotion.transition}
             >
               {renderSitemapContent()}
             </motion.div>
