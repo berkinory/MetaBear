@@ -328,6 +328,17 @@ function RobotsCard({
     return rawValue.split("\n").map((line, index) => {
       const trimmed = line.trim();
       const match = trimmed.match(/^(Allow|Disallow)\s*:(.*)$/i);
+      const uaMatch = trimmed.match(/^(User-agent)\s*:(.*)$/i);
+
+      if (uaMatch) {
+        return (
+          <div key={`robots-${index}-ua`} className="flex flex-wrap gap-2">
+            <span className="text-purple-400">{uaMatch[1]}:</span>
+            <span>{(uaMatch[2] ?? "").trim()}</span>
+          </div>
+        );
+      }
+
       if (!match) {
         return <div key={`robots-${index}`}>{line || " "}</div>;
       }
