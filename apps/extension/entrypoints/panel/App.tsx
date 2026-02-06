@@ -24,24 +24,24 @@ import { LinksTab } from "./tabs/LinksTab";
 import { MetadataTab } from "./tabs/MetadataTab";
 import { SocialTab } from "./tabs/SocialTab";
 
+const RESTRICTED_URL_PATTERNS = [
+  /^chrome:\/\//,
+  /^chrome-extension:\/\//,
+  /^edge:\/\//,
+  /^about:/,
+  /^view-source:/,
+  /^file:\/\//,
+  /^https?:\/\/chrome\.google\.com\/webstore/,
+  /^https?:\/\/chromewebstore\.google\.com/,
+  /^https?:\/\/microsoftedge\.microsoft\.com\/addons/,
+] as const;
+
 const isRestrictedUrl = (url: string | undefined): boolean => {
   if (!url) {
     return true;
   }
 
-  const restrictedPatterns = [
-    /^chrome:\/\//,
-    /^chrome-extension:\/\//,
-    /^edge:\/\//,
-    /^about:/,
-    /^view-source:/,
-    /^file:\/\//,
-    /^https?:\/\/chrome\.google\.com\/webstore/,
-    /^https?:\/\/chromewebstore\.google\.com/,
-    /^https?:\/\/microsoftedge\.microsoft\.com\/addons/,
-  ];
-
-  return restrictedPatterns.some((pattern) => pattern.test(url));
+  return RESTRICTED_URL_PATTERNS.some((pattern) => pattern.test(url));
 };
 
 const handleClose = () => {
@@ -57,6 +57,10 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const [isRestricted, setIsRestricted] = useState(false);
   const didRunRef = useRef(false);
+  const metadata = result?.metadata ?? null;
+  const links = result?.links ?? null;
+  const images = result?.images ?? null;
+  const headings = result?.headings ?? null;
   const tabTriggerClassName =
     "flex h-8 items-center justify-center rounded-md px-2 text-xs text-white/60 transition-colors hover:bg-white/10 data-[state=active]:!text-white relative overflow-hidden";
   const tabIndicatorTransition = {
@@ -130,7 +134,6 @@ export default function App() {
 
   const handleTabChange = (value: string) => {
     if (loading) {
-      setActiveTab("audit");
       return;
     }
     setActiveTab(value);
@@ -322,29 +325,19 @@ export default function App() {
               )}
               {activeTab === "metadata" && (
                 <MetadataTab
-                  metadata={result?.metadata || null}
-                  linkCount={result?.links.length ?? 0}
-                  imageCount={result?.images.length ?? 0}
+                  metadata={metadata}
+                  linkCount={links?.length ?? 0}
+                  imageCount={images?.length ?? 0}
                 />
               )}
-              {activeTab === "headings" && (
-                <HeadingsTab headings={result?.headings || null} />
-              )}
+              {activeTab === "headings" && <HeadingsTab headings={headings} />}
               {activeTab === "images" && (
-                <ImagesTab
-                  images={result?.images || null}
-                  metadata={result?.metadata || null}
-                />
+                <ImagesTab images={images} metadata={metadata} />
               )}
               {activeTab === "links" && (
-                <LinksTab
-                  links={result?.links || null}
-                  baseUrl={result?.metadata.url ?? null}
-                />
+                <LinksTab links={links} baseUrl={metadata?.url ?? null} />
               )}
-              {activeTab === "social" && (
-                <SocialTab metadata={result?.metadata || null} />
-              )}
+              {activeTab === "social" && <SocialTab metadata={metadata} />}
             </motion.div>
           </ScrollArea>
         </TabsContent>

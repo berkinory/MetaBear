@@ -16,6 +16,23 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 
+const TAB_TRIGGER_CLASSNAME =
+  "flex h-8 flex-none items-center justify-center rounded-md px-2 text-xs text-white/60 transition-colors hover:bg-white/10 data-[state=active]:!text-white relative overflow-hidden";
+const TAB_INDICATOR_TRANSITION = {
+  type: "spring",
+  stiffness: 520,
+  damping: 38,
+  mass: 0.7,
+} as const;
+const CONTENT_MOTION = {
+  initial: { opacity: 0, y: 10 },
+  animate: { opacity: 1, y: 0 },
+  transition: {
+    duration: 0.3,
+    ease: easeOut,
+  },
+};
+
 interface MetadataTabProps {
   metadata: MetadataInfo | null;
   linkCount: number;
@@ -68,7 +85,7 @@ export function MetadataTab({
 
 function BasicMetaCard({ metadata }: { metadata: MetadataInfo }) {
   const canonicalStatus = (() => {
-    if (!metadata?.canonical || !metadata?.url) {
+    if (!metadata.canonical || !metadata.url) {
       return "missing";
     }
     return metadata.url === metadata.canonical ? "match" : "mismatch";
@@ -79,10 +96,10 @@ function BasicMetaCard({ metadata }: { metadata: MetadataInfo }) {
         <div className="space-y-1">
           <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground">
             <span>Title</span>
-            <span className="font-mono">{(metadata?.title ?? "").length}</span>
+            <span className="font-mono">{(metadata.title ?? "").length}</span>
           </div>
           <Textarea
-            value={metadata?.title ?? ""}
+            value={metadata.title ?? ""}
             readOnly
             rows={2}
             className="resize-none text-sm text-foreground"
@@ -92,11 +109,11 @@ function BasicMetaCard({ metadata }: { metadata: MetadataInfo }) {
           <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground">
             <span>Description</span>
             <span className="font-mono">
-              {(metadata?.description ?? "").length}
+              {(metadata.description ?? "").length}
             </span>
           </div>
           <Textarea
-            value={metadata?.description ?? ""}
+            value={metadata.description ?? ""}
             readOnly
             rows={3}
             className="resize-none text-sm text-foreground"
@@ -105,7 +122,7 @@ function BasicMetaCard({ metadata }: { metadata: MetadataInfo }) {
         <div className="space-y-1">
           <div className="text-xs font-semibold text-muted-foreground">URL</div>
           <Input
-            value={metadata?.url ?? ""}
+            value={metadata.url ?? ""}
             readOnly
             className="text-sm text-foreground"
           />
@@ -122,7 +139,7 @@ function BasicMetaCard({ metadata }: { metadata: MetadataInfo }) {
             </span>
           </div>
           <Input
-            value={metadata?.canonical ?? ""}
+            value={metadata.canonical ?? ""}
             readOnly
             className="text-sm text-foreground"
           />
@@ -132,7 +149,7 @@ function BasicMetaCard({ metadata }: { metadata: MetadataInfo }) {
             Language
           </div>
           <Input
-            value={metadata?.lang ?? ""}
+            value={metadata.lang ?? ""}
             readOnly
             className="text-sm text-foreground"
           />
@@ -142,7 +159,7 @@ function BasicMetaCard({ metadata }: { metadata: MetadataInfo }) {
             Robots Tag
           </div>
           <Input
-            value={metadata?.robotsContent ?? ""}
+            value={metadata.robotsContent ?? ""}
             readOnly
             className="text-sm text-foreground"
           />
@@ -204,13 +221,13 @@ function CountsCard({
         <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground">
           <span>Words</span>
           <span className="text-foreground font-mono">
-            {metadata?.wordCount.toLocaleString() ?? "0"}
+            {metadata.wordCount.toLocaleString()}
           </span>
         </div>
         <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground">
           <span>Characters</span>
           <span className="text-foreground font-mono">
-            {metadata?.charCount.toLocaleString() ?? "0"}
+            {metadata.charCount.toLocaleString()}
           </span>
         </div>
         <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground">
@@ -265,22 +282,6 @@ function RobotsCard({
   robotsUrl: string | null;
   sitemapUrl: string | null;
 }) {
-  const tabTriggerClassName =
-    "flex h-8 flex-none items-center justify-center rounded-md px-2 text-xs text-white/60 transition-colors hover:bg-white/10 data-[state=active]:!text-white relative overflow-hidden";
-  const tabIndicatorTransition = {
-    type: "spring",
-    stiffness: 520,
-    damping: 38,
-    mass: 0.7,
-  } as const;
-  const contentMotion = {
-    initial: { opacity: 0, y: 10 },
-    animate: { opacity: 1, y: 0 },
-    transition: {
-      duration: 0.3,
-      ease: easeOut,
-    },
-  };
   const rawValue = robotsText ?? "";
   const sitemapValue = sitemapText ?? "";
   const [activeTab, setActiveTab] = useState("robots");
@@ -422,39 +423,9 @@ function RobotsCard({
   };
 
   const renderHeaderActions = () => {
-    if (activeTab === "robots") {
-      if (!hasRobots) {
-        return null;
-      }
-
-      return (
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={copySelected}
-            className="inline-flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground transition hover:bg-white/10 hover:text-foreground"
-            aria-label="Copy content"
-          >
-            <HugeiconsIcon
-              icon={copiedTab === activeTab ? Tick02Icon : Copy01Icon}
-              strokeWidth={2}
-              className="size-3.5"
-            />
-          </button>
-          <button
-            type="button"
-            onClick={openSelected}
-            disabled={!robotsUrl}
-            className="inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            <span>Open</span>
-            <span className="text-foreground">↗</span>
-          </button>
-        </div>
-      );
-    }
-
-    if (!hasSitemap) {
+    const hasContent = activeTab === "robots" ? hasRobots : hasSitemap;
+    const isDisabled = activeTab === "robots" ? !robotsUrl : !sitemapUrl;
+    if (!hasContent) {
       return null;
     }
 
@@ -475,7 +446,7 @@ function RobotsCard({
         <button
           type="button"
           onClick={openSelected}
-          disabled={!sitemapUrl}
+          disabled={isDisabled}
           className="inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
         >
           <span>Open</span>
@@ -534,28 +505,28 @@ function RobotsCard({
       </CardHeader>
       <CardContent className="space-y-3">
         <Tabs
-          defaultValue="robots"
+          value={activeTab}
           className="flex flex-col gap-3"
           onValueChange={setActiveTab}
         >
           <div className="flex items-center justify-between gap-2">
             <TabsList variant="line" className="w-full justify-start">
-              <TabsTrigger value="robots" className={tabTriggerClassName}>
+              <TabsTrigger value="robots" className={TAB_TRIGGER_CLASSNAME}>
                 {activeTab === "robots" && (
                   <motion.span
                     layoutId="metadata-tab-indicator"
                     className="absolute inset-0 rounded-md bg-white/20"
-                    transition={tabIndicatorTransition}
+                    transition={TAB_INDICATOR_TRANSITION}
                   />
                 )}
                 <span className="relative z-10">Robots</span>
               </TabsTrigger>
-              <TabsTrigger value="sitemap" className={tabTriggerClassName}>
+              <TabsTrigger value="sitemap" className={TAB_TRIGGER_CLASSNAME}>
                 {activeTab === "sitemap" && (
                   <motion.span
                     layoutId="metadata-tab-indicator"
                     className="absolute inset-0 rounded-md bg-white/20"
-                    transition={tabIndicatorTransition}
+                    transition={TAB_INDICATOR_TRANSITION}
                   />
                 )}
                 <span className="relative z-10">Sitemap</span>
@@ -565,18 +536,18 @@ function RobotsCard({
           </div>
           <TabsContent value="robots" className="min-h-[160px]">
             <motion.div
-              initial={contentMotion.initial}
-              animate={contentMotion.animate}
-              transition={contentMotion.transition}
+              initial={CONTENT_MOTION.initial}
+              animate={CONTENT_MOTION.animate}
+              transition={CONTENT_MOTION.transition}
             >
               {renderRobotsContent()}
             </motion.div>
           </TabsContent>
           <TabsContent value="sitemap" className="min-h-[160px]">
             <motion.div
-              initial={contentMotion.initial}
-              animate={contentMotion.animate}
-              transition={contentMotion.transition}
+              initial={CONTENT_MOTION.initial}
+              animate={CONTENT_MOTION.animate}
+              transition={CONTENT_MOTION.transition}
             >
               {renderSitemapContent()}
             </motion.div>

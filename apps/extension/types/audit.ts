@@ -106,4 +106,8 @@ export interface AuditResponse {
   success: boolean;
 }
 
-export type Message = AuditForTabMessage | AuditMessage | TogglePanelMessage;
+export type Message =
+  | AuditForTabMessage
+  | AuditMessage
+  | TogglePanelMessage
+  | ScrollToHeadingMessage;

@@ -6,6 +6,24 @@ import type { HeadingInfo } from "@/types/audit";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
+const INDENT_STEP = 12;
+const LEVEL_TONE: Record<number, string> = {
+  1: "text-foreground/90",
+  2: "text-foreground/80",
+  3: "text-foreground/75",
+  4: "text-foreground/70",
+  5: "text-foreground/65",
+  6: "text-foreground/60",
+};
+const LEVEL_BADGE_TONE: Record<number, string> = {
+  1: "border-sky-400/40 bg-sky-400/10 text-sky-200",
+  2: "border-emerald-400/40 bg-emerald-400/10 text-emerald-200",
+  3: "border-amber-400/40 bg-amber-400/10 text-amber-200",
+  4: "border-white/10 bg-white/5 text-muted-foreground",
+  5: "border-white/10 bg-white/5 text-muted-foreground",
+  6: "border-white/10 bg-white/5 text-muted-foreground",
+};
+
 interface HeadingsTabProps {
   headings: HeadingInfo[] | null;
 }
@@ -77,23 +95,7 @@ function HeadingRow({
   heading: HeadingInfo;
   index: number;
 }) {
-  const indent = (heading.level - 1) * 12;
-  const levelTone: Record<number, string> = {
-    1: "text-foreground/90",
-    2: "text-foreground/80",
-    3: "text-foreground/75",
-    4: "text-foreground/70",
-    5: "text-foreground/65",
-    6: "text-foreground/60",
-  };
-  const levelBadgeTone: Record<number, string> = {
-    1: "border-sky-400/40 bg-sky-400/10 text-sky-200",
-    2: "border-emerald-400/40 bg-emerald-400/10 text-emerald-200",
-    3: "border-amber-400/40 bg-amber-400/10 text-amber-200",
-    4: "border-white/10 bg-white/5 text-muted-foreground",
-    5: "border-white/10 bg-white/5 text-muted-foreground",
-    6: "border-white/10 bg-white/5 text-muted-foreground",
-  };
+  const indent = (heading.level - 1) * INDENT_STEP;
 
   const handleJump = async () => {
     const [tab] = await browser.tabs.query({
@@ -113,19 +115,23 @@ function HeadingRow({
     <button
       type="button"
       onClick={async () => {
-        await handleJump();
+        try {
+          await handleJump();
+        } catch {
+          return;
+        }
       }}
       className="flex w-full items-start gap-2 rounded-md px-2 py-1 text-left hover:bg-white/5 transition-colors"
       style={{ paddingLeft: `${indent + 6}px` }}
       aria-label={`Jump to heading ${heading.text}`}
     >
       <span
-        className={`inline-flex h-5 w-7 flex-shrink-0 items-center justify-center rounded border text-[10px] font-semibold ${levelBadgeTone[heading.level] ?? levelBadgeTone[6]}`}
+        className={`inline-flex h-5 w-7 flex-shrink-0 items-center justify-center rounded border text-[10px] font-semibold ${LEVEL_BADGE_TONE[heading.level] ?? LEVEL_BADGE_TONE[6]}`}
       >
         H{heading.level}
       </span>
       <span
-        className={`flex-1 break-words text-sm font-normal leading-snug ${levelTone[heading.level] ?? "text-foreground/60"}`}
+        className={`flex-1 break-words text-sm font-normal leading-snug ${LEVEL_TONE[heading.level] ?? "text-foreground/60"}`}
       >
         {heading.text}
       </span>

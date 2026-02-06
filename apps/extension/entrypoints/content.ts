@@ -3,15 +3,13 @@ import type { AxeResults } from "axe-core";
 import axe from "axe-core";
 
 import type {
-  AuditMessage,
   AuditResult,
   HeadingInfo,
   ImageInfo,
   Issue,
   LinkInfo,
+  Message,
   MetadataInfo,
-  ScrollToHeadingMessage,
-  TogglePanelMessage,
 } from "@/types/audit";
 
 const CONTENT_SCRIPT_FLAG = "__metabear_content_script_ready__";
@@ -23,6 +21,49 @@ let closeListenerRegistered = false;
 const PANEL_CONTAINER_ID = "__metabear_panel__";
 const PANEL_URL = browser.runtime.getURL("/panel.html");
 const PANEL_ORIGIN = new URL(PANEL_URL).origin;
+
+const EMPTY_AUDIT_RESULT: AuditResult = {
+  accessibility: null,
+  error: "Unknown error",
+  issues: [],
+  headings: [],
+  images: [],
+  links: [],
+  score: 100,
+  metadata: {
+    title: null,
+    description: null,
+    canonical: null,
+    lang: null,
+    keywords: null,
+    author: null,
+    robotsContent: null,
+    robotsText: null,
+    sitemapText: null,
+    favicon: null,
+    appleTouchIcon: null,
+    wordCount: 0,
+    charCount: 0,
+    url: "",
+    openGraph: {
+      title: null,
+      description: null,
+      image: null,
+      url: null,
+      type: null,
+      locale: null,
+      siteName: null,
+    },
+    twitter: {
+      card: null,
+      title: null,
+      description: null,
+      image: null,
+    },
+    robots: { url: "", exists: false },
+    sitemaps: [],
+  },
+};
 
 export default defineContentScript({
   main() {
@@ -58,7 +99,7 @@ export default defineContentScript({
     }
 
     const messageListener = (
-      message: AuditMessage | TogglePanelMessage | ScrollToHeadingMessage,
+      message: Message,
       _sender: unknown,
       sendResponse: (response?: AuditResult) => void
     ) => {
@@ -77,46 +118,8 @@ export default defineContentScript({
             const errorMessage =
               error instanceof Error ? error.message : "Unknown error";
             sendResponse({
-              accessibility: null,
+              ...EMPTY_AUDIT_RESULT,
               error: errorMessage,
-              issues: [],
-              headings: [],
-              images: [],
-              links: [],
-              score: 100,
-              metadata: {
-                title: null,
-                description: null,
-                canonical: null,
-                lang: null,
-                keywords: null,
-                author: null,
-                robotsContent: null,
-                robotsText: null,
-                sitemapText: null,
-                favicon: null,
-                appleTouchIcon: null,
-                wordCount: 0,
-                charCount: 0,
-                url: "",
-                openGraph: {
-                  title: null,
-                  description: null,
-                  image: null,
-                  url: null,
-                  type: null,
-                  locale: null,
-                  siteName: null,
-                },
-                twitter: {
-                  card: null,
-                  title: null,
-                  description: null,
-                  image: null,
-                },
-                robots: { url: "", exists: false },
-                sitemaps: [],
-              },
             });
           }
         })();
@@ -219,16 +222,18 @@ async function runAudit(): Promise<AuditResult> {
 
   const accessibilityIssues = accessibility.violations
     .filter((v) => v.impact === "critical" || v.impact === "serious")
-    .map((v) => ({
-      type: "accessibility" as const,
-      severity: (v.impact === "critical" ? "high" : "medium") as
-        | "high"
-        | "medium",
-      id: v.id,
-      title: v.help,
-      description: v.description,
-      helpUrl: v.helpUrl,
-    }));
+    .map((v) => {
+      const severity: Issue["severity"] =
+        v.impact === "critical" ? "high" : "medium";
+      return {
+        type: "accessibility" as const,
+        severity,
+        id: v.id,
+        title: v.help,
+        description: v.description,
+        helpUrl: v.helpUrl,
+      };
+    });
 
   issues.push(...accessibilityIssues);
 
@@ -463,6 +468,28 @@ function auditSEO(metadata: MetadataInfo): Issue[] {
     }
   }
 
+  if (!metadata.robots.exists) {
+    issues.push({
+      type: "seo",
+      severity: "medium",
+      id: "seo-missing-robots",
+      title: "Missing robots.txt",
+      description:
+        "robots.txt not found. Search engines lack explicit crawl directives for this site.",
+    });
+  }
+
+  if (metadata.sitemaps.length === 0) {
+    issues.push({
+      type: "seo",
+      severity: "medium",
+      id: "seo-missing-sitemap",
+      title: "Missing sitemap",
+      description:
+        "No sitemap.xml found. Search engines may discover pages more slowly without a sitemap.",
+    });
+  }
+
   const missingOgTags: string[] = [];
   if (!metadata.openGraph.title) {
     missingOgTags.push("og:title");
@@ -620,18 +647,6 @@ function auditImages(images: ImageInfo[]): Issue[] {
       id: "image-missing-alt",
       title: "Missing Alt Text",
       description: `${missingAltCount} ${imageWord} without alt text. Required for screen readers.`,
-    });
-  }
-
-  if (brokenImages.length > 0) {
-    const imageCount = brokenImages.length;
-    const imageWord = imageCount === 1 ? "image" : "images";
-    issues.push({
-      type: "accessibility",
-      severity: "high",
-      id: "image-broken",
-      title: "Broken Images",
-      description: `${imageCount} ${imageWord} failed to load. Ensure all image URLs are valid and accessible.`,
     });
   }
 
