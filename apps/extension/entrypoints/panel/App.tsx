@@ -15,6 +15,7 @@ import { useEffect, useRef, useState } from "react";
 import type { AuditResponse, AuditResult } from "@/types/audit";
 
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { AuditTab } from "./tabs/AuditTab";
@@ -57,6 +58,7 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const [isRestricted, setIsRestricted] = useState(false);
   const didRunRef = useRef(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
   const metadata = result?.metadata ?? null;
   const links = result?.links ?? null;
   const images = result?.images ?? null;
@@ -137,6 +139,7 @@ export default function App() {
       return;
     }
     setActiveTab(value);
+    scrollRef.current?.scrollTo({ top: 0 });
   };
 
   return (
@@ -160,7 +163,7 @@ export default function App() {
         <button
           type="button"
           onClick={handleClose}
-          className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-white/20 bg-white/10 text-muted-foreground transition hover:bg-white/20 hover:text-foreground"
+          className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-white/10 bg-white/5 text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground"
           aria-label="Close panel"
           title="Close"
         >
@@ -171,6 +174,7 @@ export default function App() {
           />
         </button>
       </header>
+      <Separator />
       <Tabs
         value={activeTab}
         onValueChange={handleTabChange}
@@ -306,6 +310,7 @@ export default function App() {
 
         <TabsContent value={activeTab} className="flex-1 pt-1">
           <ScrollArea
+            viewportRef={scrollRef}
             className={
               activeTab === "links" ? "h-full overflow-x-hidden" : "h-full"
             }
