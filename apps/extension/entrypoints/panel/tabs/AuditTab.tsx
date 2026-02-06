@@ -22,6 +22,7 @@ import { useEffect, useRef, useState } from "react";
 
 import type { AuditResult, Issue, MetadataInfo } from "@/types/audit";
 
+import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -29,6 +30,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -192,11 +194,11 @@ function ExportDialog({
       return;
     }
 
-     const { metadata } = result;
-     const payload: Record<string, unknown> = {
-       exportedAt: new Date().toISOString(),
-       url: metadata.url,
-     };
+    const { metadata } = result;
+    const payload: Record<string, unknown> = {
+      exportedAt: new Date().toISOString(),
+      url: metadata.url,
+    };
 
     if (options.score) {
       payload.seoScore = {
@@ -287,45 +289,55 @@ function ExportDialog({
           Export
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md" showCloseButton={false}>
         <DialogHeader>
-          <DialogTitle>Export</DialogTitle>
+          <DialogTitle>Export Audit</DialogTitle>
+          <DialogDescription>
+            Choose which sections to include in the JSON export.
+          </DialogDescription>
         </DialogHeader>
-        <Card className="border border-white/10 bg-white/5">
-          <CardContent className="py-3">
-            <div className="grid grid-cols-2 gap-3">
-              {EXPORT_FIELDS.map((item) => {
-                const id = `export-${item.key}`;
-                const checked = options[item.key as keyof typeof options];
-                return (
-                  <label
-                    key={item.key}
-                    htmlFor={id}
-                    className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-foreground"
-                  >
-                    <Checkbox
-                      id={id}
-                      checked={checked}
-                      onCheckedChange={(value) =>
-                        handleCheckedChange(
-                          item.key as keyof typeof options,
-                          value === true
-                        )
-                      }
-                    />
-                    <span>{item.label}</span>
-                  </label>
-                );
-              })}
-            </div>
-          </CardContent>
-        </Card>
+        <div className="grid grid-cols-2 gap-2">
+          {EXPORT_FIELDS.map((item) => {
+            const id = `export-${item.key}`;
+            const checked = options[item.key as keyof typeof options];
+            return (
+              <label
+                key={item.key}
+                htmlFor={id}
+                className={cn(
+                  "flex items-center gap-2.5 rounded-lg border px-3 py-2 text-sm cursor-pointer transition-colors duration-150",
+                  checked
+                    ? "border-white/15 bg-white/8 text-foreground"
+                    : "border-white/8 bg-transparent text-muted-foreground hover:border-white/12 hover:bg-white/3"
+                )}
+              >
+                <Checkbox
+                  id={id}
+                  checked={checked}
+                  onCheckedChange={(value) =>
+                    handleCheckedChange(
+                      item.key as keyof typeof options,
+                      value === true
+                    )
+                  }
+                />
+                <span className="select-none">{item.label}</span>
+              </label>
+            );
+          })}
+        </div>
         <DialogFooter>
           <Button
             variant="secondary"
             onClick={handleExport}
             disabled={!hasSelection}
+            className="gap-2"
           >
+            <HugeiconsIcon
+              icon={FileExportIcon}
+              strokeWidth={2}
+              className="size-4"
+            />
             Export JSON
           </Button>
         </DialogFooter>

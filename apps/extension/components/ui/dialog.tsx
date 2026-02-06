@@ -1,15 +1,41 @@
 import { Cancel01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+import { AnimatePresence, motion } from "motion/react";
 import { Dialog as DialogPrimitive } from "radix-ui";
 import * as React from "react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
+const DialogOpenContext = React.createContext(false);
+
 function Dialog({
+  open,
+  defaultOpen,
+  onOpenChange,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Root>) {
-  return <DialogPrimitive.Root data-slot="dialog" {...props} />;
+  const [internalOpen, setInternalOpen] = React.useState(defaultOpen ?? false);
+  const isOpen = open ?? internalOpen;
+
+  const handleOpenChange = React.useCallback(
+    (next: boolean) => {
+      setInternalOpen(next);
+      onOpenChange?.(next);
+    },
+    [onOpenChange]
+  );
+
+  return (
+    <DialogOpenContext.Provider value={isOpen}>
+      <DialogPrimitive.Root
+        data-slot="dialog"
+        open={isOpen}
+        onOpenChange={handleOpenChange}
+        {...props}
+      />
+    </DialogOpenContext.Provider>
+  );
 }
 
 function DialogTrigger({
@@ -30,21 +56,13 @@ function DialogClose({
   return <DialogPrimitive.Close data-slot="dialog-close" {...props} />;
 }
 
-function DialogOverlay({
-  className,
-  ...props
-}: React.ComponentProps<typeof DialogPrimitive.Overlay>) {
-  return (
-    <DialogPrimitive.Overlay
-      data-slot="dialog-overlay"
-      className={cn(
-        "bg-black/10 supports-backdrop-filter:backdrop-blur-xs fixed inset-0 isolate z-50",
-        className
-      )}
-      {...props}
-    />
-  );
-}
+const OVERLAY_TRANSITION = { duration: 0.2, ease: "easeOut" } as const;
+const CONTENT_TRANSITION = {
+  type: "spring",
+  stiffness: 500,
+  damping: 34,
+  mass: 0.8,
+} as const;
 
 function DialogContent({
   className,
@@ -54,32 +72,52 @@ function DialogContent({
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean;
 }) {
+  const isOpen = React.useContext(DialogOpenContext);
+
   return (
-    <DialogPortal>
-      <DialogOverlay />
-      <DialogPrimitive.Content
-        data-slot="dialog-content"
-        className={cn(
-          "bg-background ring-foreground/10 grid max-w-[calc(100%-2rem)] gap-4 rounded-xl p-4 text-sm ring-1 sm:max-w-sm fixed top-1/2 left-1/2 z-50 w-full -translate-x-1/2 -translate-y-1/2 outline-none",
-          className
-        )}
-        {...props}
-      >
-        {children}
-        {showCloseButton && (
-          <DialogPrimitive.Close data-slot="dialog-close" asChild>
-            <Button
-              variant="ghost"
-              className="absolute top-2 right-2"
-              size="icon-sm"
+    <AnimatePresence>
+      {isOpen && (
+        <DialogPortal forceMount>
+          <DialogPrimitive.Overlay forceMount asChild>
+            <motion.div
+              data-slot="dialog-overlay"
+              className="bg-black/50 supports-backdrop-filter:backdrop-blur-sm fixed inset-0 isolate z-50"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={OVERLAY_TRANSITION}
+            />
+          </DialogPrimitive.Overlay>
+          <DialogPrimitive.Content forceMount asChild {...props}>
+            <motion.div
+              data-slot="dialog-content"
+              className={cn(
+                "bg-background ring-foreground/10 grid max-w-[calc(100%-2rem)] gap-4 rounded-xl p-4 text-sm ring-1 shadow-xl sm:max-w-sm fixed top-1/2 left-1/2 z-50 w-full origin-center outline-none",
+                className
+              )}
+              initial={{ opacity: 0, scale: 0.95, x: "-50%", y: "-48%" }}
+              animate={{ opacity: 1, scale: 1, x: "-50%", y: "-50%" }}
+              exit={{ opacity: 0, scale: 0.95, x: "-50%", y: "-48%" }}
+              transition={CONTENT_TRANSITION}
             >
-              <HugeiconsIcon icon={Cancel01Icon} strokeWidth={2} />
-              <span className="sr-only">Close</span>
-            </Button>
-          </DialogPrimitive.Close>
-        )}
-      </DialogPrimitive.Content>
-    </DialogPortal>
+              {children}
+              {showCloseButton && (
+                <DialogPrimitive.Close data-slot="dialog-close" asChild>
+                  <Button
+                    variant="ghost"
+                    className="absolute top-2 right-2"
+                    size="icon-sm"
+                  >
+                    <HugeiconsIcon icon={Cancel01Icon} strokeWidth={2} />
+                    <span className="sr-only">Close</span>
+                  </Button>
+                </DialogPrimitive.Close>
+              )}
+            </motion.div>
+          </DialogPrimitive.Content>
+        </DialogPortal>
+      )}
+    </AnimatePresence>
   );
 }
 
@@ -156,7 +194,6 @@ export {
   DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogOverlay,
   DialogPortal,
   DialogTitle,
   DialogTrigger,
