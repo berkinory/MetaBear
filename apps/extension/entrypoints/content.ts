@@ -568,6 +568,25 @@ function collectImages(): ImageInfo[] {
       continue;
     }
 
+    if (src.startsWith("data:image/svg+xml")) {
+      try {
+        const svgContent = decodeURIComponent(src.slice(src.indexOf(",") + 1));
+        const hasDrawing =
+          /<(path|rect|circle|line|polygon|polyline|ellipse|text|image|use|g)\b/i.test(
+            svgContent
+          );
+        if (!hasDrawing) {
+          continue;
+        }
+      } catch {
+        // If decoding fails, keep the image
+      }
+    }
+
+    if (src.startsWith("data:image/") && src.length < 200) {
+      continue;
+    }
+
     let isValidUrl = false;
     try {
       const _url = new URL(src);
