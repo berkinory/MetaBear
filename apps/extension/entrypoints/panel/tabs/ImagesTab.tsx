@@ -16,6 +16,17 @@ interface ImagesTabProps {
   metadata: MetadataInfo | null;
 }
 
+const IMAGE_FORMATS = new Set([
+  "svg",
+  "png",
+  "jpg",
+  "jpeg",
+  "webp",
+  "gif",
+  "avif",
+  "ico",
+]);
+
 function formatAlt(text: string): string {
   const trimmed = text.trim();
   if (trimmed.length <= 30) {
@@ -34,33 +45,47 @@ function getImageFormat(src: string): string | null {
 
     if (lastPart && lastPart.includes(".")) {
       const ext = lastPart.split(".").pop();
-      if (
-        ext &&
-        ["svg", "png", "jpg", "jpeg", "webp", "gif", "avif", "ico"].includes(
-          ext
-        )
-      ) {
+      if (ext && IMAGE_FORMATS.has(ext)) {
         return ext === "jpeg" ? "jpg" : ext;
       }
     }
 
     for (const part of pathParts) {
-      if (part.includes(".")) {
-        const ext = part.split(".").pop();
-        if (
-          ext &&
-          ["svg", "png", "jpg", "jpeg", "webp", "gif", "avif", "ico"].includes(
-            ext
-          )
-        ) {
-          return ext === "jpeg" ? "jpg" : ext;
-        }
+      if (!part.includes(".")) {
+        continue;
+      }
+      const ext = part.split(".").pop();
+      if (ext && IMAGE_FORMATS.has(ext)) {
+        return ext === "jpeg" ? "jpg" : ext;
       }
     }
   } catch {
     // Invalid URL
   }
   return null;
+}
+
+async function downloadFromUrl({
+  url,
+  fallbackName,
+  extHint,
+  fallbackExt,
+}: {
+  url: string;
+  fallbackName: string;
+  extHint?: string | null;
+  fallbackExt: string;
+}) {
+  const response = await fetch(url);
+  const blob = await response.blob();
+  const blobUrl = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = blobUrl;
+  const filename = url.split("/").pop()?.split("?")[0] || fallbackName;
+  const ext = extHint || blob.type.split("/")[1] || fallbackExt;
+  link.download = filename.includes(".") ? filename : `${filename}.${ext}`;
+  link.click();
+  URL.revokeObjectURL(blobUrl);
 }
 
 export function ImagesTab({ images, metadata }: ImagesTabProps) {
@@ -199,20 +224,11 @@ function IconCard({
               e.preventDefault();
               e.stopPropagation();
               try {
-                const response = await fetch(url);
-                const blob = await response.blob();
-                const blobUrl = URL.createObjectURL(blob);
-                const link = document.createElement("a");
-                link.href = blobUrl;
-                const filename =
-                  url.split("/").pop()?.split("?")[0] ||
-                  label.toLowerCase().replace(/\s+/g, "-");
-                const ext = blob.type.split("/")[1] || "ico";
-                link.download = filename.includes(".")
-                  ? filename
-                  : `${filename}.${ext}`;
-                link.click();
-                URL.revokeObjectURL(blobUrl);
+                await downloadFromUrl({
+                  url,
+                  fallbackName: label.toLowerCase().replace(/\s+/g, "-"),
+                  fallbackExt: "ico",
+                });
               } catch (error) {
                 console.error("Download failed:", error);
               }
@@ -293,19 +309,12 @@ function ImageRow({ image }: { image: ImageInfo }) {
               e.preventDefault();
               e.stopPropagation();
               try {
-                const response = await fetch(image.src);
-                const blob = await response.blob();
-                const url = URL.createObjectURL(blob);
-                const link = document.createElement("a");
-                link.href = url;
-                const filename =
-                  image.src.split("/").pop()?.split("?")[0] || "image";
-                const ext = format || blob.type.split("/")[1] || "jpg";
-                link.download = filename.includes(".")
-                  ? filename
-                  : `${filename}.${ext}`;
-                link.click();
-                URL.revokeObjectURL(url);
+                await downloadFromUrl({
+                  url: image.src,
+                  fallbackName: "image",
+                  extHint: format,
+                  fallbackExt: "jpg",
+                });
               } catch (error) {
                 console.error("Download failed:", error);
               }

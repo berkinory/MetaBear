@@ -27,7 +27,7 @@ export function LinksTab({ links, baseUrl }: LinksTabProps) {
     links?.filter((link) => !link.text || link.text.trim() === "") ?? [];
   const sortedLinks = links
     ? [...links].toSorted((a, b) => Number(b.isExternal) - Number(a.isExternal))
-    : null;
+    : [];
 
   if (isLoading) {
     return (
@@ -85,7 +85,7 @@ export function LinksTab({ links, baseUrl }: LinksTabProps) {
     </Card>
   );
 
-  if (links && links.length > 0) {
+  if (links.length > 0) {
     listContent = (
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
@@ -107,7 +107,7 @@ export function LinksTab({ links, baseUrl }: LinksTabProps) {
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
-            {sortedLinks?.map((link, index) => (
+            {sortedLinks.map((link, index) => (
               <LinkRow
                 key={`${link.href}-${index}`}
                 link={link}
@@ -129,9 +129,7 @@ export function LinksTab({ links, baseUrl }: LinksTabProps) {
         <CardContent className="space-y-2">
           <div className="flex justify-between items-center text-xs font-semibold text-muted-foreground">
             <span>Total</span>
-            <span className="text-foreground font-mono">
-              {links?.length ?? 0}
-            </span>
+            <span className="text-foreground font-mono">{links.length}</span>
           </div>
           <div className="flex justify-between items-center text-xs font-semibold text-muted-foreground">
             <span>Internal</span>

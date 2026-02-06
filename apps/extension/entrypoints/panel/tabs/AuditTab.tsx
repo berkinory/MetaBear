@@ -41,6 +41,23 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
+const ISSUE_ICON_BY_TYPE: Record<Issue["type"], typeof SeoIcon> = {
+  accessibility: UniversalAccessIcon,
+  seo: SeoIcon,
+  performance: DashboardSpeed01Icon,
+  security: SecurityIcon,
+};
+
+const EXPORT_FIELDS = [
+  { key: "score", label: "SEO Score" },
+  { key: "issues", label: "Issues" },
+  { key: "metaTags", label: "Meta Tags" },
+  { key: "headings", label: "Headings" },
+  { key: "images", label: "Images" },
+  { key: "links", label: "Links" },
+  { key: "openGraph", label: "OpenGraph" },
+] as const;
+
 interface AuditTabProps {
   error: string | null;
   loading: boolean;
@@ -175,9 +192,10 @@ function ExportDialog({
       return;
     }
 
+    const { metadata } = result;
     const payload: Record<string, unknown> = {
       exportedAt: new Date().toISOString(),
-      url: result.metadata?.url ?? null,
+      url: metadata?.url ?? null,
     };
 
     if (options.score) {
@@ -193,27 +211,27 @@ function ExportDialog({
 
     if (options.metaTags) {
       payload.metaTags = {
-        title: result.metadata.title,
-        description: result.metadata.description,
-        canonical: result.metadata.canonical,
-        lang: result.metadata.lang,
-        keywords: result.metadata.keywords,
-        author: result.metadata.author,
-        robotsContent: result.metadata.robotsContent,
-        favicon: result.metadata.favicon,
-        appleTouchIcon: result.metadata.appleTouchIcon,
-        wordCount: result.metadata.wordCount,
-        charCount: result.metadata.charCount,
+        title: metadata.title,
+        description: metadata.description,
+        canonical: metadata.canonical,
+        lang: metadata.lang,
+        keywords: metadata.keywords,
+        author: metadata.author,
+        robotsContent: metadata.robotsContent,
+        favicon: metadata.favicon,
+        appleTouchIcon: metadata.appleTouchIcon,
+        wordCount: metadata.wordCount,
+        charCount: metadata.charCount,
         imagesCount: result.images.length,
         linksCount: result.links.length,
-        url: result.metadata.url,
+        url: metadata.url,
         robots: {
-          ...result.metadata.robots,
-          text: result.metadata.robotsText,
+          ...metadata.robots,
+          text: metadata.robotsText,
         },
         sitemap: {
-          text: result.metadata.sitemapText,
-          urls: result.metadata.sitemaps,
+          text: metadata.sitemapText,
+          urls: metadata.sitemaps,
         },
       };
     }
@@ -232,8 +250,8 @@ function ExportDialog({
 
     if (options.openGraph) {
       payload.openGraph = {
-        ...result.metadata.openGraph,
-        twitter: result.metadata.twitter,
+        ...metadata.openGraph,
+        twitter: metadata.twitter,
       };
     }
 
@@ -276,15 +294,7 @@ function ExportDialog({
         <Card className="border border-white/10 bg-white/5">
           <CardContent className="py-3">
             <div className="grid grid-cols-2 gap-3">
-              {[
-                { key: "score", label: "SEO Score" },
-                { key: "issues", label: "Issues" },
-                { key: "metaTags", label: "Meta Tags" },
-                { key: "headings", label: "Headings" },
-                { key: "images", label: "Images" },
-                { key: "links", label: "Links" },
-                { key: "openGraph", label: "OpenGraph" },
-              ].map((item) => {
+              {EXPORT_FIELDS.map((item) => {
                 const id = `export-${item.key}`;
                 const checked = options[item.key as keyof typeof options];
                 return (
@@ -613,16 +623,7 @@ function IssuesCard({
     []
   );
 
-  const getIssueIcon = (type: Issue["type"]) => {
-    const icons: Record<Issue["type"], typeof SeoIcon> = {
-      accessibility: UniversalAccessIcon,
-      seo: SeoIcon,
-      performance: DashboardSpeed01Icon,
-      security: SecurityIcon,
-    };
-
-    return icons[type];
-  };
+  const getIssueIcon = (type: Issue["type"]) => ISSUE_ICON_BY_TYPE[type];
 
   if (!loading && (!issues || issues.length === 0)) {
     return (

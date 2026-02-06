@@ -20,44 +20,47 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 
+const TAB_TRIGGER_CLASSNAME =
+  "flex h-8 w-8 flex-none items-center justify-center rounded-md px-0 text-white/60 transition-colors hover:bg-white/10 data-[state=active]:!text-white relative overflow-hidden";
+const TAB_INDICATOR_TRANSITION = {
+  type: "spring",
+  stiffness: 520,
+  damping: 38,
+  mass: 0.7,
+} as const;
+const CONTENT_MOTION = {
+  initial: { opacity: 0, y: 10 },
+  animate: { opacity: 1, y: 0 },
+  transition: {
+    duration: 0.3,
+    ease: easeOut,
+  },
+};
+const DEFAULT_OPEN_GRAPH: MetadataInfo["openGraph"] = {
+  title: null,
+  description: null,
+  image: null,
+  url: null,
+  type: null,
+  locale: null,
+  siteName: null,
+};
+const DEFAULT_TWITTER: MetadataInfo["twitter"] = {
+  card: null,
+  title: null,
+  description: null,
+  image: null,
+};
+
 interface SocialTabProps {
   metadata: MetadataInfo | null;
 }
 
 export function SocialTab({ metadata }: SocialTabProps) {
-  const tabTriggerClassName =
-    "flex h-8 w-8 flex-none items-center justify-center rounded-md px-0 text-white/60 transition-colors hover:bg-white/10 data-[state=active]:!text-white relative overflow-hidden";
-  const tabIndicatorTransition = {
-    type: "spring",
-    stiffness: 520,
-    damping: 38,
-    mass: 0.7,
-  } as const;
-  const contentMotion = {
-    initial: { opacity: 0, y: 10 },
-    animate: { opacity: 1, y: 0 },
-    transition: {
-      duration: 0.3,
-      ease: easeOut,
-    },
-  };
   const [activeTab, setActiveTab] = useState("tags");
   const isLoading = !metadata;
-  const openGraph = metadata?.openGraph ?? {
-    title: null,
-    description: null,
-    image: null,
-    url: null,
-    type: null,
-    locale: null,
-    siteName: null,
-  };
-  const twitter = metadata?.twitter ?? {
-    card: null,
-    title: null,
-    description: null,
-    image: null,
-  };
+  const openGraph = metadata?.openGraph ?? DEFAULT_OPEN_GRAPH;
+  const twitter = metadata?.twitter ?? DEFAULT_TWITTER;
   const pageTitle = metadata?.title ?? null;
   const pageDescription = metadata?.description ?? null;
   const pageUrl = metadata?.url ?? null;
@@ -80,13 +83,12 @@ export function SocialTab({ metadata }: SocialTabProps) {
     <Tabs
       value={activeTab}
       onValueChange={setActiveTab}
-      defaultValue="tags"
       className="flex flex-col gap-3"
     >
       <TabsList variant="line" className="w-fit mx-auto justify-center">
         <TabsTrigger
           value="tags"
-          className={tabTriggerClassName}
+          className={TAB_TRIGGER_CLASSNAME}
           aria-label="Tags"
           title="Tags"
         >
@@ -94,7 +96,7 @@ export function SocialTab({ metadata }: SocialTabProps) {
             <motion.span
               layoutId="social-tab-indicator"
               className="absolute inset-0 rounded-md bg-white/20"
-              transition={tabIndicatorTransition}
+              transition={TAB_INDICATOR_TRANSITION}
             />
           )}
           <span className="relative z-10">
@@ -107,7 +109,7 @@ export function SocialTab({ metadata }: SocialTabProps) {
         </TabsTrigger>
         <TabsTrigger
           value="og-image"
-          className={tabTriggerClassName}
+          className={TAB_TRIGGER_CLASSNAME}
           aria-label="Open Graph Image"
           title="Open Graph Image"
         >
@@ -115,7 +117,7 @@ export function SocialTab({ metadata }: SocialTabProps) {
             <motion.span
               layoutId="social-tab-indicator"
               className="absolute inset-0 rounded-md bg-white/20"
-              transition={tabIndicatorTransition}
+              transition={TAB_INDICATOR_TRANSITION}
             />
           )}
           <span className="relative z-10">
@@ -128,7 +130,7 @@ export function SocialTab({ metadata }: SocialTabProps) {
         </TabsTrigger>
         <TabsTrigger
           value="twitter-image"
-          className={tabTriggerClassName}
+          className={TAB_TRIGGER_CLASSNAME}
           aria-label="Twitter Image"
           title="Twitter Image"
         >
@@ -136,7 +138,7 @@ export function SocialTab({ metadata }: SocialTabProps) {
             <motion.span
               layoutId="social-tab-indicator"
               className="absolute inset-0 rounded-md bg-white/20"
-              transition={tabIndicatorTransition}
+              transition={TAB_INDICATOR_TRANSITION}
             />
           )}
           <span className="relative z-10">
@@ -149,7 +151,7 @@ export function SocialTab({ metadata }: SocialTabProps) {
         </TabsTrigger>
         <TabsTrigger
           value="google"
-          className={tabTriggerClassName}
+          className={TAB_TRIGGER_CLASSNAME}
           aria-label="Google"
           title="Google"
         >
@@ -157,7 +159,7 @@ export function SocialTab({ metadata }: SocialTabProps) {
             <motion.span
               layoutId="social-tab-indicator"
               className="absolute inset-0 rounded-md bg-white/20"
-              transition={tabIndicatorTransition}
+              transition={TAB_INDICATOR_TRANSITION}
             />
           )}
           <span className="relative z-10">
@@ -170,7 +172,7 @@ export function SocialTab({ metadata }: SocialTabProps) {
         </TabsTrigger>
         <TabsTrigger
           value="facebook"
-          className={tabTriggerClassName}
+          className={TAB_TRIGGER_CLASSNAME}
           aria-label="Facebook"
           title="Facebook"
         >
@@ -178,7 +180,7 @@ export function SocialTab({ metadata }: SocialTabProps) {
             <motion.span
               layoutId="social-tab-indicator"
               className="absolute inset-0 rounded-md bg-white/20"
-              transition={tabIndicatorTransition}
+              transition={TAB_INDICATOR_TRANSITION}
             />
           )}
           <span className="relative z-10">
@@ -193,9 +195,9 @@ export function SocialTab({ metadata }: SocialTabProps) {
       <TabsContent value="tags" className="min-h-[160px]">
         <motion.div
           className="space-y-4"
-          initial={contentMotion.initial}
-          animate={contentMotion.animate}
-          transition={contentMotion.transition}
+          initial={CONTENT_MOTION.initial}
+          animate={CONTENT_MOTION.animate}
+          transition={CONTENT_MOTION.transition}
         >
           <OpenGraphCard openGraph={openGraph} />
           <TwitterCard twitter={twitter} />
@@ -204,9 +206,9 @@ export function SocialTab({ metadata }: SocialTabProps) {
       <TabsContent value="og-image" className="min-h-[160px]">
         <motion.div
           className="space-y-4"
-          initial={contentMotion.initial}
-          animate={contentMotion.animate}
-          transition={contentMotion.transition}
+          initial={CONTENT_MOTION.initial}
+          animate={CONTENT_MOTION.animate}
+          transition={CONTENT_MOTION.transition}
         >
           <OpenGraphPreviewCard
             imageUrl={openGraph.image}
@@ -217,9 +219,9 @@ export function SocialTab({ metadata }: SocialTabProps) {
       <TabsContent value="twitter-image" className="min-h-[160px]">
         <motion.div
           className="space-y-4"
-          initial={contentMotion.initial}
-          animate={contentMotion.animate}
-          transition={contentMotion.transition}
+          initial={CONTENT_MOTION.initial}
+          animate={CONTENT_MOTION.animate}
+          transition={CONTENT_MOTION.transition}
         >
           <TwitterPreviewCard
             imageUrl={twitter.image}
@@ -232,9 +234,9 @@ export function SocialTab({ metadata }: SocialTabProps) {
       <TabsContent value="google" className="min-h-[160px]">
         <motion.div
           className="space-y-4"
-          initial={contentMotion.initial}
-          animate={contentMotion.animate}
-          transition={contentMotion.transition}
+          initial={CONTENT_MOTION.initial}
+          animate={CONTENT_MOTION.animate}
+          transition={CONTENT_MOTION.transition}
         >
           <GooglePreviewCard
             title={pageTitle ?? openGraph.title}
@@ -248,9 +250,9 @@ export function SocialTab({ metadata }: SocialTabProps) {
       <TabsContent value="facebook" className="min-h-[160px]">
         <motion.div
           className="space-y-4"
-          initial={contentMotion.initial}
-          animate={contentMotion.animate}
-          transition={contentMotion.transition}
+          initial={CONTENT_MOTION.initial}
+          animate={CONTENT_MOTION.animate}
+          transition={CONTENT_MOTION.transition}
         >
           <FacebookPreviewCard
             title={openGraph.title}

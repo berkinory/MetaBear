@@ -4,6 +4,18 @@ import type {
   AuditResult,
 } from "@/types/audit";
 
+const RESTRICTED_URL_PATTERNS = [
+  /^chrome:\/\//,
+  /^chrome-extension:\/\//,
+  /^edge:\/\//,
+  /^about:/,
+  /^view-source:/,
+  /^file:\/\//,
+  /^https?:\/\/chrome\.google\.com\/webstore/,
+  /^https?:\/\/chromewebstore\.google\.com/,
+  /^https?:\/\/microsoftedge\.microsoft\.com\/addons/,
+] as const;
+
 export default defineBackground(() => {
   browser.action.onClicked.addListener(async (tab) => {
     if (!tab.id) {
@@ -59,19 +71,7 @@ const isRestrictedUrl = (url: string | undefined): boolean => {
     return true;
   }
 
-  const restrictedPatterns = [
-    /^chrome:\/\//,
-    /^chrome-extension:\/\//,
-    /^edge:\/\//,
-    /^about:/,
-    /^view-source:/,
-    /^file:\/\//,
-    /^https?:\/\/chrome\.google\.com\/webstore/,
-    /^https?:\/\/chromewebstore\.google\.com/,
-    /^https?:\/\/microsoftedge\.microsoft\.com\/addons/,
-  ];
-
-  return restrictedPatterns.some((pattern) => pattern.test(url));
+  return RESTRICTED_URL_PATTERNS.some((pattern) => pattern.test(url));
 };
 
 async function runAuditForTab(tabId: number): Promise<AuditResult> {
