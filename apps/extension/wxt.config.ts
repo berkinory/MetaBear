@@ -3,7 +3,7 @@ import { defineConfig } from "wxt";
 
 export default defineConfig({
   manifest: {
-    permissions: ["activeTab", "scripting", "tabs"],
+    permissions: ["activeTab", "scripting", "tabs", "webNavigation"],
     action: {},
     web_accessible_resources: [
       {

@@ -16,6 +16,13 @@ const RESTRICTED_URL_PATTERNS = [
   /^https?:\/\/microsoftedge\.microsoft\.com\/addons/,
 ] as const;
 
+interface AuditCacheEntry {
+  url: string | null;
+  result: AuditResult;
+}
+
+const auditCache = new Map<number, AuditCacheEntry>();
+
 export default defineBackground(() => {
   browser.action.onClicked.addListener(async (tab) => {
     if (!tab.id) {
@@ -64,6 +71,31 @@ export default defineBackground(() => {
       }
     }
   );
+
+  browser.tabs.onRemoved.addListener((tabId) => {
+    auditCache.delete(tabId);
+  });
+
+  browser.tabs.onUpdated.addListener((tabId, changeInfo) => {
+    if (changeInfo.status === "loading") {
+      auditCache.delete(tabId);
+    }
+    if (changeInfo.url) {
+      auditCache.delete(tabId);
+    }
+  });
+
+  browser.webNavigation.onCommitted.addListener((details) => {
+    if (details.frameId === 0) {
+      auditCache.delete(details.tabId);
+    }
+  });
+
+  browser.webNavigation.onHistoryStateUpdated.addListener((details) => {
+    if (details.frameId === 0) {
+      auditCache.delete(details.tabId);
+    }
+  });
 });
 
 const isRestrictedUrl = (url: string | undefined): boolean => {
@@ -75,5 +107,19 @@ const isRestrictedUrl = (url: string | undefined): boolean => {
 };
 
 async function runAuditForTab(tabId: number): Promise<AuditResult> {
-  return browser.tabs.sendMessage(tabId, { type: "RUN_AUDIT" });
+  const tab = await browser.tabs.get(tabId);
+  const currentUrl = tab.url ?? null;
+
+  if (isRestrictedUrl(currentUrl ?? undefined)) {
+    throw new Error("Restricted URL");
+  }
+
+  const cached = auditCache.get(tabId);
+  if (cached && cached.url === currentUrl) {
+    return cached.result;
+  }
+
+  const result = await browser.tabs.sendMessage(tabId, { type: "RUN_AUDIT" });
+  auditCache.set(tabId, { url: currentUrl, result });
+  return result;
 }
