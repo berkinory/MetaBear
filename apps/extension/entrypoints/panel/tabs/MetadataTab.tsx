@@ -1,3 +1,4 @@
+/* oxlint-disable react/no-multi-comp */
 import {
   Copy01Icon,
   LicenseNoIcon,
@@ -8,7 +9,6 @@ import { easeOut } from "motion";
 import { motion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 
-/* oxlint-disable react/no-multi-comp */
 import type { MetadataInfo } from "@/types/audit";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -258,12 +258,14 @@ function KeywordsCard({ keywords }: { keywords: string }) {
       <CardContent>
         <div className="flex flex-wrap gap-2">
           {keywordList.map((keyword) => (
-            <span
+            <motion.span
               key={keyword}
-              className="px-2 py-1 text-xs bg-muted rounded-md"
+              className="px-2 py-1 text-xs bg-muted rounded-md border border-transparent cursor-default select-none transition-colors hover:border-white/15 hover:bg-white/8"
+              whileHover={{ scale: 1.05 }}
+              transition={{ type: "spring", stiffness: 400, damping: 25 }}
             >
               {keyword}
-            </span>
+            </motion.span>
           ))}
         </div>
       </CardContent>

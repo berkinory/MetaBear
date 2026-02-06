@@ -5,6 +5,9 @@ import {
   LicenseNoIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+import { easeOut } from "motion";
+import { motion } from "motion/react";
+import { useState } from "react";
 
 import type { ImageInfo, MetadataInfo } from "@/types/audit";
 
@@ -26,6 +29,15 @@ const IMAGE_FORMATS = new Set([
   "avif",
   "ico",
 ]);
+
+const listVariants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.04 } },
+};
+const itemVariants = {
+  hidden: { opacity: 0, y: 6 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.25, ease: easeOut } },
+};
 
 function formatAlt(text: string): string {
   const trimmed = text.trim();
@@ -161,11 +173,18 @@ export function ImagesTab({ images, metadata }: ImagesTabProps) {
             </div>
           )}
           {!isLoading && validImages.length > 0 && (
-            <div className="space-y-2">
+            <motion.div
+              className="space-y-2"
+              variants={listVariants}
+              initial="hidden"
+              animate="visible"
+            >
               {validImages.map((image, idx) => (
-                <ImageRow key={`${image.src}-${idx}`} image={image} />
+                <motion.div key={`${image.src}-${idx}`} variants={itemVariants}>
+                  <ImageRow image={image} />
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
           )}
         </CardContent>
       </Card>
@@ -244,7 +263,7 @@ function IconCard({
   );
 
   const className =
-    "flex items-center gap-3 rounded-lg bg-muted/20 p-3 hover:bg-white/5 transition-colors select-none";
+    "flex items-center gap-3 rounded-lg bg-muted/20 p-3 hover:bg-white/8 transition-colors select-none";
 
   if (url) {
     return (
@@ -263,6 +282,7 @@ function IconCard({
 }
 
 function ImageRow({ image }: { image: ImageInfo }) {
+  const [imgLoaded, setImgLoaded] = useState(false);
   const format = getImageFormat(image.src);
   const hasMissingAlt = !image.hasAlt || image.alt === "";
   const hasWarning = hasMissingAlt;
@@ -283,7 +303,9 @@ function ImageRow({ image }: { image: ImageInfo }) {
         <img
           src={image.src}
           alt={image.alt || ""}
-          className="max-h-full max-w-full object-contain"
+          className="max-h-full max-w-full object-contain transition-opacity duration-300"
+          style={{ opacity: imgLoaded ? 1 : 0 }}
+          onLoad={() => setImgLoaded(true)}
           loading="lazy"
         />
       </div>
@@ -351,7 +373,7 @@ function ImageRow({ image }: { image: ImageInfo }) {
   );
 
   const className =
-    "flex items-center gap-3 rounded-md px-2 py-2 hover:bg-white/5 transition-colors select-none";
+    "flex items-center gap-3 rounded-md px-2 py-2 hover:bg-white/8 transition-colors select-none";
 
   return (
     <a

@@ -407,6 +407,8 @@ function OpenGraphPreviewCard({
     );
   }
 
+  const [imgLoaded, setImgLoaded] = useState(false);
+
   return (
     <div className="space-y-2">
       <div className="text-base font-medium text-muted-foreground">
@@ -416,12 +418,14 @@ function OpenGraphPreviewCard({
         href={imageUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="relative block overflow-hidden rounded-2xl border border-white/10 bg-[#0f1114]"
+        className="relative block overflow-hidden rounded-2xl border border-white/10 bg-[#0f1114] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/20 hover:border-white/15"
       >
         <img
           src={imageUrl}
           alt={title ?? "Open Graph image"}
-          className="h-48 w-full object-cover"
+          className="h-48 w-full object-cover transition-opacity duration-300"
+          style={{ opacity: imgLoaded ? 1 : 0 }}
+          onLoad={() => setImgLoaded(true)}
           onError={(event) => {
             event.currentTarget.style.display = "none";
           }}
@@ -458,6 +462,8 @@ function TwitterPreviewCard({
     );
   }
 
+  const [imgLoaded, setImgLoaded] = useState(false);
+
   return (
     <div className="space-y-2">
       <div className="text-base font-medium text-muted-foreground">
@@ -467,12 +473,14 @@ function TwitterPreviewCard({
         href={resolvedImageUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="relative block overflow-hidden rounded-2xl border border-white/10 bg-[#0f1114]"
+        className="relative block overflow-hidden rounded-2xl border border-white/10 bg-[#0f1114] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/20 hover:border-white/15"
       >
         <img
           src={resolvedImageUrl}
           alt={title ?? "Twitter image"}
-          className="h-48 w-full object-cover"
+          className="h-48 w-full object-cover transition-opacity duration-300"
+          style={{ opacity: imgLoaded ? 1 : 0 }}
+          onLoad={() => setImgLoaded(true)}
           onError={(event) => {
             event.currentTarget.style.display = "none";
           }}
@@ -502,6 +510,7 @@ function FacebookPreviewCard({
   url: string | null;
   siteName: string | null;
 }) {
+  const [imgLoaded, setImgLoaded] = useState(false);
   const host = getHost(url ?? "");
   const displaySite = siteName || host || "Website";
 
@@ -510,7 +519,7 @@ function FacebookPreviewCard({
       <div className="text-base font-medium text-muted-foreground">
         Facebook
       </div>
-      <div className="rounded-2xl border border-white/10 bg-[#282828] text-white shadow-sm overflow-hidden">
+      <div className="rounded-2xl border border-white/10 bg-[#282828] text-white shadow-sm overflow-hidden transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/20 hover:border-white/15">
         <div className="bg-[#242424] px-4 pt-4 pb-3">
           <div className="flex items-center gap-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#3a4a5e] text-white/90">
@@ -536,7 +545,9 @@ function FacebookPreviewCard({
             <img
               src={imageUrl}
               alt={title ?? "Facebook preview"}
-              className="h-56 w-full object-contain"
+              className="h-56 w-full object-contain transition-opacity duration-300"
+              style={{ opacity: imgLoaded ? 1 : 0 }}
+              onLoad={() => setImgLoaded(true)}
               onError={(event) => {
                 event.currentTarget.style.display = "none";
               }}
@@ -618,7 +629,7 @@ function GooglePreviewCard({
         <div className="text-base font-medium text-muted-foreground">
           Desktop
         </div>
-        <Card className="border border-white/10 bg-[#242424] rounded-2xl">
+        <Card className="border border-white/10 bg-[#242424] rounded-2xl transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/20 hover:border-white/15">
           <CardContent className="px-2.5 py-0">
             <div className="flex items-start justify-between gap-2">
               <div className="flex items-center gap-1">
@@ -666,7 +677,7 @@ function GooglePreviewCard({
         <div className="text-base font-medium text-muted-foreground">
           Mobile
         </div>
-        <Card className="border border-white/10 bg-[#242424] rounded-2xl">
+        <Card className="border border-white/10 bg-[#242424] rounded-2xl transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/20 hover:border-white/15">
           <CardContent className="px-2.5 py-0">
             <div className="flex items-start justify-between gap-2">
               <div className="flex items-center gap-1">

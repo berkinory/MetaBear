@@ -1,7 +1,9 @@
+/* oxlint-disable react/no-multi-comp */
 import { Alert01Icon, LicenseNoIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+import { easeOut } from "motion";
+import { motion } from "motion/react";
 
-/* oxlint-disable react/no-multi-comp */
 import type { LinkInfo } from "@/types/audit";
 
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +20,15 @@ function truncateText(text: string, maxLength: number): string {
   }
   return `${text.slice(0, maxLength)}...`;
 }
+
+const listVariants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.04 } },
+};
+const itemVariants = {
+  hidden: { opacity: 0, y: 6 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.25, ease: easeOut } },
+};
 
 export function LinksTab({ links, baseUrl }: LinksTabProps) {
   const isLoading = links === null;
@@ -106,15 +117,18 @@ export function LinksTab({ links, baseUrl }: LinksTabProps) {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="space-y-2">
+          <motion.div
+            className="space-y-2"
+            variants={listVariants}
+            initial="hidden"
+            animate="visible"
+          >
             {sortedLinks.map((link, index) => (
-              <LinkRow
-                key={`${link.href}-${index}`}
-                link={link}
-                baseUrl={baseUrl}
-              />
+              <motion.div key={`${link.href}-${index}`} variants={itemVariants}>
+                <LinkRow link={link} baseUrl={baseUrl} />
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </CardContent>
       </Card>
     );
@@ -191,7 +205,7 @@ function LinkRow({
           event.stopPropagation();
         }
       }}
-      className="flex items-center gap-2 rounded-md px-2 py-2 hover:bg-white/5 transition-colors select-none cursor-pointer min-w-0 w-full"
+      className="flex items-center gap-2 rounded-md px-2 py-2 hover:bg-white/8 transition-colors select-none cursor-pointer min-w-0 w-full"
     >
       <div className="min-w-0 w-0 flex-1 overflow-hidden">
         <div className="flex items-center gap-2 min-w-0 overflow-hidden">

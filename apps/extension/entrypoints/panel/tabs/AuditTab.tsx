@@ -11,6 +11,7 @@ import {
   UniversalAccessIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+import { easeOut } from "motion";
 import {
   animate,
   motion,
@@ -59,6 +60,15 @@ const EXPORT_FIELDS = [
   { key: "links", label: "Links" },
   { key: "openGraph", label: "OpenGraph" },
 ] as const;
+
+const listVariants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.04 } },
+};
+const itemVariants = {
+  hidden: { opacity: 0, y: 6 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.25, ease: easeOut } },
+};
 
 interface AuditTabProps {
   error: string | null;
@@ -662,7 +672,7 @@ function IssuesCard({
       <CardHeader>
         <CardTitle className="text-muted-foreground">Issues</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-2">
+      <CardContent>
         {loading ? (
           <Card className="border border-white/10 bg-white/5">
             <CardContent className="space-y-2 py-0">
@@ -674,64 +684,73 @@ function IssuesCard({
             </CardContent>
           </Card>
         ) : (
-          issues?.map((issue) => (
-            <Card key={issue.id} className="border border-white/10 bg-white/5">
-              <CardContent className="space-y-1 py-0">
-                <div className="flex items-start justify-between gap-2">
-                  <Badge
-                    variant="secondary"
-                    className={
-                      issue.severity === "high"
-                        ? "w-fit gap-1 select-none bg-red-500/15 text-red-200"
-                        : "w-fit gap-1 select-none bg-orange-400/15 text-orange-200"
-                    }
-                  >
-                    <HugeiconsIcon
-                      icon={getIssueIcon(issue.type)}
-                      strokeWidth={2}
-                      className="size-3"
-                    />
-                    {issue.type === "seo"
-                      ? "SEO"
-                      : issue.type.charAt(0).toUpperCase() +
-                        issue.type.slice(1)}
-                  </Badge>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground"
-                    onClick={async () => {
-                      await copyToClipboard(buildPrompt(issue));
-                      setCopiedId(issue.id);
-                      if (copiedTimeoutRef.current) {
-                        window.clearTimeout(copiedTimeoutRef.current);
-                      }
-                      copiedTimeoutRef.current = window.setTimeout(() => {
-                        setCopiedId(null);
-                      }, 2500);
-                    }}
-                    aria-label="Copy prompt"
-                  >
-                    <HugeiconsIcon
-                      icon={copiedId === issue.id ? Tick02Icon : Copy01Icon}
-                      strokeWidth={2}
-                      className={
-                        copiedId === issue.id
-                          ? "size-3.5 blur-[0.5px]"
-                          : "size-3.5"
-                      }
-                    />
-                  </Button>
-                </div>
-                <div className="text-sm font-medium text-foreground">
-                  {issue.title}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  {parseDescription(issue.description)}
-                </p>
-              </CardContent>
-            </Card>
-          ))
+          <motion.div
+            className="space-y-2"
+            variants={listVariants}
+            initial="hidden"
+            animate="visible"
+          >
+            {issues?.map((issue) => (
+              <motion.div key={issue.id} variants={itemVariants}>
+                <Card className="border border-white/10 bg-white/5">
+                  <CardContent className="space-y-1 py-0">
+                    <div className="flex items-start justify-between gap-2">
+                      <Badge
+                        variant="secondary"
+                        className={
+                          issue.severity === "high"
+                            ? "w-fit gap-1 select-none bg-red-500/15 text-red-200"
+                            : "w-fit gap-1 select-none bg-orange-400/15 text-orange-200"
+                        }
+                      >
+                        <HugeiconsIcon
+                          icon={getIssueIcon(issue.type)}
+                          strokeWidth={2}
+                          className="size-3"
+                        />
+                        {issue.type === "seo"
+                          ? "SEO"
+                          : issue.type.charAt(0).toUpperCase() +
+                            issue.type.slice(1)}
+                      </Badge>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground"
+                        onClick={async () => {
+                          await copyToClipboard(buildPrompt(issue));
+                          setCopiedId(issue.id);
+                          if (copiedTimeoutRef.current) {
+                            window.clearTimeout(copiedTimeoutRef.current);
+                          }
+                          copiedTimeoutRef.current = window.setTimeout(() => {
+                            setCopiedId(null);
+                          }, 2500);
+                        }}
+                        aria-label="Copy prompt"
+                      >
+                        <HugeiconsIcon
+                          icon={copiedId === issue.id ? Tick02Icon : Copy01Icon}
+                          strokeWidth={2}
+                          className={
+                            copiedId === issue.id
+                              ? "size-3.5 blur-[0.5px]"
+                              : "size-3.5"
+                          }
+                        />
+                      </Button>
+                    </div>
+                    <div className="text-sm font-medium text-foreground">
+                      {issue.title}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {parseDescription(issue.description)}
+                    </p>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </motion.div>
         )}
       </CardContent>
     </Card>

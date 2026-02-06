@@ -1,5 +1,7 @@
 import { LicenseNoIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+import { easeOut } from "motion";
+import { motion } from "motion/react";
 
 import type { HeadingInfo } from "@/types/audit";
 
@@ -22,6 +24,15 @@ const LEVEL_BADGE_TONE: Record<number, string> = {
   4: "border-white/10 bg-white/5 text-muted-foreground",
   5: "border-white/10 bg-white/5 text-muted-foreground",
   6: "border-white/10 bg-white/5 text-muted-foreground",
+};
+
+const listVariants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.04 } },
+};
+const itemVariants = {
+  hidden: { opacity: 0, y: 6 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.25, ease: easeOut } },
 };
 
 interface HeadingsTabProps {
@@ -73,15 +84,21 @@ export function HeadingsTab({ headings }: HeadingsTabProps) {
           </div>
         )}
         {headings.length > 0 && (
-          <div className="space-y-2">
+          <motion.div
+            className="space-y-2"
+            variants={listVariants}
+            initial="hidden"
+            animate="visible"
+          >
             {headings.map((heading, idx) => (
-              <HeadingRow
+              <motion.div
                 key={`${heading.level}-${idx}-${heading.text.slice(0, 20)}`}
-                heading={heading}
-                index={idx}
-              />
+                variants={itemVariants}
+              >
+                <HeadingRow heading={heading} index={idx} />
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         )}
       </CardContent>
     </Card>
@@ -121,7 +138,7 @@ function HeadingRow({
           return;
         }
       }}
-      className="flex w-full items-start gap-2 rounded-md px-2 py-1 text-left hover:bg-white/5 transition-colors"
+      className="flex w-full items-start gap-2 rounded-md px-2 py-1 text-left hover:bg-white/8 transition-colors"
       style={{ paddingLeft: `${indent + 6}px` }}
       aria-label={`Jump to heading ${heading.text}`}
     >

@@ -140,9 +140,12 @@ export default function App() {
   };
 
   return (
-    <div
+    <motion.div
       className="font-sans flex h-full w-full flex-col overflow-hidden rounded-3xl pb-1 shadow-[0_0_0_1px_rgba(255,255,255,0.1),0_4px_24px_rgba(0,0,0,0.4)]"
       style={{ backgroundColor: "rgba(48, 48, 48, 1)" }}
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35, ease: easeOut }}
     >
       <header className="flex items-center justify-between gap-3 px-4 py-3">
         <div className="flex items-center gap-2.5">
@@ -342,6 +345,6 @@ export default function App() {
           </ScrollArea>
         </TabsContent>
       </Tabs>
-    </div>
+    </motion.div>
   );
 }
