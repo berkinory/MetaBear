@@ -1,0 +1,139 @@
+<div
+  id="image-viewer"
+  class="image-viewer fixed top-0 left-0 w-full h-full z-[9999] flex items-center justify-center opacity-0 transition-opacity duration-150 cursor-zoom-out"
+  style="background: color-mix(in srgb, var(--background) 90%, transparent);"
+>
+  <img
+    id="image-viewer-img"
+    src=""
+    alt=""
+    class="min-w-[45rem] max-w-[60vw] max-h-[80vh] object-contain cursor-zoom-out md:min-w-[45rem] max-md:min-w-screen"
+  />
+</div>
+
+<script>
+  const initImageViewer = () => {
+    const viewer = document.getElementById("image-viewer");
+    const viewerImg = document.getElementById(
+      "image-viewer-img",
+    ) as HTMLImageElement;
+
+    if (!viewer || !viewerImg || viewerImg.tagName !== "IMG") {
+      return;
+    }
+
+    const showImage = (src: string, alt?: string) => {
+      if (viewerImg && src) {
+        viewerImg.src = src;
+        viewerImg.alt = alt || "";
+      }
+      if (!viewer) {
+        return;
+      }
+      viewer.style.visibility = "visible";
+      // oxlint-disable-next-line no-void
+      void viewer.offsetWidth;
+      viewer.classList.add("active");
+      document.body.classList.add("image-viewer-open");
+      document.body.style.overflow = "hidden";
+      document.body.dataset.scrollY = window.scrollY.toString();
+      viewer.style.cursor = "auto";
+      setTimeout(() => {
+        viewer.style.cursor = "";
+      }, 10);
+    };
+
+    const hideImage = () => {
+      if (!viewer) {
+        return;
+      }
+      viewer.classList.remove("active");
+      document.body.classList.remove("image-viewer-open");
+      document.body.style.overflow = "";
+    };
+
+    viewer?.addEventListener("transitionend", (e) => {
+      if (
+        e.propertyName === "opacity" &&
+        viewer &&
+        !viewer.classList.contains("active")
+      ) {
+        viewer.style.visibility = "hidden";
+        if (viewerImg) {
+          viewerImg.src = "";
+          viewerImg.alt = "";
+        }
+        viewer.style.cursor = "auto";
+        setTimeout(() => {
+          viewer.style.cursor = "";
+        }, 10);
+      }
+    });
+
+    const bindImageClickEvents = () => {
+      const previewImages = document.querySelectorAll(
+        'img[data-preview="true"]',
+      );
+      for (const img of previewImages) {
+        const imgElement = img as HTMLImageElement;
+        imgElement.style.cursor = "pointer";
+        imgElement.addEventListener("click", (e) => {
+          e.preventDefault();
+          const target = e.target as HTMLImageElement;
+          showImage(target.src, target.alt || "");
+        });
+      }
+    };
+
+    viewer?.addEventListener("click", hideImage);
+
+    viewer?.addEventListener(
+      "touchmove",
+      (e) => {
+        if (viewer.classList.contains("active")) {
+          e.preventDefault();
+        }
+      },
+      { passive: false },
+    );
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && viewer.classList.contains("active")) {
+        hideImage();
+      }
+    });
+
+    bindImageClickEvents();
+
+    const contentArea =
+      document.querySelector(".prose") ||
+      document.querySelector(".content") ||
+      document.querySelector("article");
+    if (contentArea) {
+      const observer = new MutationObserver(() => {
+        bindImageClickEvents();
+      });
+
+      observer.observe(contentArea, {
+        childList: true,
+        subtree: true,
+      });
+    }
+
+    if (viewer) {
+      viewer.style.visibility = "hidden";
+    }
+  };
+
+  document.addEventListener("astro:page-load", initImageViewer);
+</script>
+
+<style>
+  .image-viewer.active {
+    opacity: 1;
+  }
+
+  body.image-viewer-open {
+    overflow: hidden;
+  }
+</style>

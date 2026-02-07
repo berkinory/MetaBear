@@ -1,0 +1,91 @@
+---
+import "@/styles/global.css";
+import "katex/dist/katex.min.css";
+import type { PostLayoutProps } from "@/types";
+import FormattedDate from "@/components/widgets/FormattedDate.astro";
+import FootnoteScroll from "@/components/widgets/FootnoteScroll.astro";
+import BaseHead from "@/components/layout/BaseHead.astro";
+import BackButton from "@/components/ui/BackButton.astro";
+import Breadcrumb from "@/components/ui/Breadcrumb.astro";
+import RelatedPosts from "@/components/widgets/RelatedPosts.astro";
+import TableOfContents from "@/components/ui/TableOfContents.astro";
+import GradientMask from "@/components/ui/GradientMask.astro";
+import ImageOptimizer from "@/components/ui/ImageOptimizer.astro";
+import ImageViewer from "@/components/ui/ImageViewer.astro";
+import GitHubCard from "@/components/ui/GitHubCard.astro";
+import XPOST from "@/components/ui/XPOST.astro";
+import CopyCode from "@/components/ui/CopyCode.astro";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import Footer from "@/components/layout/Footer.astro";
+
+import { themeConfig } from "@/config";
+
+const {
+  title,
+  pubDate,
+  updatedDate,
+  description,
+  keywords,
+  readingTime,
+  toc,
+  image,
+  id,
+  category,
+} = Astro.props as PostLayoutProps;
+
+const pathParts = Astro.url.pathname.split("/").filter(Boolean);
+const postSlug = pathParts[pathParts.length - 1] || "";
+const ogImage = image || `/og/blog/${postSlug}.png`;
+---
+
+<BaseLayout
+  title={title || themeConfig.site.title}
+  description={description || themeConfig.site.description}
+  type="post"
+>
+  <BaseHead
+    title={title || themeConfig.site.title}
+    description={description || themeConfig.site.description}
+    ogImage={ogImage}
+    keywords={keywords || themeConfig.site.keywords}
+    pubDate={pubDate}
+    updatedDate={updatedDate}
+    type="article"
+    slot="head"
+  />
+  <div class="flex flex-col flex-1">
+    <main class="flex-1">
+      <div class="prose">
+        <GradientMask />
+        <BackButton />
+        <Breadcrumb postTitle={title} />
+        {themeConfig.post.toc && <TableOfContents toc={toc} />}
+        <div class="title">
+          <h1>{title}</h1>
+          <div class="date">
+            <FormattedDate date={pubDate} context="post" />
+            {
+              themeConfig.post.readingTime && readingTime && (
+                <span class="reading-time">
+                  <span class="separator">·</span>
+                  {readingTime.text}
+                </span>
+              )
+            }
+          </div>
+        </div>
+        <article class="content">
+          <slot />
+        </article>
+        <RelatedPosts currentPostId={id} category={category} />
+      </div>
+    </main>
+    <Footer />
+    <ImageOptimizer />
+    <FootnoteScroll />
+    <CopyCode />
+    <GitHubCard />
+    <XPOST />
+    <ImageViewer />
+  </div>
+</BaseLayout>

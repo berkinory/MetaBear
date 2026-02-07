@@ -1,9 +1,6 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "extends": [
-    "./node_modules/ultracite/config/oxlint/core/.oxlintrc.json",
-    "./node_modules/ultracite/config/oxlint/react/.oxlintrc.json"
-  ],
+  "extends": ["ultracite/config/oxlint/core", "ultracite/config/oxlint/react"],
   "ignorePatterns": [
     "**/drizzle/**",
     "**/.next/**",
@@ -39,6 +36,7 @@
     "complexity": "off",
     "func-style": "off",
     "react/no-multi-comp": "off",
-    "sort-keys": "off"
+    "sort-keys": "off",
+    "import/no-nodejs-modules": "off"
   }
 }

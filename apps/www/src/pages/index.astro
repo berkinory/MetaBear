@@ -1,0 +1,13 @@
+---
+import IndexLayout from "@/layouts/IndexLayout.astro";
+import { themeConfig } from "@/config";
+---
+
+<IndexLayout
+  title={themeConfig.site.longTitle || themeConfig.site.title}
+  description={themeConfig.site.description}
+>
+  <div class="flex flex-col items-center justify-center min-h-[60vh] gap-8">
+    <h1 class="text-6xl font-bold">Hello World</h1>
+  </div>
+</IndexLayout>

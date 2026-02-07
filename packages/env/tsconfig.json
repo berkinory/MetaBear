@@ -1,0 +1,7 @@
+{
+  "extends": "@MetaBear/config/tsconfig.base.json",
+  "compilerOptions": {
+    "strictNullChecks": true,
+    "types": ["bun"]
+  }
+}

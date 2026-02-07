@@ -1,0 +1,27 @@
+---
+import IndexLayout from "@/layouts/IndexLayout.astro";
+import PostList from "@/components/widgets/PostList.astro";
+import Footer from "@/components/layout/Footer.astro";
+import { themeConfig } from "@/config";
+import { getSortedFilteredPosts } from "@/utils/draft";
+
+const allPosts = await getSortedFilteredPosts();
+const posts = allPosts.filter((post) => post.data.show !== false);
+---
+
+<IndexLayout
+  title={`Blog | ${themeConfig.site.title}`}
+  description={themeConfig.site.description}
+  ogImage="/og/blog.png"
+>
+  <div class="prose not-empty:mb-5">
+    <p>
+      A static blog theme based on <a href="https://astro.build">Astro</a>,
+      designed for clarity and focus.
+    </p>
+  </div>
+  <main>
+    <PostList posts={posts} />
+  </main>
+  <Footer />
+</IndexLayout>

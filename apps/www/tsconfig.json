@@ -1,0 +1,10 @@
+{
+  "extends": ["astro/tsconfigs/strict", "@MetaBear/config/tsconfig.astro.json"],
+  "include": [".astro/types.d.ts", "**/*"],
+  "exclude": ["dist"],
+  "compilerOptions": {
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  }
+}

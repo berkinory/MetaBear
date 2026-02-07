@@ -1,0 +1,173 @@
+---
+import { themeConfig } from "@/config";
+---
+
+<style is:inline>
+  :root {
+    --background: #f9fafa;
+    --foreground: rgba(0, 0, 0, 0.85);
+    --primary: rgba(0, 0, 0, 0.85);
+    --muted-foreground: rgba(0, 0, 0, 0.4);
+    --border: rgba(0, 0, 0, 0.1);
+    --code-bg: rgba(0, 0, 0, 0.04);
+    --selection: rgba(0, 0, 0, 0.08);
+    --text-tertiary: rgba(0, 0, 0, 0.24);
+  }
+
+  html.dark {
+    --background: #1c1c1c;
+    --foreground: rgba(255, 255, 255, 0.9);
+    --primary: rgba(255, 255, 255, 0.9);
+    --muted-foreground: rgba(255, 255, 255, 0.4);
+    --border: rgba(255, 255, 255, 0.1);
+    --code-bg: rgba(255, 255, 255, 0.04);
+    --selection: rgba(255, 255, 255, 0.08);
+    --text-tertiary: rgba(255, 255, 255, 0.24);
+  }
+
+  html {
+    background-color: var(--background);
+    color: var(--foreground);
+    color-scheme: light;
+  }
+
+  html.dark {
+    color-scheme: dark;
+  }
+</style>
+
+<script is:inline define:vars={{ defaultTheme: themeConfig.general.theme }}>
+  const applyTheme = () => {
+    if (window.ThemeManager) {
+      const theme = window.ThemeManager.getEffectiveTheme();
+      window.ThemeManager.applyTheme(theme);
+    }
+  };
+
+  const applyThemeAfterNavigation = () => {
+    if (window.ThemeManager) {
+      const currentTheme = window.ThemeManager.getEffectiveTheme();
+      window.ThemeManager.applyTheme(currentTheme);
+    }
+  };
+
+  const preserveThemeOnSwap = (e) => {
+    if (window.ThemeManager) {
+      const currentTheme = window.ThemeManager.getEffectiveTheme();
+      e.newDocument.documentElement.classList.remove("light", "dark");
+      e.newDocument.documentElement.classList.add(currentTheme);
+    }
+  };
+
+  (function initThemeManager() {
+    if (window.ThemeManager && window.ThemeManager.initialized) {
+      return;
+    }
+
+    window.ThemeManager = {
+      STORAGE_KEY: "blog-theme",
+      applyTheme(theme) {
+        document.documentElement.classList.remove("light", "dark");
+        document.documentElement.classList.add(theme);
+
+        document.dispatchEvent(
+          new CustomEvent("themechange", {
+            detail: {
+              isSystemTheme: this.isUsingSystemTheme(),
+              isUserChoice: !this.isUsingSystemTheme(),
+              theme,
+            },
+          }),
+        );
+      },
+
+      getEffectiveTheme() {
+        const stored = this.getStoredTheme();
+        if (stored) {
+          return stored;
+        }
+
+        if (defaultTheme === "auto") {
+          return this.getSystemTheme();
+        }
+        return defaultTheme;
+      },
+
+      getStoredTheme() {
+        try {
+          return localStorage.getItem(this.STORAGE_KEY);
+        } catch {
+          return null;
+        }
+      },
+
+      getSystemTheme() {
+        return window.matchMedia("(prefers-color-scheme: dark)").matches
+          ? "dark"
+          : "light";
+      },
+
+      init() {
+        if (this.initialized) {
+          return;
+        }
+
+        this.applyTheme(this.getEffectiveTheme());
+
+        window
+          .matchMedia("(prefers-color-scheme: dark)")
+          .addEventListener("change", (e) => {
+            const newSystemTheme = e.matches ? "dark" : "light";
+
+            this.setStoredTheme(newSystemTheme);
+            this.applyTheme(newSystemTheme);
+          });
+
+        this.initialized = true;
+      },
+
+      initialized: false,
+
+      isUsingSystemTheme() {
+        return this.getStoredTheme() === null;
+      },
+
+      setStoredTheme(theme) {
+        try {
+          if (theme === "system") {
+            localStorage.removeItem(this.STORAGE_KEY);
+          } else {
+            localStorage.setItem(this.STORAGE_KEY, theme);
+          }
+        } catch (error) {
+          console.warn("Failed to store theme preference:", error);
+        }
+      },
+
+      toggle() {
+        const currentTheme = this.getEffectiveTheme();
+        const newTheme = currentTheme === "dark" ? "light" : "dark";
+
+        this.setStoredTheme(newTheme);
+        this.applyTheme(newTheme);
+      },
+    };
+
+    window.ThemeManager.init();
+
+    applyTheme();
+
+    document.addEventListener("astro:before-preparation", applyTheme);
+    document.addEventListener("astro:before-swap", preserveThemeOnSwap);
+    document.addEventListener("astro:after-swap", applyThemeAfterNavigation);
+    document.addEventListener("astro:page-load", applyThemeAfterNavigation);
+
+    window
+      .matchMedia("(prefers-color-scheme: dark)")
+      .addEventListener("change", () => {
+        if (window.ThemeManager && window.ThemeManager.isUsingSystemTheme()) {
+          setTimeout(applyTheme, 0);
+        }
+      });
+  })();
+</script>

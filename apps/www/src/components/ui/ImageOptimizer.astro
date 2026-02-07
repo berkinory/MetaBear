@@ -1,0 +1,35 @@
+<script>
+  const removeImgPlaceholder = () => {
+    const images = document.querySelectorAll<HTMLImageElement>(
+      "img.img-placeholder",
+    );
+    for (const img of images) {
+      if (img.complete && img.naturalWidth > 0) {
+        img.classList.remove("img-placeholder");
+      } else {
+        if (img.dataset.placeholderBound) {
+          continue;
+        }
+        img.dataset.placeholderBound = "true";
+
+        img.addEventListener("load", () => {
+          requestAnimationFrame(() => {
+            img.classList.remove("img-placeholder");
+          });
+        });
+
+        img.addEventListener("error", () => {
+          img.classList.remove("img-placeholder");
+        });
+      }
+    }
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", removeImgPlaceholder);
+  } else {
+    removeImgPlaceholder();
+  }
+
+  document.addEventListener("astro:page-load", removeImgPlaceholder);
+</script>

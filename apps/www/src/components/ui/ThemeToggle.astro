@@ -1,0 +1,68 @@
+---
+import { themeConfig } from "@/config";
+---
+
+{
+  themeConfig.general.themeToggle && (
+    <button
+      id="theme-toggle"
+      class="relative w-10 h-10 rounded-lg bg-transparent border-none cursor-pointer text-[var(--foreground)] transition-all duration-300 hover:bg-[var(--bg-secondary)] flex items-center justify-center group"
+      aria-label="Toggle theme"
+    >
+      <svg
+        class="sun absolute w-5 h-5 transition-all duration-300 rotate-0 scale-100 opacity-100"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        stroke-width="2"
+      >
+        <title>Light mode</title>
+        <circle cx="12" cy="12" r="4"></circle>
+        <path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
+      </svg>
+      <svg
+        class="moon absolute w-5 h-5 transition-all duration-300 rotate-90 scale-0 opacity-0"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        stroke-width="2"
+      >
+        <title>Dark mode</title>
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+      </svg>
+    </button>
+  )
+}
+
+<style>
+  html.dark .sun {
+    @apply rotate-90 scale-0 opacity-0;
+  }
+  html.dark .moon {
+    @apply rotate-0 scale-100 opacity-100;
+  }
+</style>
+
+<script is:inline>
+  const bindThemeToggle = () => {
+    const themeToggle = document.getElementById("theme-toggle");
+    if (!themeToggle || !window.ThemeManager) {
+      return;
+    }
+
+    if (themeToggle.dataset.themeBound) {
+      return;
+    }
+    themeToggle.dataset.themeBound = "true";
+
+    themeToggle.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      window.ThemeManager.toggle();
+    });
+  }
+
+  document.addEventListener("astro:page-load", bindThemeToggle);
+</script>

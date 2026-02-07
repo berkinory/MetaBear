@@ -1,0 +1,59 @@
+---
+import FormattedDate from "@/components/widgets/FormattedDate.astro";
+import type { PostListProps } from "@/types";
+
+const { posts } = Astro.props as PostListProps;
+---
+
+<ul class="p-0 m-0 list-none flex flex-col gap-0 post-list">
+  {
+    posts.map((post) => (
+      <li>
+        <a
+          href={`/${post.id}`}
+          class="text-[var(--foreground)] block no-underline transition-opacity duration-150"
+        >
+          <div class="h-11 flex justify-between items-center gap-3">
+            <p class="m-0 shrink min-w-0 whitespace-nowrap overflow-hidden text-ellipsis">
+              {post.data.title}
+            </p>
+            <div class="divider" />
+            <p class="m-0 text-(--text-secondary) opacity-75 tracking-(--spacing-s) shrink-0 whitespace-nowrap font-features">
+              <FormattedDate date={post.data.pubDate} context="list" />
+            </p>
+          </div>
+        </a>
+      </li>
+    ))
+  }
+</ul>
+<div class="h-12"></div>
+
+<style>
+  @media (hover: hover) and (pointer: fine) {
+    .post-list:hover a {
+      opacity: 0.4;
+    }
+
+    .post-list:hover a:hover {
+      opacity: 1;
+    }
+
+    .post-list:hover a:hover .divider {
+      background-color: var(--text-tertiary);
+      opacity: 0.75;
+    }
+    .post-list:hover a:hover p {
+      color: var(--muted-foreground);
+      opacity: 1;
+    }
+  }
+
+  .divider {
+    flex: 1 1 auto;
+    min-width: 3rem;
+    margin: 0 0.25rem;
+    height: 0.5px;
+    background-color: var(--border);
+  }
+</style>

@@ -1,0 +1,60 @@
+---
+import "@/styles/global.css";
+import { themeConfig } from "@/config";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import BaseHead from "@/components/layout/BaseHead.astro";
+import Footer from "@/components/layout/Footer.astro";
+---
+
+<BaseLayout
+  title={`Page Not Found | ${themeConfig.site.title}`}
+  description="The page you're looking for doesn't exist or has been moved. Return to the homepage to continue browsing."
+  type="page"
+>
+  <BaseHead
+    title={`Page Not Found | ${themeConfig.site.title}`}
+    description="The page you're looking for doesn't exist or has been moved. Return to the homepage to continue browsing."
+    keywords={[]}
+    robots="noindex, follow"
+    slot="head"
+  />
+  <div class="flex flex-col flex-1">
+    <main class="flex-1 flex items-center justify-center min-h-[60vh]">
+      <div class="not-found">
+        <h1 class="error-code">404</h1>
+        <p class="error-message">Page not found</p>
+      </div>
+    </main>
+    <Footer />
+  </div>
+</BaseLayout>
+
+<style>
+  .not-found {
+    text-align: center;
+  }
+
+  .error-code {
+    font-size: 6rem;
+    font-weight: 700;
+    margin: 0;
+    line-height: 1;
+    color: var(--foreground);
+  }
+
+  .error-message {
+    margin-top: 1rem;
+    font-size: 1.25rem;
+    color: var(--muted-foreground);
+  }
+
+  @media (max-width: 640px) {
+    .error-code {
+      font-size: 4rem;
+    }
+
+    .error-message {
+      font-size: 1rem;
+    }
+  }
+</style>

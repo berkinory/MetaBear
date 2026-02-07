@@ -1,0 +1,66 @@
+---
+import { themeConfig } from "@/config";
+const today = new Date();
+---
+
+<footer class="footer">
+    <div class="footer-content">
+        <nav class="footer-links">
+            <a href="/">Home</a>
+            <span class="separator">/</span>
+            <a href="/blog">Posts</a>
+        </nav>
+        <div class="copyright">
+            &copy; {today.getFullYear()}
+            {themeConfig.site.title}
+        </div>
+    </div>
+</footer>
+
+<style>
+    .footer {
+        margin-top: auto;
+        padding: 0rem 0;
+        color: var(--muted-foreground);
+        font-size: var(--font-size-s);
+    }
+
+    .footer-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .footer-links {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .footer-links a {
+        color: var(--muted-foreground);
+        text-decoration: none;
+        transition: color 0.2s ease-out;
+    }
+
+    .footer-links a:hover {
+        color: var(--foreground);
+    }
+
+    .separator {
+        color: var(--text-tertiary);
+    }
+
+    .copyright {
+        font-family: var(--mono);
+        opacity: 0.6;
+    }
+
+    @media (max-width: 640px) {
+        .footer-content {
+            flex-direction: column;
+            gap: 1rem;
+        }
+    }
+</style>

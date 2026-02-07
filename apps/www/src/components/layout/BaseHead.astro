@@ -1,0 +1,152 @@
+---
+import { themeConfig } from "@/config";
+import type { BaseHeadProps } from "@/types/component.types";
+
+const pathname = Astro.url.pathname.replace(/\/$/, "") || "/";
+const canonicalURL = new URL(pathname, Astro.site);
+
+const {
+  title,
+  description,
+  ogImage,
+  keywords,
+  pubDate,
+  updatedDate,
+  type = "website",
+  robots = "index, follow",
+} = Astro.props as BaseHeadProps;
+const imageUrl = ogImage
+  ? new URL(ogImage, Astro.url)
+  : new URL("/og.png", Astro.url);
+
+const finalTitle = title || themeConfig.site.title;
+const finalDescription = description || themeConfig.site.description;
+const siteKeywords =
+  keywords !== undefined ? keywords : themeConfig.site.keywords;
+
+const jsonLd =
+  type === "article"
+    ? {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        author: {
+          "@type": "Person",
+          name: themeConfig.site.author,
+        },
+        dateModified: updatedDate?.toISOString() || pubDate?.toISOString(),
+        datePublished: pubDate?.toISOString(),
+        description: finalDescription,
+        headline: finalTitle,
+        image: imageUrl.toString(),
+        keywords: siteKeywords.join(", "),
+        mainEntityOfPage: {
+          "@id": canonicalURL.toString(),
+          "@type": "WebPage",
+        },
+        publisher: {
+          "@type": "Organization",
+          logo: {
+            "@type": "ImageObject",
+            url: new URL("/favicon.ico", Astro.site).toString(),
+          },
+          name: themeConfig.site.author,
+        },
+      }
+    : {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        author: {
+          "@type": "Person",
+          name: themeConfig.site.author,
+        },
+        description: themeConfig.site.description,
+        name: themeConfig.site.title,
+        url: themeConfig.site.website,
+      };
+---
+
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta name="robots" content={robots} />
+<link rel="icon" type="image/x-icon" href="/favicon.ico" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+<link
+  rel="preload"
+  href="/fonts/Geist.woff2"
+  as="font"
+  type="font/woff2"
+  crossorigin="anonymous"
+/>
+<link
+  rel="preload"
+  href="/fonts/JetBrainsMono.woff2"
+  as="font"
+  type="font/woff2"
+  crossorigin="anonymous"
+/>
+<link rel="sitemap" href="/sitemap.xml" />
+<link
+  rel="alternate"
+  type="application/rss+xml"
+  title={themeConfig.site.title}
+  href={new URL("rss.xml", Astro.site)}
+/>
+<meta name="generator" content={Astro.generator} />
+
+<link rel="canonical" href={canonicalURL} />
+
+<title>
+  {finalTitle}
+</title>
+<meta name="title" content={finalTitle} />
+<meta name="description" content={finalDescription} />
+<meta name="keywords" content={siteKeywords.join(", ")} />
+<meta name="author" content={themeConfig.site.author} />
+
+<meta property="og:type" content={type === "article" ? "article" : "website"} />
+<meta property="og:url" content={Astro.url} />
+<meta property="og:site_name" content={themeConfig.site.title} />
+<meta property="og:locale" content={themeConfig.site.language} />
+<meta property="og:title" content={finalTitle} />
+<meta property="og:description" content={finalDescription} />
+<meta property="og:image" content={imageUrl} />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content={finalTitle} />
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:site" content={themeConfig.site.twitter} />
+<meta name="twitter:creator" content={themeConfig.site.twitter} />
+<meta name="twitter:title" content={finalTitle} />
+<meta name="twitter:description" content={finalDescription} />
+<meta name="twitter:image" content={imageUrl} />
+
+{
+  type === "article" && pubDate && (
+    <>
+      <meta property="article:published_time" content={pubDate.toISOString()} />
+      {updatedDate && (
+        <meta
+          property="article:modified_time"
+          content={updatedDate.toISOString()}
+        />
+      )}
+      <meta property="article:author" content={themeConfig.site.author} />
+      {siteKeywords.map((keyword) => (
+        <meta property="article:tag" content={keyword} />
+      ))}
+    </>
+  )
+}
+
+<script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+
+<script
+  is:inline
+  src="https://cdn.databuddy.cc/databuddy.js"
+  data-client-id="df2e77bd-1063-499b-b0e2-436331886afa"
+  data-track-performance
+  data-track-web-vitals
+  data-track-outgoing-links
+  async
+></script>

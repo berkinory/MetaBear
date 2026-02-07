@@ -1,0 +1,53 @@
+<script>
+  const handleFootnoteClick = (link: HTMLElement) => (e: Event) => {
+    e.preventDefault();
+    const href = link.getAttribute("href");
+    if (!href) {
+      return;
+    }
+
+    const target = document.querySelector(href);
+    if (!target) {
+      return;
+    }
+
+    const offset = 128;
+    const targetPosition =
+      target.getBoundingClientRect().top + window.scrollY - offset;
+
+    window.scrollTo({
+      top: targetPosition,
+    });
+
+    const highlightTarget =
+      target.closest("cite") || target.closest("sup") || target;
+    highlightTarget.classList.add("footnote-highlight");
+    highlightTarget.addEventListener(
+      "animationend",
+      () => {
+        highlightTarget.classList.remove("footnote-highlight");
+      },
+      { once: true },
+    );
+  };
+
+  const bindFootnoteEvents = () => {
+    const footnoteLinks = document.querySelectorAll(
+      "[data-footnote-ref], [data-footnote-backref]",
+    );
+
+    for (const link of footnoteLinks) {
+      if ((link as HTMLElement).dataset.footnoteBound) {
+        continue;
+      }
+      (link as HTMLElement).dataset.footnoteBound = "true";
+
+      (link as HTMLElement).addEventListener(
+        "click",
+        handleFootnoteClick(link as HTMLElement),
+      );
+    }
+  };
+
+  document.addEventListener("astro:page-load", bindFootnoteEvents);
+</script>

@@ -1,0 +1,47 @@
+---
+import { themeConfig } from "@/config";
+import { ClientRouter } from "astro:transitions";
+import ThemeManager from "@/components/ui/ThemeManager.astro";
+import TransitionWrapper from "@/components/layout/TransitionWrapper.astro";
+import type { LayoutProps } from "@/types";
+
+type Props = LayoutProps;
+
+const { type = "page" } = Astro.props;
+const language = themeConfig.site.language || "en-US";
+const fadeAnimation = true;
+const contentWidth = "35rem";
+const widthValue = Math.min(Number.parseFloat(contentWidth), 50);
+const shouldUseCustomWidth = widthValue > 25;
+const finalWidth = shouldUseCustomWidth ? `${widthValue}rem` : "25rem";
+---
+
+<html lang={language}>
+  <head>
+    <ThemeManager />
+    {fadeAnimation && <ClientRouter />}
+    <slot name="head" />
+  </head>
+  <body
+    data-centered={true}
+    style={`
+      max-width: ${finalWidth};
+      ${shouldUseCustomWidth ? `--content-width: ${widthValue}rem;` : ""}
+    `}
+  >
+    {
+      fadeAnimation ? (
+        <TransitionWrapper
+          type={type}
+          class="flex flex-col min-h-[calc(100vh-7.5rem)] md:min-h-[calc(100vh-7.5rem)] max-md:min-h-[calc(100vh-5.5rem)]"
+        >
+          <slot />
+        </TransitionWrapper>
+      ) : (
+        <div class="flex flex-col min-h-[calc(100vh-7.5rem)] md:min-h-[calc(100vh-7.5rem)] max-md:min-h-[calc(100vh-5.5rem)]">
+          <slot />
+        </div>
+      )
+    }
+  </body>
+</html>

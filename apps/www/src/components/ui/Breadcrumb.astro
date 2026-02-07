@@ -1,0 +1,37 @@
+---
+import { themeConfig } from "@/config";
+
+interface Props {
+  postTitle: string;
+}
+
+const { postTitle } = Astro.props;
+const baseUrl = themeConfig.site.website;
+
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "item": baseUrl,
+      "name": "Home",
+      "position": 1
+    },
+    {
+      "@type": "ListItem",
+      "item": `${baseUrl}/blog`,
+      "name": "Blog",
+      "position": 2
+    },
+    {
+      "@type": "ListItem",
+      "item": Astro.url.href,
+      "name": postTitle,
+      "position": 3
+    }
+  ]
+};
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />

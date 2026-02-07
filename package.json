@@ -10,11 +10,19 @@
     "dev": "turbo dev",
     "build": "turbo build",
     "check": "ultracite fix && oxfmt --write .",
-    "check-types": "turbo check-types"
+    "check-types": "turbo check-types",
+    "www:dev": "turbo -F www dev",
+    "www:build": "turbo -F www build",
+    "extension:dev": "turbo -F extension dev",
+    "extension:build": "turbo -F extension build",
+    "extension:zip": "turbo -F extension zip",
+    "docker:up": "docker compose up",
+    "docker:build": "docker compose build",
+    "docker:dev": "docker compose -f docker-compose.dev.yml up"
   },
   "dependencies": {
-    "dotenv": "^17.2.2",
-    "zod": "^4.1.13"
+    "dotenv": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@MetaBear/config": "workspace:*",
@@ -25,5 +33,11 @@
     "turbo": "^2.6.3",
     "ultracite": "7.0.12"
   },
-  "packageManager": "bun@1.3.3"
+  "packageManager": "bun@1.3.3",
+  "catalog": {
+    "dotenv": "^17.2.2",
+    "zod": "^4.1.13",
+    "@types/bun": "^1.3.8",
+    "@types/node": "^22.10.5"
+  }
 }
