@@ -20,11 +20,18 @@ export const themeConfig: ThemeConfig = {
 
   site: {
     author: "berkinory",
-    description: "All-in-one SEO & Accessibility audits for websites",
-    keywords: ["seo", "accessibility", "audit", "website", "tools"],
+    description:
+      "Professional SEO and accessibility auditing tool. Analyze your website's performance, fix issues, and boost search rankings with actionable insights.",
+    keywords: [
+      "seo audit",
+      "website accessibility",
+      "website analyzer",
+      "seo tools",
+      "meta tags checker",
+    ],
     language: "en-US",
-    longTitle: "MetaBear | SEO & Accessibility Audit",
-    ogLogo: "",
+    longTitle: "MetaBear | Professional SEO & Accessibility Audit Tool",
+    ogLogo: "logo.png",
     title: "MetaBear",
     twitter: "@berkinory",
     website: env.PUBLIC_WWW_URL || "http://localhost:4001",
