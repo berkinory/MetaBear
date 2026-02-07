@@ -8,7 +8,7 @@ export default defineConfig({
     web_accessible_resources: [
       {
         resources: ["panel.html"],
-        matches: ["<all_urls>"],
+        matches: ["http://*/*", "https://*/*"],
       },
     ],
   },
