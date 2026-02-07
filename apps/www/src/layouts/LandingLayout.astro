@@ -1,0 +1,24 @@
+---
+import '@/styles/global.css'
+import BaseHead from '@/components/layout/BaseHead.astro'
+import { themeConfig } from '@/config'
+import { ClientRouter } from 'astro:transitions'
+import ThemeManager from '@/components/ui/ThemeManager.astro'
+import TransitionWrapper from '@/components/layout/TransitionWrapper.astro'
+
+const { title, description, ogImage } = Astro.props
+const language = themeConfig.site.language || 'en-US'
+---
+
+<html lang={language}>
+  <head>
+    <ThemeManager />
+    <ClientRouter />
+    <BaseHead title={title} description={description} ogImage={ogImage} />
+  </head>
+  <body class="landing-body" style="max-width: 100% !important; padding: 0 !important; margin: 0 !important;">
+    <TransitionWrapper type="page" class="flex flex-col min-h-screen">
+      <slot />
+    </TransitionWrapper>
+  </body>
+</html>

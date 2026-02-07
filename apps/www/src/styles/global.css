@@ -218,6 +218,93 @@ body[data-centered='true'] {
   margin: 0 auto;
 }
 
+body.landing-body {
+  max-width: 100% !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  overflow-x: hidden;
+  --landing-accent: #e8a44a;
+  --landing-accent-soft: #e8a44a33;
+  --landing-accent-glow: #e8a44a22;
+  --landing-surface: #1a1a1e;
+  --landing-surface-elevated: #222226;
+  --landing-surface-hover: #2a2a2e;
+  --landing-text: #f0ebe3;
+  --landing-text-muted: #8a857d;
+  --landing-text-dim: #5a5650;
+  --landing-border: rgba(232, 164, 74, 0.12);
+  --landing-gradient-start: #1a1a1e;
+  --landing-gradient-mid: #1e1c1a;
+  --landing-gradient-end: #1a1a1e;
+}
+
+@keyframes landing-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes landing-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes landing-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes landing-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes landing-float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes landing-pulse-glow {
+  0%, 100% { box-shadow: 0 0 20px var(--landing-accent-glow), 0 0 60px transparent; }
+  50% { box-shadow: 0 0 30px var(--landing-accent-soft), 0 0 80px var(--landing-accent-glow); }
+}
+
+@keyframes landing-grain {
+  0%, 100% { transform: translate(0, 0); }
+  10% { transform: translate(-5%, -10%); }
+  20% { transform: translate(-15%, 5%); }
+  30% { transform: translate(7%, -25%); }
+  40% { transform: translate(-5%, 25%); }
+  50% { transform: translate(-15%, 10%); }
+  60% { transform: translate(15%, 0%); }
+  70% { transform: translate(0%, 15%); }
+  80% { transform: translate(3%, 35%); }
+  90% { transform: translate(-10%, 10%); }
+}
+
+@keyframes score-fill {
+  from { stroke-dashoffset: 283; }
+}
+
+.landing-stagger-1 { animation: landing-fade-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both; }
+.landing-stagger-2 { animation: landing-fade-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.25s both; }
+.landing-stagger-3 { animation: landing-fade-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.4s both; }
+.landing-stagger-4 { animation: landing-fade-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.55s both; }
+.landing-stagger-5 { animation: landing-fade-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.7s both; }
+.landing-stagger-6 { animation: landing-fade-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.85s both; }
+.landing-stagger-7 { animation: landing-fade-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) 1.0s both; }
+
 main {
   flex: 1;
   display: flex;
