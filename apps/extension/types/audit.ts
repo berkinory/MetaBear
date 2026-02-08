@@ -69,6 +69,8 @@ export interface MetadataInfo {
     exists: boolean;
   };
   sitemaps: string[];
+  jsonLd: string[];
+  hreflang: Array<{ lang: string; url: string }>;
 }
 
 export interface AuditResult {

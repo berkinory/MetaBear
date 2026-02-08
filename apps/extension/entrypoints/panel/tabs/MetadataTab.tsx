@@ -7,7 +7,7 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react";
 import { easeOut } from "motion";
 import { motion } from "motion/react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import type { MetadataInfo } from "@/types/audit";
 
@@ -73,11 +73,13 @@ export function MetadataTab({
         imageCount={imageCount}
       />
       {metadata?.keywords && <KeywordsCard keywords={metadata.keywords} />}
-      <RobotsCard
+      <SchemaCard
         robotsText={metadata?.robotsText ?? null}
         sitemapText={metadata?.sitemapText ?? null}
         robotsUrl={metadata?.robots.url ?? null}
         sitemapUrl={metadata?.sitemaps[0] ?? null}
+        jsonLd={metadata?.jsonLd ?? []}
+        hreflang={metadata?.hreflang ?? []}
       />
     </div>
   );
@@ -273,16 +275,20 @@ function KeywordsCard({ keywords }: { keywords: string }) {
   );
 }
 
-function RobotsCard({
+function SchemaCard({
   robotsText,
   sitemapText,
   robotsUrl,
   sitemapUrl,
+  jsonLd,
+  hreflang,
 }: {
   robotsText: string | null;
   sitemapText: string | null;
   robotsUrl: string | null;
   sitemapUrl: string | null;
+  jsonLd: string[];
+  hreflang: Array<{ lang: string; url: string }>;
 }) {
   const rawValue = robotsText ?? "";
   const sitemapValue = sitemapText ?? "";
@@ -291,6 +297,8 @@ function RobotsCard({
   const copiedTimeoutRef = useRef<number | null>(null);
   const hasRobots = Boolean(rawValue);
   const hasSitemap = Boolean(sitemapValue);
+  const hasJsonLd = jsonLd.length > 0;
+  const hasHreflang = hreflang.length > 0;
 
   useEffect(
     () => () => {
@@ -302,14 +310,25 @@ function RobotsCard({
   );
 
   const openSelected = () => {
-    const url = activeTab === "robots" ? robotsUrl : sitemapUrl;
-    if (url) {
-      openUrl(url);
+    if (activeTab === "robots" && robotsUrl) {
+      openUrl(robotsUrl);
+    } else if (activeTab === "sitemap" && sitemapUrl) {
+      openUrl(sitemapUrl);
     }
   };
 
   const copySelected = async () => {
-    const text = activeTab === "robots" ? rawValue : sitemapValue;
+    let text = "";
+    if (activeTab === "robots") {
+      text = rawValue;
+    } else if (activeTab === "sitemap") {
+      text = sitemapValue;
+    } else if (activeTab === "json-ld" && hasJsonLd) {
+      text = jsonLd.join("\n\n");
+    } else if (activeTab === "hreflang" && hasHreflang) {
+      text = hreflang.map((h) => `${h.lang}: ${h.url}`).join("\n");
+    }
+
     await copyToClipboard(text);
     setCopiedTab(activeTab);
     if (copiedTimeoutRef.current) {
@@ -320,7 +339,7 @@ function RobotsCard({
     }, 2000);
   };
 
-  const renderRobotsText = () => {
+  const robotsTextContent = useMemo(() => {
     if (!rawValue) {
       return <div className="text-muted-foreground">robots.txt not found.</div>;
     }
@@ -329,12 +348,22 @@ function RobotsCard({
       const trimmed = line.trim();
       const match = trimmed.match(/^(Allow|Disallow)\s*:(.*)$/i);
       const uaMatch = trimmed.match(/^(User-agent)\s*:(.*)$/i);
+      const sitemapMatch = trimmed.match(/^(Sitemap)\s*:(.*)$/i);
 
       if (uaMatch) {
         return (
           <div key={`robots-${index}-ua`} className="flex flex-wrap gap-2">
             <span className="text-purple-400">{uaMatch[1]}:</span>
             <span>{(uaMatch[2] ?? "").trim()}</span>
+          </div>
+        );
+      }
+
+      if (sitemapMatch) {
+        return (
+          <div key={`robots-${index}-sitemap`} className="flex flex-wrap gap-2">
+            <span className="text-blue-400">{sitemapMatch[1]}:</span>
+            <span>{(sitemapMatch[2] ?? "").trim()}</span>
           </div>
         );
       }
@@ -357,9 +386,9 @@ function RobotsCard({
         </div>
       );
     });
-  };
+  }, [rawValue]);
 
-  const renderSitemapXml = () => {
+  const sitemapXmlContent = useMemo(() => {
     if (!sitemapValue) {
       return (
         <div className="text-muted-foreground">sitemap.xml not found.</div>
@@ -433,14 +462,133 @@ function RobotsCard({
     }
 
     return tokens;
-  };
+  }, [sitemapValue]);
+
+  const jsonLdContent = useMemo(() => {
+    if (!hasJsonLd) {
+      return (
+        <div className="text-muted-foreground">
+          No JSON-LD structured data found.
+        </div>
+      );
+    }
+
+    return jsonLd.map((json, index) => {
+      try {
+        const parsed = JSON.parse(json);
+        const formatted = JSON.stringify(parsed, null, 2);
+
+        return (
+          <div key={`jsonld-${index}`} className="space-y-2">
+            {jsonLd.length > 1 && (
+              <div className="text-xs text-muted-foreground">
+                Schema #{index + 1}
+              </div>
+            )}
+            <div className="text-xs font-mono text-foreground whitespace-pre-wrap break-all">
+              {formatted.split("\n").map((line, lineIndex) => {
+                const keyMatch = line.match(/^(\s*)"([^"]+)":/);
+                if (keyMatch) {
+                  const [, spaces, key] = keyMatch;
+                  const rest = line.slice(keyMatch[0].length);
+                  return (
+                    <div key={`line-${lineIndex}`}>
+                      {spaces}
+                      <span className="text-cyan-400">"{key}"</span>:
+                      <span className="text-amber-300">{rest}</span>
+                    </div>
+                  );
+                }
+                return <div key={`line-${lineIndex}`}>{line}</div>;
+              })}
+            </div>
+          </div>
+        );
+      } catch {
+        return (
+          <div
+            key={`jsonld-${index}`}
+            className="text-xs font-mono text-red-400"
+          >
+            Invalid JSON-LD
+          </div>
+        );
+      }
+    });
+  }, [jsonLd, hasJsonLd]);
+
+  const hreflangContent = useMemo(() => {
+    if (!hasHreflang) {
+      return (
+        <div className="text-muted-foreground">
+          No hreflang alternate links found.
+        </div>
+      );
+    }
+
+    const truncateUrl = (url: string) => {
+      if (url.length <= 35) return url;
+      return url.slice(0, 35) + "...";
+    };
+
+    const sortedHreflang = [...hreflang].sort((a, b) => {
+      if (a.lang === "x-default") return -1;
+      if (b.lang === "x-default") return 1;
+      return 0;
+    });
+
+    return (
+      <div className="space-y-2">
+        {sortedHreflang.map((link, index) => (
+          <button
+            key={`hreflang-${index}`}
+            type="button"
+            onClick={() => openUrl(link.url)}
+            className="flex w-full items-start gap-3 rounded-lg border border-white/10 bg-white/5 p-3 text-left transition-colors hover:bg-white/10 hover:border-white/20 cursor-pointer"
+          >
+            <div className="flex-1 min-w-0 space-y-1">
+              <div className="text-xs font-mono text-muted-foreground">
+                {link.lang}
+              </div>
+              <div className="text-xs text-foreground font-mono break-all">
+                {truncateUrl(link.url)}
+              </div>
+            </div>
+          </button>
+        ))}
+      </div>
+    );
+  }, [hreflang, hasHreflang]);
+
+  const renderRobotsText = () => robotsTextContent;
+  const renderSitemapXml = () => sitemapXmlContent;
+  const renderJsonLd = () => jsonLdContent;
+  const renderHreflang = () => hreflangContent;
 
   const renderHeaderActions = () => {
-    const hasContent = activeTab === "robots" ? hasRobots : hasSitemap;
-    const isDisabled = activeTab === "robots" ? !robotsUrl : !sitemapUrl;
+    let hasContent = false;
+    let isDisabled = true;
+
+    if (activeTab === "robots") {
+      hasContent = hasRobots;
+      isDisabled = !robotsUrl;
+    } else if (activeTab === "sitemap") {
+      hasContent = hasSitemap;
+      isDisabled = !sitemapUrl;
+    } else if (activeTab === "json-ld") {
+      hasContent = hasJsonLd;
+      isDisabled = true;
+    } else if (activeTab === "hreflang") {
+      hasContent = hasHreflang;
+      isDisabled = true;
+    }
+
     if (!hasContent) {
       return null;
     }
+
+    const showOpenButton =
+      (activeTab === "robots" || activeTab === "sitemap") && !isDisabled;
 
     return (
       <div className="flex items-center gap-2">
@@ -456,15 +604,16 @@ function RobotsCard({
             className="size-3.5"
           />
         </button>
-        <button
-          type="button"
-          onClick={openSelected}
-          disabled={isDisabled}
-          className="inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          <span>Open</span>
-          <span className="text-foreground">↗</span>
-        </button>
+        {showOpenButton && (
+          <button
+            type="button"
+            onClick={openSelected}
+            className="inline-flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground transition hover:bg-white/10 hover:text-foreground"
+            aria-label="Open in new tab"
+          >
+            <span className="text-foreground">↗</span>
+          </button>
+        )}
       </div>
     );
   };
@@ -509,12 +658,46 @@ function RobotsCard({
     );
   };
 
+  const renderJsonLdContent = () => {
+    if (!hasJsonLd) {
+      return (
+        <div className="flex flex-col items-center gap-2 py-6 text-muted-foreground">
+          <HugeiconsIcon
+            icon={LicenseNoIcon}
+            strokeWidth={2}
+            className="size-6"
+          />
+          <span className="text-sm">No JSON-LD found</span>
+        </div>
+      );
+    }
+    return (
+      <div className="max-w-full rounded-lg border border-white/10 bg-white/5 p-3">
+        {renderJsonLd()}
+      </div>
+    );
+  };
+
+  const renderHreflangContent = () => {
+    if (!hasHreflang) {
+      return (
+        <div className="flex flex-col items-center gap-2 py-6 text-muted-foreground">
+          <HugeiconsIcon
+            icon={LicenseNoIcon}
+            strokeWidth={2}
+            className="size-6"
+          />
+          <span className="text-sm">No hreflang links found</span>
+        </div>
+      );
+    }
+    return renderHreflang();
+  };
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-muted-foreground">
-          Robots & Sitemap
-        </CardTitle>
+        <CardTitle className="text-muted-foreground">Schemas</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
         <Tabs
@@ -527,7 +710,7 @@ function RobotsCard({
               <TabsTrigger value="robots" className={TAB_TRIGGER_CLASSNAME}>
                 {activeTab === "robots" && (
                   <motion.span
-                    layoutId="metadata-tab-indicator"
+                    layoutId="schema-tab-indicator"
                     className="absolute inset-0 rounded-md bg-[#6B8DD6]/30"
                     transition={TAB_INDICATOR_TRANSITION}
                   />
@@ -537,12 +720,32 @@ function RobotsCard({
               <TabsTrigger value="sitemap" className={TAB_TRIGGER_CLASSNAME}>
                 {activeTab === "sitemap" && (
                   <motion.span
-                    layoutId="metadata-tab-indicator"
+                    layoutId="schema-tab-indicator"
                     className="absolute inset-0 rounded-md bg-[#6B8DD6]/30"
                     transition={TAB_INDICATOR_TRANSITION}
                   />
                 )}
                 <span className="relative z-10">Sitemap</span>
+              </TabsTrigger>
+              <TabsTrigger value="json-ld" className={TAB_TRIGGER_CLASSNAME}>
+                {activeTab === "json-ld" && (
+                  <motion.span
+                    layoutId="schema-tab-indicator"
+                    className="absolute inset-0 rounded-md bg-[#6B8DD6]/30"
+                    transition={TAB_INDICATOR_TRANSITION}
+                  />
+                )}
+                <span className="relative z-10">JSON-LD</span>
+              </TabsTrigger>
+              <TabsTrigger value="hreflang" className={TAB_TRIGGER_CLASSNAME}>
+                {activeTab === "hreflang" && (
+                  <motion.span
+                    layoutId="schema-tab-indicator"
+                    className="absolute inset-0 rounded-md bg-[#6B8DD6]/30"
+                    transition={TAB_INDICATOR_TRANSITION}
+                  />
+                )}
+                <span className="relative z-10">Hreflang</span>
               </TabsTrigger>
             </TabsList>
             {renderHeaderActions()}
@@ -563,6 +766,24 @@ function RobotsCard({
               transition={CONTENT_MOTION.transition}
             >
               {renderSitemapContent()}
+            </motion.div>
+          </TabsContent>
+          <TabsContent value="json-ld" className="min-h-[160px]">
+            <motion.div
+              initial={CONTENT_MOTION.initial}
+              animate={CONTENT_MOTION.animate}
+              transition={CONTENT_MOTION.transition}
+            >
+              {renderJsonLdContent()}
+            </motion.div>
+          </TabsContent>
+          <TabsContent value="hreflang" className="min-h-[160px]">
+            <motion.div
+              initial={CONTENT_MOTION.initial}
+              animate={CONTENT_MOTION.animate}
+              transition={CONTENT_MOTION.transition}
+            >
+              {renderHreflangContent()}
             </motion.div>
           </TabsContent>
         </Tabs>

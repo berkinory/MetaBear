@@ -62,6 +62,8 @@ const EMPTY_AUDIT_RESULT: AuditResult = {
     },
     robots: { url: "", exists: false },
     sitemaps: [],
+    jsonLd: [],
+    hreflang: [],
   },
 };
 
@@ -351,6 +353,29 @@ function collectMetadata(): Omit<
   const wordCount = bodyText ? bodyText.split(/\s+/).length : 0;
   const charCount = bodyText.length;
 
+  const jsonLdScripts = document.querySelectorAll(
+    'script[type="application/ld+json"]'
+  );
+  const jsonLd: string[] = [];
+  for (const script of jsonLdScripts) {
+    const content = script.textContent?.trim();
+    if (content) {
+      jsonLd.push(content);
+    }
+  }
+
+  const hreflangLinks = document.querySelectorAll(
+    'link[rel="alternate"][hreflang]'
+  );
+  const hreflang: Array<{ lang: string; url: string }> = [];
+  for (const link of hreflangLinks) {
+    const lang = link.getAttribute("hreflang");
+    const url = link.getAttribute("href");
+    if (lang && url) {
+      hreflang.push({ lang, url });
+    }
+  }
+
   return {
     title: titleText,
     description,
@@ -379,6 +404,8 @@ function collectMetadata(): Omit<
       description: twitterDescription?.getAttribute("content") || null,
       image: twitterImage?.getAttribute("content") || null,
     },
+    jsonLd,
+    hreflang,
   };
 }
 
