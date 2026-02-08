@@ -1,60 +1,5 @@
 import { useState, useEffect, useRef, type FC } from "react";
 
-const ScoreCircle: FC<{ score: number; size?: number }> = ({
-  score,
-  size = 120,
-}) => {
-  const radius = 45;
-  const circumference = 2 * Math.PI * radius;
-  const offset = circumference - (score / 100) * circumference;
-  const color = score >= 80 ? "#4ade80" : score >= 50 ? "#e8a44a" : "#f87171";
-
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 100 100"
-      className="transform -rotate-90"
-    >
-      <circle
-        cx="50"
-        cy="50"
-        r={radius}
-        fill="none"
-        stroke="rgba(255,255,255,0.06)"
-        strokeWidth="8"
-      />
-      <circle
-        cx="50"
-        cy="50"
-        r={radius}
-        fill="none"
-        stroke={color}
-        strokeWidth="8"
-        strokeLinecap="round"
-        strokeDasharray={circumference}
-        strokeDashoffset={offset}
-        style={{
-          animation: "score-fill 1.5s cubic-bezier(0.16, 1, 0.3, 1) 0.8s both",
-        }}
-      />
-      <text
-        x="50"
-        y="50"
-        textAnchor="middle"
-        dominantBaseline="central"
-        fill={color}
-        fontSize="24"
-        fontWeight="700"
-        fontFamily="var(--sans)"
-        style={{ transform: "rotate(90deg)", transformOrigin: "center" }}
-      >
-        {score}
-      </text>
-    </svg>
-  );
-};
-
 const Counter: FC<{ end: number; suffix?: string; duration?: number }> = ({
   end,
   suffix = "",
@@ -182,102 +127,6 @@ const BrowserBar: FC = () => (
         </svg>
         <span className="ml-2 opacity-60">example.com</span>
       </div>
-    </div>
-  </div>
-);
-
-const ExtensionPanel: FC = () => (
-  <div
-    className="w-[320px] sm:w-[380px] bg-[#1c1c1c] rounded-2xl shadow-2xl shadow-black/40 border border-white/[0.06] overflow-hidden"
-    style={{ animation: "landing-float 6s ease-in-out infinite" }}
-  >
-    <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.06]">
-      <div className="flex items-center gap-2">
-        <img src="/logo.png" alt="MetaBear" className="w-5 h-5 rounded" />
-        <span className="text-sm font-semibold text-[var(--landing-text)]">
-          MetaBear
-        </span>
-        <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[var(--landing-accent)]/15 text-[var(--landing-accent)] font-medium">
-          PRO
-        </span>
-      </div>
-      <div className="flex items-center gap-1">
-        <div className="w-6 h-6 rounded-md flex items-center justify-center text-[var(--landing-text-muted)] hover:text-[var(--landing-text)] transition-colors cursor-pointer">
-          <svg
-            width="14"
-            height="14"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-          >
-            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" />
-          </svg>
-        </div>
-      </div>
-    </div>
-
-    <div className="flex items-center gap-0.5 px-3 py-2 border-b border-white/[0.04] overflow-x-auto">
-      {["Audit", "Meta", "Headings", "Images", "Links", "Social"].map(
-        (tab, i) => (
-          <button
-            key={tab}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap ${
-              i === 0
-                ? "bg-[var(--landing-accent)]/15 text-[var(--landing-accent)]"
-                : "text-[var(--landing-text-muted)] hover:text-[var(--landing-text)] hover:bg-white/[0.04]"
-            }`}
-          >
-            {tab}
-          </button>
-        )
-      )}
-    </div>
-
-    <div className="p-6 flex flex-col items-center">
-      <ScoreCircle score={87} size={100} />
-      <div className="mt-3 text-center">
-        <p className="text-sm font-medium text-[var(--landing-text)]">
-          SEO Score
-        </p>
-        <p className="text-xs text-[var(--landing-text-muted)] mt-0.5">
-          Good - 3 issues found
-        </p>
-      </div>
-    </div>
-
-    <div className="px-4 pb-4 space-y-2">
-      {[
-        {
-          severity: "warning",
-          text: "Missing alt text on 2 images",
-          color: "#e8a44a",
-        },
-        {
-          severity: "info",
-          text: "Meta description could be longer",
-          color: "#60a5fa",
-        },
-        {
-          severity: "success",
-          text: "All headings properly nested",
-          color: "#4ade80",
-        },
-      ].map((issue, i) => (
-        <div
-          key={i}
-          className="flex items-start gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/[0.04]"
-        >
-          <div
-            className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0"
-            style={{ backgroundColor: issue.color }}
-          />
-          <span className="text-xs text-[var(--landing-text-muted)] leading-relaxed">
-            {issue.text}
-          </span>
-        </div>
-      ))}
     </div>
   </div>
 );
@@ -593,25 +442,12 @@ export default function LandingPage() {
           <div className="relative">
             <div className="rounded-2xl overflow-hidden border border-white/[0.06] shadow-2xl shadow-black/50">
               <BrowserBar />
-              <div className="relative bg-gradient-to-br from-[#0f1117] to-[#1a1a2e] aspect-[16/9] sm:aspect-[2/1] flex items-center justify-center overflow-hidden">
-                <div className="absolute inset-0 p-6 sm:p-10 opacity-40">
-                  <div className="space-y-4">
-                    <div className="h-8 w-48 bg-white/[0.06] rounded-lg" />
-                    <div className="h-4 w-96 max-w-full bg-white/[0.04] rounded" />
-                    <div className="h-4 w-80 max-w-full bg-white/[0.04] rounded" />
-                    <div className="h-4 w-72 max-w-full bg-white/[0.04] rounded" />
-                    <div className="mt-8 grid grid-cols-3 gap-4">
-                      <div className="h-32 bg-white/[0.03] rounded-xl" />
-                      <div className="h-32 bg-white/[0.03] rounded-xl" />
-                      <div className="h-32 bg-white/[0.03] rounded-xl" />
-                    </div>
-                    <div className="h-4 w-64 bg-white/[0.04] rounded" />
-                    <div className="h-4 w-56 bg-white/[0.04] rounded" />
-                  </div>
-                </div>
-                <div className="relative z-10 scale-[0.65] sm:scale-75 lg:scale-90 origin-center">
-                  <ExtensionPanel />
-                </div>
+              <div className="relative bg-gradient-to-br from-[#0f1117] to-[#1a1a2e] aspect-[16/9] sm:aspect-[2/1] flex items-center justify-end overflow-hidden p-4 sm:p-8">
+                <img
+                  src="/showcase.webp"
+                  alt="MetaBear Extension Panel"
+                  className="h-full w-auto object-contain rounded-[18px] shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
+                />
               </div>
             </div>
 
