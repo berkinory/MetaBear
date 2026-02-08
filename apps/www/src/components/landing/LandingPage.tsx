@@ -497,8 +497,7 @@ export default function LandingPage() {
                 <span
                   className="absolute bottom-2 sm:bottom-3 left-0 right-0 h-5 sm:h-7"
                   style={{
-                    background:
-                      "linear-gradient(90deg, var(--landing-accent) 0%, #d4873a 100%)",
+                    background: "linear-gradient(90deg, #6B8DD6 0%, #5B7AC7 100%)",
                     opacity: 0.3,
                     borderRadius: "2px",
                   }}

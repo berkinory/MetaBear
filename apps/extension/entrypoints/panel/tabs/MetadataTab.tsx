@@ -17,7 +17,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 
 const TAB_TRIGGER_CLASSNAME =
-  "flex h-8 flex-none items-center justify-center rounded-md px-2 text-xs text-white/60 transition-colors hover:bg-white/10 data-[state=active]:!text-white relative overflow-hidden";
+  "flex h-8 flex-none items-center justify-center rounded-md px-2 text-xs text-white/60 transition-colors hover:bg-[#6B8DD6]/10 data-[state=active]:!text-white relative overflow-hidden";
 const TAB_INDICATOR_TRANSITION = {
   type: "spring",
   stiffness: 520,
@@ -528,7 +528,7 @@ function RobotsCard({
                 {activeTab === "robots" && (
                   <motion.span
                     layoutId="metadata-tab-indicator"
-                    className="absolute inset-0 rounded-md bg-white/20"
+                    className="absolute inset-0 rounded-md bg-[#6B8DD6]/30"
                     transition={TAB_INDICATOR_TRANSITION}
                   />
                 )}
@@ -538,7 +538,7 @@ function RobotsCard({
                 {activeTab === "sitemap" && (
                   <motion.span
                     layoutId="metadata-tab-indicator"
-                    className="absolute inset-0 rounded-md bg-white/20"
+                    className="absolute inset-0 rounded-md bg-[#6B8DD6]/30"
                     transition={TAB_INDICATOR_TRANSITION}
                   />
                 )}

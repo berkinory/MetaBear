@@ -21,7 +21,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 
 const TAB_TRIGGER_CLASSNAME =
-  "flex h-8 w-8 flex-none items-center justify-center rounded-md px-0 text-white/60 transition-colors hover:bg-white/10 data-[state=active]:!text-white relative overflow-hidden";
+  "flex h-8 w-8 flex-none items-center justify-center rounded-md px-0 text-white/60 transition-colors hover:bg-[#6B8DD6]/10 data-[state=active]:!text-white relative overflow-hidden";
 const TAB_INDICATOR_TRANSITION = {
   type: "spring",
   stiffness: 520,
@@ -95,7 +95,7 @@ export function SocialTab({ metadata }: SocialTabProps) {
           {activeTab === "tags" && (
             <motion.span
               layoutId="social-tab-indicator"
-              className="absolute inset-0 rounded-md bg-white/20"
+                className="absolute inset-0 rounded-md bg-[#6B8DD6]/30"
               transition={TAB_INDICATOR_TRANSITION}
             />
           )}
@@ -116,7 +116,7 @@ export function SocialTab({ metadata }: SocialTabProps) {
           {activeTab === "og-image" && (
             <motion.span
               layoutId="social-tab-indicator"
-              className="absolute inset-0 rounded-md bg-white/20"
+                className="absolute inset-0 rounded-md bg-[#6B8DD6]/30"
               transition={TAB_INDICATOR_TRANSITION}
             />
           )}
@@ -137,7 +137,7 @@ export function SocialTab({ metadata }: SocialTabProps) {
           {activeTab === "twitter-image" && (
             <motion.span
               layoutId="social-tab-indicator"
-              className="absolute inset-0 rounded-md bg-white/20"
+                className="absolute inset-0 rounded-md bg-[#6B8DD6]/30"
               transition={TAB_INDICATOR_TRANSITION}
             />
           )}
@@ -158,7 +158,7 @@ export function SocialTab({ metadata }: SocialTabProps) {
           {activeTab === "google" && (
             <motion.span
               layoutId="social-tab-indicator"
-              className="absolute inset-0 rounded-md bg-white/20"
+                className="absolute inset-0 rounded-md bg-[#6B8DD6]/30"
               transition={TAB_INDICATOR_TRANSITION}
             />
           )}
@@ -179,7 +179,7 @@ export function SocialTab({ metadata }: SocialTabProps) {
           {activeTab === "facebook" && (
             <motion.span
               layoutId="social-tab-indicator"
-              className="absolute inset-0 rounded-md bg-white/20"
+                className="absolute inset-0 rounded-md bg-[#6B8DD6]/30"
               transition={TAB_INDICATOR_TRANSITION}
             />
           )}

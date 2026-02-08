@@ -64,7 +64,7 @@ export default function App() {
   const images = result?.images ?? null;
   const headings = result?.headings ?? null;
   const tabTriggerClassName =
-    "flex h-8 items-center justify-center rounded-md px-2 text-xs text-white/60 transition-colors hover:bg-white/10 data-[state=active]:!text-white relative overflow-hidden";
+    "flex h-8 items-center justify-center rounded-md px-2 text-xs text-white/60 transition-colors hover:bg-[#6B8DD6]/10 data-[state=active]:!text-white relative overflow-hidden";
   const tabIndicatorTransition = {
     type: "spring",
     stiffness: 520,
@@ -188,7 +188,7 @@ export default function App() {
             {activeTab === "audit" && (
               <motion.span
                 layoutId="tab-indicator"
-                className="absolute inset-0 rounded-md bg-white/20"
+                className="absolute inset-0 rounded-md bg-[#6B8DD6]/30"
                 transition={tabIndicatorTransition}
               />
             )}
@@ -209,7 +209,7 @@ export default function App() {
             {activeTab === "metadata" && (
               <motion.span
                 layoutId="tab-indicator"
-                className="absolute inset-0 rounded-md bg-white/20"
+                className="absolute inset-0 rounded-md bg-[#6B8DD6]/30"
                 transition={tabIndicatorTransition}
               />
             )}
@@ -227,13 +227,12 @@ export default function App() {
             disabled={loading}
             className={tabTriggerClassName}
           >
-            {activeTab === "headings" && (
-              <motion.span
-                layoutId="tab-indicator"
-                className="absolute inset-0 rounded-md bg-white/20"
-                transition={tabIndicatorTransition}
-              />
-            )}
+                {activeTab === "headings" && (
+                  <div
+                    className="absolute inset-0 rounded-md bg-[#6B8DD6]/30"
+                    style={{ zIndex: -1 }}
+                  />
+                )}
             <span className="relative z-10 flex items-center gap-1.5">
               <HugeiconsIcon
                 icon={TextFontIcon}
@@ -251,7 +250,7 @@ export default function App() {
             {activeTab === "images" && (
               <motion.span
                 layoutId="tab-indicator"
-                className="absolute inset-0 rounded-md bg-white/20"
+                className="absolute inset-0 rounded-md bg-[#6B8DD6]/30"
                 transition={tabIndicatorTransition}
               />
             )}
@@ -272,7 +271,7 @@ export default function App() {
             {activeTab === "links" && (
               <motion.span
                 layoutId="tab-indicator"
-                className="absolute inset-0 rounded-md bg-white/20"
+                className="absolute inset-0 rounded-md bg-[#6B8DD6]/30"
                 transition={tabIndicatorTransition}
               />
             )}
@@ -290,13 +289,12 @@ export default function App() {
             disabled={loading}
             className={tabTriggerClassName}
           >
-            {activeTab === "social" && (
-              <motion.span
-                layoutId="tab-indicator"
-                className="absolute inset-0 rounded-md bg-white/20"
-                transition={tabIndicatorTransition}
-              />
-            )}
+                {activeTab === "social" && (
+                  <div
+                    className="absolute inset-0 rounded-md bg-[#6B8DD6]/30"
+                    style={{ zIndex: -1 }}
+                  />
+                )}
             <span className="relative z-10 flex items-center gap-1.5">
               <HugeiconsIcon
                 icon={Share01Icon}

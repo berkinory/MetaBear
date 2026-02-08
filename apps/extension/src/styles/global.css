@@ -31,6 +31,8 @@
   --muted-foreground: rgba(0, 0, 0, 0.4);
   --accent: rgba(0, 0, 0, 0.04);
   --accent-foreground: rgba(0, 0, 0, 0.85);
+  --accent-blue: #6B8DD6;
+  --accent-blue-soft: rgba(107, 141, 214, 0.2);
   --destructive: #dc2626;
   --border: rgba(0, 0, 0, 0.1);
   --input: rgba(0, 0, 0, 0.1);
@@ -83,6 +85,8 @@
   --muted-foreground: rgba(255, 255, 255, 0.4);
   --accent: rgba(255, 255, 255, 0.04);
   --accent-foreground: rgba(255, 255, 255, 0.9);
+  --accent-blue: #6B8DD6;
+  --accent-blue-soft: rgba(107, 141, 214, 0.2);
   --destructive: #f87171;
   --border: rgba(255, 255, 255, 0.1);
   --input: rgba(255, 255, 255, 0.1);
