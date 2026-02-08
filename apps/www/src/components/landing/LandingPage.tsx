@@ -1,75 +1,41 @@
-import { useState, useEffect, useRef, type FC } from "react";
+import type { FC } from "react";
 
-const Counter: FC<{ end: number; suffix?: string; duration?: number }> = ({
-  end,
-  suffix = "",
-  duration = 2000,
-}) => {
-  const [count, setCount] = useState(0);
-  const ref = useRef<HTMLSpanElement>(null);
-  const hasAnimated = useRef(false);
+import {
+  ArrowDown01Icon,
+  ArrowLeft01Icon,
+  ArrowRight01Icon,
+  ChromeIcon,
+  DashboardSpeed02Icon,
+  Download04Icon,
+  FlashIcon,
+  GithubIcon,
+  Heading01Icon,
+  Image02Icon,
+  LinkSquare02Icon,
+  Menu03Icon,
+  MessageMultiple02Icon,
+  NewTwitterIcon,
+  Notification02Icon,
+  PuzzleIcon,
+  UserMultiple02Icon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const entry = entries[0];
-        if (entry?.isIntersecting && !hasAnimated.current) {
-          hasAnimated.current = true;
-          const start = performance.now();
-          const animate = (now: number) => {
-            const elapsed = now - start;
-            const progress = Math.min(elapsed / duration, 1);
-            const eased = 1 - Math.pow(1 - progress, 3);
-            setCount(Math.round(eased * end));
-            if (progress < 1) requestAnimationFrame(animate);
-          };
-          requestAnimationFrame(animate);
-        }
-      },
-      { threshold: 0.5 }
-    );
-    if (ref.current) observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, [end, duration]);
-
-  return (
-    <span ref={ref}>
-      {count}
-      {suffix}
-    </span>
-  );
-};
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 const FeatureCard: FC<{
   icon: React.ReactNode;
   title: string;
   description: string;
   delay: number;
-}> = ({ icon, title, description, delay }) => {
-  const [visible, setVisible] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0]?.isIntersecting) setVisible(true);
-      },
-      { threshold: 0.2 }
-    );
-    if (ref.current) observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, []);
-
+}> = ({ icon, title, description }) => {
   return (
-    <div
-      ref={ref}
-      className="group relative p-6 rounded-2xl transition-all duration-500 hover:bg-[var(--landing-surface-hover)]"
-      style={{
-        opacity: visible ? 1 : 0,
-        transform: visible ? "translateY(0)" : "translateY(32px)",
-        transition: `opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1) ${delay}ms, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1) ${delay}ms, background-color 0.3s ease`,
-      }}
-    >
+    <div className="group relative p-6 rounded-2xl transition-all duration-500 hover:bg-[var(--landing-surface-hover)]">
       <div className="absolute inset-0 rounded-2xl border border-[var(--landing-border)] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       <div className="relative">
         <div className="w-12 h-12 rounded-xl bg-[var(--landing-accent)]/10 flex items-center justify-center mb-4 text-[var(--landing-accent)] group-hover:bg-[var(--landing-accent)]/15 transition-colors duration-300">
@@ -86,169 +52,127 @@ const FeatureCard: FC<{
   );
 };
 
-const BrowserBar: FC = () => (
-  <div className="flex items-center gap-2 px-4 py-3 bg-[#141416] rounded-t-2xl border-b border-white/[0.04]">
-    <div className="flex gap-1.5">
-      <div className="w-3 h-3 rounded-full bg-[#ff5f57]" />
-      <div className="w-3 h-3 rounded-full bg-[#febc2e]" />
-      <div className="w-3 h-3 rounded-full bg-[#28c840]" />
-    </div>
-    <div className="flex-1 mx-8">
-      <div className="bg-white/[0.06] rounded-lg px-4 py-1.5 text-xs text-[var(--landing-text-muted)] font-mono flex items-center gap-2">
-        <svg
-          width="12"
-          height="12"
-          viewBox="0 0 16 16"
-          fill="none"
-          className="opacity-40"
-        >
-          <path
-            d="M8 1L1 8l7 7"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-        <svg
-          width="12"
-          height="12"
-          viewBox="0 0 16 16"
-          fill="none"
-          className="opacity-20"
-        >
-          <path
-            d="M8 1l7 7-7 7"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-        <span className="ml-2 opacity-60">example.com</span>
+const WebContent: FC = () => (
+  <div className="h-full overflow-hidden bg-[#f8f9fa] text-gray-900 p-8">
+    <div className="max-w-3xl mx-auto space-y-6">
+      <div className="space-y-4">
+        <div className="h-8 bg-gray-300/60 rounded w-3/4 animate-pulse" />
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-gray-300/60 animate-pulse" />
+          <div className="space-y-2 flex-1">
+            <div className="h-3 bg-gray-300/60 rounded w-32 animate-pulse" />
+            <div className="h-2 bg-gray-300/60 rounded w-24 animate-pulse" />
+          </div>
+        </div>
+      </div>
+
+      <div className="w-full h-48 bg-gradient-to-br from-gray-300/60 to-gray-400/60 rounded-lg animate-pulse" />
+
+      <div className="space-y-3">
+        <div className="h-3 bg-gray-300/60 rounded w-full animate-pulse" />
+        <div className="h-3 bg-gray-300/60 rounded w-full animate-pulse" />
+        <div className="h-3 bg-gray-300/60 rounded w-5/6 animate-pulse" />
+        <div className="h-3 bg-gray-300/60 rounded w-full animate-pulse" />
+        <div className="h-3 bg-gray-300/60 rounded w-4/5 animate-pulse" />
+      </div>
+
+      <div className="h-6 bg-gray-300/60 rounded w-2/3 animate-pulse mt-8" />
+
+      <div className="space-y-3">
+        <div className="h-3 bg-gray-300/60 rounded w-full animate-pulse" />
+        <div className="h-3 bg-gray-300/60 rounded w-full animate-pulse" />
+        <div className="h-3 bg-gray-300/60 rounded w-3/4 animate-pulse" />
       </div>
     </div>
   </div>
 );
 
+const BrowserBar: FC = () => (
+  <div className="flex items-center gap-3 px-4 py-3 bg-[#141416] rounded-t-2xl border-b border-white/[0.04]">
+    <div className="flex gap-1.5">
+      <div className="w-3 h-3 rounded-full bg-[#ff5f57]" />
+      <div className="w-3 h-3 rounded-full bg-[#febc2e]" />
+      <div className="w-3 h-3 rounded-full bg-[#28c840]" />
+    </div>
+    <div className="bg-white/[0.06] rounded-lg px-4 py-1.5 text-xs text-[var(--landing-text-muted)] font-mono flex items-center gap-2 flex-1 ml-8 mr-3">
+      <HugeiconsIcon
+        icon={ArrowLeft01Icon}
+        strokeWidth={2}
+        className="w-3 h-3 opacity-40 hidden sm:block"
+      />
+      <HugeiconsIcon
+        icon={ArrowRight01Icon}
+        strokeWidth={2}
+        className="w-3 h-3 opacity-20 hidden sm:block"
+      />
+      <span className="sm:ml-2 opacity-60 truncate">localhost:4001</span>
+    </div>
+    <img src="/logo.png" alt="MetaBear" className="w-5 h-5 rounded flex-none" />
+    <HugeiconsIcon
+      icon={PuzzleIcon}
+      strokeWidth={2}
+      className="w-4 h-4 text-[var(--landing-text-muted)] flex-none"
+    />
+    <div className="w-px h-4 bg-white/[0.08] flex-none hidden sm:block" />
+    <HugeiconsIcon
+      icon={Menu03Icon}
+      strokeWidth={2}
+      className="w-4 h-4 text-[var(--landing-text-muted)] flex-none hidden sm:block"
+    />
+  </div>
+);
+
 const icons = {
   audit: (
-    <svg
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <circle cx="12" cy="12" r="10" />
-      <path d="M12 6v6l4 2" />
-    </svg>
+    <HugeiconsIcon
+      icon={DashboardSpeed02Icon}
+      strokeWidth={1.5}
+      className="w-6 h-6"
+    />
   ),
   meta: (
-    <svg
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
-    </svg>
+    <HugeiconsIcon
+      icon={MessageMultiple02Icon}
+      strokeWidth={1.5}
+      className="w-6 h-6"
+    />
   ),
   headings: (
-    <svg
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M4 12h8M4 18V6M12 18V6M17 10l3-4h-6l3 4M17 10v8" />
-    </svg>
+    <HugeiconsIcon icon={Heading01Icon} strokeWidth={1.5} className="w-6 h-6" />
   ),
   images: (
-    <svg
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-      <circle cx="8.5" cy="8.5" r="1.5" />
-      <path d="M21 15l-5-5L5 21" />
-    </svg>
+    <HugeiconsIcon icon={Image02Icon} strokeWidth={1.5} className="w-6 h-6" />
   ),
   links: (
-    <svg
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71" />
-      <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" />
-    </svg>
+    <HugeiconsIcon
+      icon={LinkSquare02Icon}
+      strokeWidth={1.5}
+      className="w-6 h-6"
+    />
   ),
   social: (
-    <svg
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" />
-      <path d="M13.73 21a2 2 0 01-3.46 0" />
-    </svg>
+    <HugeiconsIcon
+      icon={Notification02Icon}
+      strokeWidth={1.5}
+      className="w-6 h-6"
+    />
   ),
   accessibility: (
-    <svg
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <circle cx="12" cy="4" r="2" />
-      <path d="M12 6v6M9 20l3-6 3 6M6 9h12" />
-    </svg>
+    <HugeiconsIcon
+      icon={UserMultiple02Icon}
+      strokeWidth={1.5}
+      className="w-6 h-6"
+    />
   ),
   export: (
-    <svg
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" />
-    </svg>
+    <HugeiconsIcon
+      icon={Download04Icon}
+      strokeWidth={1.5}
+      className="w-6 h-6"
+    />
+  ),
+  flash: (
+    <HugeiconsIcon icon={FlashIcon} strokeWidth={1.5} className="w-6 h-6" />
   ),
 };
 
@@ -260,7 +184,7 @@ export default function LandingPage() {
         <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-[radial-gradient(ellipse_at_center,_rgba(232,164,74,0.04)_0%,_transparent_70%)]" />
       </div>
 
-      <header className="fixed top-0 left-0 right-0 z-40 landing-stagger-1">
+      <header className="relative z-40 landing-stagger-1">
         <div className="mx-auto max-w-6xl px-6 sm:px-8">
           <nav className="flex items-center justify-between h-16 sm:h-20">
             <a href="/" className="flex items-center gap-2.5 group">
@@ -280,45 +204,18 @@ export default function LandingPage() {
                 rel="noopener noreferrer"
                 className="group relative inline-flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-[var(--landing-accent)] text-[#1a1a1e] text-sm font-semibold transition-all duration-300 hover:brightness-110 hover:shadow-lg hover:shadow-[var(--landing-accent)]/20"
               >
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  className="transition-transform duration-300 group-hover:-translate-x-0.5"
-                >
-                  <circle
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  />
-                  <circle
-                    cx="12"
-                    cy="12"
-                    r="4"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  />
-                </svg>
+                <HugeiconsIcon
+                  icon={ChromeIcon}
+                  strokeWidth={2}
+                  className="w-4 h-4"
+                />
                 <span className="hidden sm:inline">Add to Chrome</span>
                 <span className="sm:hidden">Install</span>
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 16 16"
-                  fill="none"
-                  className="opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300"
-                >
-                  <path
-                    d="M6 4l4 4-4 4"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
+                <HugeiconsIcon
+                  icon={ArrowRight01Icon}
+                  strokeWidth={2}
+                  className="w-3.5 h-3.5 transition-all duration-300 group-hover:translate-x-1"
+                />
               </a>
             </div>
           </nav>
@@ -326,23 +223,29 @@ export default function LandingPage() {
         <div className="h-px bg-gradient-to-r from-transparent via-[var(--landing-border)] to-transparent" />
       </header>
 
-      <section className="relative pt-32 sm:pt-44 pb-16 sm:pb-24 px-6 sm:px-8">
+      <section className="relative pt-16 sm:pt-24 pb-16 sm:pb-24 px-6 sm:px-8">
         <div className="mx-auto max-w-5xl text-center">
           <div className="landing-stagger-2 mb-8">
-            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[var(--landing-border)] bg-[var(--landing-surface-elevated)] text-xs font-medium text-[var(--landing-text-muted)]">
-              <span className="w-1.5 h-1.5 rounded-full bg-[var(--landing-accent)] animate-pulse" />
-              Chrome Extension
-              <span className="text-[var(--landing-text-dim)]">&middot;</span>
+            <a
+              href="https://github.com/berkinory/MetaBear"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[var(--landing-border)] bg-[var(--landing-surface-elevated)] text-xs font-medium text-[var(--landing-text-muted)] hover:border-[var(--landing-accent)]/30 hover:bg-[var(--landing-surface-elevated)]/80 transition-all duration-200"
+            >
+              <HugeiconsIcon
+                icon={GithubIcon}
+                strokeWidth={2}
+                className="w-3.5 h-3.5"
+              />
               Free & Open Source
-            </span>
+            </a>
           </div>
 
           <h1 className="landing-stagger-3 text-4xl sm:text-6xl lg:text-7xl xl:text-8xl font-bold tracking-tight leading-[1.05] mb-6 sm:mb-8">
-            <span className="block">See what search</span>
+            <span className="block">See What Search Engines</span>
             <span className="block">
-              engines{" "}
               <span className="relative inline-block">
-                <span className="relative z-10">really</span>
+                <span className="relative z-10">Really</span>
                 <span
                   className="absolute bottom-2 sm:bottom-3 left-0 right-0 h-5 sm:h-7"
                   style={{
@@ -353,14 +256,14 @@ export default function LandingPage() {
                   }}
                 />
               </span>{" "}
-              see
+              See
             </span>
           </h1>
 
           <p className="landing-stagger-4 max-w-2xl mx-auto text-base sm:text-lg lg:text-xl text-[var(--landing-text-muted)] leading-relaxed mb-10 sm:mb-14">
-            Professional SEO & accessibility auditing, right in your browser.
-            Analyze meta tags, heading structure, images, links, and social
-            previews &mdash; all in one click.
+            Free Chrome extension for instant SEO audits and accessibility
+            testing. Analyze meta tags, Open Graph, heading structure, and WCAG
+            compliance in one click. No sign-up, no tracking, 100% private.
           </p>
 
           <div className="landing-stagger-5 flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -373,65 +276,28 @@ export default function LandingPage() {
                 animation: "landing-pulse-glow 4s ease-in-out infinite",
               }}
             >
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                className="transition-transform duration-300 group-hover:scale-110"
-              >
-                <circle
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                />
-                <circle
-                  cx="12"
-                  cy="12"
-                  r="4"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                />
-              </svg>
-              Add to Chrome &mdash; It's Free
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 16 16"
-                fill="none"
-                className="opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300"
-              >
-                <path
-                  d="M6 4l4 4-4 4"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
+              <HugeiconsIcon
+                icon={ChromeIcon}
+                strokeWidth={2}
+                className="w-5 h-5"
+              />
+              Add to Chrome - It's Free
+              <HugeiconsIcon
+                icon={ArrowRight01Icon}
+                strokeWidth={2}
+                className="w-4 h-4 transition-all duration-300 group-hover:translate-x-1"
+              />
             </a>
             <a
               href="#features"
               className="inline-flex items-center gap-2 px-6 py-4 rounded-2xl text-[var(--landing-text-muted)] font-medium text-base transition-all duration-300 hover:text-[var(--landing-text)] hover:bg-white/[0.04]"
             >
               See features
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 16 16"
-                fill="none"
-                className="transition-transform duration-300 group-hover:translate-y-0.5"
-              >
-                <path
-                  d="M4 6l4 4 4-4"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
+              <HugeiconsIcon
+                icon={ArrowDown01Icon}
+                strokeWidth={2}
+                className="w-4 h-4 transition-transform duration-300 group-hover:translate-y-0.5"
+              />
             </a>
           </div>
         </div>
@@ -442,12 +308,15 @@ export default function LandingPage() {
           <div className="relative">
             <div className="rounded-2xl overflow-hidden border border-white/[0.06] shadow-2xl shadow-black/50">
               <BrowserBar />
-              <div className="relative bg-gradient-to-br from-[#0f1117] to-[#1a1a2e] aspect-[16/9] sm:aspect-[2/1] flex items-center justify-end overflow-hidden p-4 sm:p-8">
-                <img
-                  src="/showcase.webp"
-                  alt="MetaBear Extension Panel"
-                  className="h-full w-auto object-contain rounded-[18px] shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
-                />
+              <div className="relative aspect-[16/9] sm:aspect-[2/1] overflow-hidden">
+                <WebContent />
+                <div className="absolute top-2 right-2 sm:top-3 sm:right-8">
+                  <img
+                    src="/showcase.webp"
+                    alt="MetaBear Extension Panel"
+                    className="h-[36vh] sm:h-[calc(100vh*0.6)] w-auto object-contain rounded-lg sm:rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.6)]"
+                  />
+                </div>
               </div>
             </div>
 
@@ -457,18 +326,39 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section className="relative px-6 sm:px-8 pb-24 sm:pb-32">
+      <section
+        className="relative px-6 sm:px-8 pb-24 sm:pb-32"
+        aria-label="Key Statistics"
+      >
         <div className="mx-auto max-w-4xl">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 sm:gap-4 py-8 px-6 rounded-2xl border border-[var(--landing-border)] bg-[var(--landing-surface-elevated)]/50 backdrop-blur-sm">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-4 py-8 px-6 rounded-2xl border border-[var(--landing-border)] bg-[var(--landing-surface-elevated)]/50 backdrop-blur-sm">
             {[
-              { value: 6, suffix: "", label: "Audit Panels" },
-              { value: 100, suffix: "+", label: "SEO Checks" },
-              { value: 50, suffix: "+", label: "Accessibility Rules" },
-              { value: 1, suffix: "-Click", label: "Full Analysis" },
+              {
+                value: 12,
+                suffix: "",
+                label: "SEO Checks",
+                description: "Essential SEO validations",
+              },
+              {
+                value: 16,
+                suffix: "",
+                label: "Accessibility Checks",
+                description: "WCAG compliance tests",
+              },
+              {
+                value: 1,
+                suffix: "-Click",
+                label: "Instant Audit",
+                description: "Complete website analysis",
+              },
             ].map((stat, i) => (
               <div key={i} className="text-center">
-                <div className="text-2xl sm:text-3xl font-bold text-[var(--landing-accent)] tracking-tight">
-                  <Counter end={stat.value} suffix={stat.suffix} />
+                <div
+                  className="text-2xl sm:text-3xl font-bold text-[var(--landing-accent)] tracking-tight"
+                  aria-label={`${stat.value}${stat.suffix} ${stat.label}`}
+                >
+                  {stat.value}
+                  {stat.suffix}
                 </div>
                 <div className="text-xs sm:text-sm text-[var(--landing-text-muted)] mt-1">
                   {stat.label}
@@ -479,88 +369,78 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section id="features" className="relative px-6 sm:px-8 pb-24 sm:pb-32">
+      <section
+        id="features"
+        className="relative px-6 sm:px-8 pb-24 sm:pb-32"
+        aria-labelledby="features-heading"
+      >
         <div className="mx-auto max-w-5xl">
           <div className="text-center mb-16 sm:mb-20">
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight mb-4">
-              Everything you need to
-              <br />
-              <span className="text-[var(--landing-accent)]">
-                debug your SEO
-              </span>
+            <h2
+              id="features-heading"
+              className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight mb-4"
+            >
+              Complete SEO & Accessibility Tools
             </h2>
             <p className="max-w-xl mx-auto text-[var(--landing-text-muted)] text-base sm:text-lg">
-              Six powerful panels, one extension. Instantly audit any page
-              without leaving your browser.
+              Six powerful panels for comprehensive website auditing. Test SEO,
+              accessibility, meta tags, and social media previews instantly.
             </p>
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
             <FeatureCard
               icon={icons.audit}
-              title="SEO Audit Score"
-              description="Get an instant 0-100 SEO score with categorized issues by severity. See exactly what needs fixing and why."
+              title="SEO Score & Audit"
+              description="Get instant SEO score from 0-100 with categorized issues by severity. Identify title tags, meta descriptions, canonical URLs, and technical SEO problems instantly."
               delay={0}
             />
             <FeatureCard
               icon={icons.meta}
-              title="Meta Tag Inspector"
-              description="Inspect title, description, canonical URL, language, and robots directives with character counts and validation."
+              title="Meta Tags & Open Graph"
+              description="Inspect HTML meta tags including title, description, canonical URL, robots directives, Open Graph tags, and Twitter Cards with character count validation."
               delay={80}
             />
             <FeatureCard
               icon={icons.headings}
-              title="Heading Hierarchy"
-              description="Visualize your heading structure at a glance. Click any heading to scroll directly to it on the page."
+              title="Heading Structure Checker"
+              description="Visualize H1-H6 heading hierarchy for SEO optimization. Detect skipped heading levels and validate semantic HTML structure for better search rankings."
               delay={160}
             />
             <FeatureCard
               icon={icons.images}
-              title="Image Analysis"
-              description="Find missing alt text, broken images, and oversized files. Every image listed with actionable details."
+              title="Image SEO Analyzer"
+              description="Find missing alt text, broken images, and large file sizes. Optimize images for search engines with detailed analysis of every image on your page."
               delay={240}
             />
             <FeatureCard
               icon={icons.links}
-              title="Link Checker"
-              description="Analyze internal, external, and nofollow links. Catch broken links and audit your link profile instantly."
+              title="Link Analysis Tool"
+              description="Audit internal links, external links, nofollow attributes, and broken links. Analyze your link profile and detect redirect chains for better SEO."
               delay={320}
             />
             <FeatureCard
               icon={icons.social}
-              title="Social Previews"
-              description="Preview how your page appears on Google, Facebook, and Twitter. Inspect OG and Twitter Card meta tags."
+              title="Social Media Preview"
+              description="Preview how your page appears on Google Search, Facebook, and Twitter. Test Open Graph images, Twitter Card meta tags, and social sharing optimization."
               delay={400}
             />
             <FeatureCard
               icon={icons.accessibility}
-              title="Accessibility Audit"
-              description="Powered by axe-core, catch WCAG violations and accessibility issues with clear remediation guidance."
+              title="WCAG Accessibility Testing"
+              description="Powered by axe-core for WCAG 2.1 compliance testing. Check color contrast, ARIA attributes, form labels, keyboard navigation, and screen reader compatibility."
               delay={480}
             />
             <FeatureCard
               icon={icons.export}
-              title="Export & AI Ready"
-              description="Export full audit results as JSON. Copy issues as AI prompts for instant fix suggestions from your favorite LLM."
+              title="Export Audit Results"
+              description="Export complete SEO audit data as JSON for reporting. Copy issues as AI prompts for ChatGPT, Claude, or other LLMs to get instant fix recommendations."
               delay={560}
             />
             <FeatureCard
-              icon={
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
-                </svg>
-              }
-              title="Blazing Fast"
-              description="Native browser extension performance. No external API calls, no loading spinners. Results appear the instant you click."
+              icon={icons.flash}
+              title="Instant Browser Testing"
+              description="100% client-side processing with zero external API calls. Fast, private SEO and accessibility testing directly in your Chrome browser without data collection."
               delay={640}
             />
           </div>
@@ -571,26 +451,30 @@ export default function LandingPage() {
         <div className="mx-auto max-w-4xl">
           <div className="text-center mb-16">
             <h2 className="text-3xl sm:text-4xl font-bold tracking-tight mb-4">
-              Three steps. That's it.
+              How to Use MetaBear SEO Extension
             </h2>
+            <p className="text-[var(--landing-text-muted)] text-base sm:text-lg max-w-2xl mx-auto">
+              Start auditing your website's SEO and accessibility in three
+              simple steps
+            </p>
           </div>
 
           <div className="grid sm:grid-cols-3 gap-8 sm:gap-12">
             {[
               {
                 step: "01",
-                title: "Install",
-                desc: "Add MetaBear to Chrome from the Web Store. One click, zero configuration.",
+                title: "Install Chrome Extension",
+                desc: "Add MetaBear SEO checker to Chrome from the Web Store. One-click installation with zero configuration required.",
               },
               {
                 step: "02",
-                title: "Click",
-                desc: "Navigate to any webpage and click the MetaBear icon in your toolbar.",
+                title: "Click to Audit",
+                desc: "Navigate to any webpage and click the MetaBear extension icon in your browser toolbar to start the SEO audit.",
               },
               {
                 step: "03",
-                title: "Fix",
-                desc: "Review the audit, export issues, and fix them. Watch your SEO score climb.",
+                title: "Fix SEO Issues",
+                desc: "Review audit results, export issues as JSON or AI prompts, and fix them. Watch your SEO score improve instantly.",
               },
             ].map((item, i) => (
               <div key={i} className="relative group">
@@ -607,18 +491,11 @@ export default function LandingPage() {
                 </div>
                 {i < 2 && (
                   <div className="hidden sm:block absolute top-12 -right-6 text-[var(--landing-text-dim)]">
-                    <svg
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M5 12h14M12 5l7 7-7 7" />
-                    </svg>
+                    <HugeiconsIcon
+                      icon={ArrowRight01Icon}
+                      strokeWidth={1.5}
+                      className="w-6 h-6"
+                    />
                   </div>
                 )}
               </div>
@@ -635,10 +512,11 @@ export default function LandingPage() {
 
             <div className="relative">
               <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight mb-4">
-                Start auditing today
+                Start Your Free SEO Audit Today
               </h2>
               <p className="text-[var(--landing-text-muted)] text-base sm:text-lg mb-8 max-w-md mx-auto">
-                Free, open source, and built for developers who care about SEO.
+                Free, open source Chrome extension built for developers and SEO
+                professionals
               </p>
               <a
                 href="https://chrome.google.com/webstore"
@@ -646,74 +524,146 @@ export default function LandingPage() {
                 rel="noopener noreferrer"
                 className="group inline-flex items-center gap-3 px-8 py-4 rounded-2xl bg-[var(--landing-accent)] text-[#1a1a1e] font-semibold text-base transition-all duration-300 hover:brightness-110 hover:shadow-xl hover:shadow-[var(--landing-accent)]/25 hover:-translate-y-0.5"
               >
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  className="transition-transform duration-300 group-hover:scale-110"
-                >
-                  <circle
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  />
-                  <circle
-                    cx="12"
-                    cy="12"
-                    r="4"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  />
-                </svg>
+                <HugeiconsIcon
+                  icon={ChromeIcon}
+                  strokeWidth={2}
+                  className="w-5 h-5"
+                />
                 Add to Chrome
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 16 16"
-                  fill="none"
-                  className="transition-transform duration-300 group-hover:translate-x-1"
-                >
-                  <path
-                    d="M6 4l4 4-4 4"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
+                <HugeiconsIcon
+                  icon={ArrowRight01Icon}
+                  strokeWidth={2}
+                  className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1"
+                />
               </a>
             </div>
           </div>
         </div>
       </section>
 
-      <footer className="relative px-6 sm:px-8 pb-8 pt-8 border-t border-[var(--landing-border)]">
+      <section className="relative px-6 sm:px-8 pb-24 sm:pb-32">
+        <div className="mx-auto max-w-3xl">
+          <div className="text-center mb-12 sm:mb-16">
+            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight mb-4">
+              Frequently Asked Questions
+            </h2>
+            <p className="text-[var(--landing-text-muted)] text-base sm:text-lg">
+              Everything you need to know about MetaBear
+            </p>
+          </div>
+
+          <Accordion type="single" collapsible className="space-y-4">
+            <AccordionItem
+              value="item-1"
+              className="border border-[var(--landing-border)] rounded-xl px-6 bg-[var(--landing-surface-elevated)]/30"
+            >
+              <AccordionTrigger className="text-[var(--landing-text)] hover:no-underline py-4">
+                What is MetaBear?
+              </AccordionTrigger>
+              <AccordionContent className="text-[var(--landing-text-muted)]">
+                MetaBear is a free Chrome extension that helps you audit and
+                optimize your website's SEO and accessibility. It provides
+                instant analysis of meta tags, heading structure, images, links,
+                social previews, and accessibility issues, all in one click.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem
+              value="item-2"
+              className="border border-[var(--landing-border)] rounded-xl px-6 bg-[var(--landing-surface-elevated)]/30"
+            >
+              <AccordionTrigger className="text-[var(--landing-text)] hover:no-underline py-4">
+                Is MetaBear really free?
+              </AccordionTrigger>
+              <AccordionContent className="text-[var(--landing-text-muted)]">
+                Yes! MetaBear is 100% free and open source. There are no hidden
+                fees, premium tiers, or subscriptions. You get full access to
+                all features forever.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem
+              value="item-3"
+              className="border border-[var(--landing-border)] rounded-xl px-6 bg-[var(--landing-surface-elevated)]/30"
+            >
+              <AccordionTrigger className="text-[var(--landing-text)] hover:no-underline py-4">
+                How does MetaBear protect my privacy?
+              </AccordionTrigger>
+              <AccordionContent className="text-[var(--landing-text-muted)]">
+                MetaBear runs entirely in your browser. All audits are performed
+                locally. No data is sent to external servers. Your browsing data
+                and audit results stay completely private.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem
+              value="item-4"
+              className="border border-[var(--landing-border)] rounded-xl px-6 bg-[var(--landing-surface-elevated)]/30"
+            >
+              <AccordionTrigger className="text-[var(--landing-text)] hover:no-underline py-4">
+                What accessibility checks does MetaBear perform?
+              </AccordionTrigger>
+              <AccordionContent className="text-[var(--landing-text-muted)]">
+                MetaBear uses axe-core to check for WCAG violations including
+                color contrast, ARIA attributes, form labels, and more. It also
+                performs custom checks for missing alt text, broken images, and
+                heading hierarchy issues.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem
+              value="item-5"
+              className="border border-[var(--landing-border)] rounded-xl px-6 bg-[var(--landing-surface-elevated)]/30"
+            >
+              <AccordionTrigger className="text-[var(--landing-text)] hover:no-underline py-4">
+                Can I export audit results?
+              </AccordionTrigger>
+              <AccordionContent className="text-[var(--landing-text-muted)]">
+                Yes! You can export full audit results as JSON for further
+                analysis or documentation. You can also copy individual issues
+                as AI prompts to get instant fix suggestions from your favorite
+                LLM.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem
+              value="item-6"
+              className="border border-[var(--landing-border)] rounded-xl px-6 bg-[var(--landing-surface-elevated)]/30"
+            >
+              <AccordionTrigger className="text-[var(--landing-text)] hover:no-underline py-4">
+                Does MetaBear work on any website?
+              </AccordionTrigger>
+              <AccordionContent className="text-[var(--landing-text-muted)]">
+                Yes! MetaBear works on any website you visit. Simply navigate to
+                a page and click the MetaBear icon in your toolbar to run an
+                instant audit.
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        </div>
+      </section>
+
+      <footer className="relative px-6 sm:px-8 py-6 border-t border-[var(--landing-border)]">
         <div className="mx-auto max-w-5xl">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
-              <img src="/logo.png" alt="MetaBear" className="w-5 h-5 rounded" />
-              <span className="text-sm text-[var(--landing-text-muted)]">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <img src="/logo.png" alt="MetaBear" className="w-7 h-7 rounded" />
+              <span className="text-base font-medium text-[var(--landing-text)]">
                 MetaBear
               </span>
             </div>
             <div className="flex items-center gap-6">
               <a
-                href="https://github.com/berkinory"
+                href="https://github.com/berkinory/MetaBear"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-[var(--landing-text-dim)] hover:text-[var(--landing-text-muted)] transition-colors duration-200"
               >
-                <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                >
-                  <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
-                </svg>
+                <HugeiconsIcon
+                  icon={GithubIcon}
+                  strokeWidth={2}
+                  className="w-[18px] h-[18px]"
+                />
               </a>
               <a
                 href="https://twitter.com/berkinory"
@@ -721,14 +671,11 @@ export default function LandingPage() {
                 rel="noopener noreferrer"
                 className="text-[var(--landing-text-dim)] hover:text-[var(--landing-text-muted)] transition-colors duration-200"
               >
-                <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                >
-                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-                </svg>
+                <HugeiconsIcon
+                  icon={NewTwitterIcon}
+                  strokeWidth={2}
+                  className="w-[18px] h-[18px]"
+                />
               </a>
             </div>
           </div>
