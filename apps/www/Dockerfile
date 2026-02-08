@@ -26,8 +26,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends adduser && \
     adduser --system --uid 1001 astro && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-RUN bun add -g serve
-
 COPY --from=builder --chown=astro:nodejs /app/dist ./dist
 
 USER astro
@@ -35,7 +33,7 @@ USER astro
 EXPOSE 4001
 
 ENV NODE_ENV=production
-ENV HOST=0.0.0.0
 ENV PORT=4001
+ENV HOSTNAME="0.0.0.0"
 
-CMD ["serve", "./dist", "-l", "4001"]
+CMD ["bunx", "serve", "./dist", "-l", "4001"]
