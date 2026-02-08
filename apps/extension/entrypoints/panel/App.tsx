@@ -150,20 +150,20 @@ export default function App() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, ease: easeOut }}
     >
-      <header className="flex items-center justify-between gap-3 px-4 py-3">
-        <div className="flex items-center gap-2.5">
-          <img src="/icon/128.png" alt="MetaBear" className="h-7 w-7" />
-          <div className="flex flex-col">
-            <span className="text-sm font-semibold">MetaBear</span>
-            <span className="text-[11px] text-muted-foreground">
-              metabear.dev
-            </span>
-          </div>
-        </div>
+      <header className="flex items-center justify-between gap-3 px-4 py-2">
+        <a
+          href="https://metabear.dev"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-2.5 hover:opacity-80 transition-opacity"
+        >
+          <img src="/icon/128.png" alt="MetaBear" className="h-6 w-6" />
+          <span className="text-sm font-semibold">MetaBear</span>
+        </a>
         <button
           type="button"
           onClick={handleClose}
-          className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-white/10 bg-white/5 text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground"
+          className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-white/10 bg-white/5 text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground"
           aria-label="Close panel"
           title="Close"
         >
@@ -227,12 +227,12 @@ export default function App() {
             disabled={loading}
             className={tabTriggerClassName}
           >
-                {activeTab === "headings" && (
-                  <div
-                    className="absolute inset-0 rounded-md bg-[#6B8DD6]/30"
-                    style={{ zIndex: -1 }}
-                  />
-                )}
+            {activeTab === "headings" && (
+              <div
+                className="absolute inset-0 rounded-md bg-[#6B8DD6]/30"
+                style={{ zIndex: -1 }}
+              />
+            )}
             <span className="relative z-10 flex items-center gap-1.5">
               <HugeiconsIcon
                 icon={TextFontIcon}
@@ -289,12 +289,12 @@ export default function App() {
             disabled={loading}
             className={tabTriggerClassName}
           >
-                {activeTab === "social" && (
-                  <div
-                    className="absolute inset-0 rounded-md bg-[#6B8DD6]/30"
-                    style={{ zIndex: -1 }}
-                  />
-                )}
+            {activeTab === "social" && (
+              <div
+                className="absolute inset-0 rounded-md bg-[#6B8DD6]/30"
+                style={{ zIndex: -1 }}
+              />
+            )}
             <span className="relative z-10 flex items-center gap-1.5">
               <HugeiconsIcon
                 icon={Share01Icon}

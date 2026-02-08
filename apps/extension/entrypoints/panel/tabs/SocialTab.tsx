@@ -95,7 +95,7 @@ export function SocialTab({ metadata }: SocialTabProps) {
           {activeTab === "tags" && (
             <motion.span
               layoutId="social-tab-indicator"
-                className="absolute inset-0 rounded-md bg-[#6B8DD6]/30"
+              className="absolute inset-0 rounded-md bg-[#6B8DD6]/30"
               transition={TAB_INDICATOR_TRANSITION}
             />
           )}
@@ -116,7 +116,7 @@ export function SocialTab({ metadata }: SocialTabProps) {
           {activeTab === "og-image" && (
             <motion.span
               layoutId="social-tab-indicator"
-                className="absolute inset-0 rounded-md bg-[#6B8DD6]/30"
+              className="absolute inset-0 rounded-md bg-[#6B8DD6]/30"
               transition={TAB_INDICATOR_TRANSITION}
             />
           )}
@@ -137,7 +137,7 @@ export function SocialTab({ metadata }: SocialTabProps) {
           {activeTab === "twitter-image" && (
             <motion.span
               layoutId="social-tab-indicator"
-                className="absolute inset-0 rounded-md bg-[#6B8DD6]/30"
+              className="absolute inset-0 rounded-md bg-[#6B8DD6]/30"
               transition={TAB_INDICATOR_TRANSITION}
             />
           )}
@@ -158,7 +158,7 @@ export function SocialTab({ metadata }: SocialTabProps) {
           {activeTab === "google" && (
             <motion.span
               layoutId="social-tab-indicator"
-                className="absolute inset-0 rounded-md bg-[#6B8DD6]/30"
+              className="absolute inset-0 rounded-md bg-[#6B8DD6]/30"
               transition={TAB_INDICATOR_TRANSITION}
             />
           )}
@@ -179,7 +179,7 @@ export function SocialTab({ metadata }: SocialTabProps) {
           {activeTab === "facebook" && (
             <motion.span
               layoutId="social-tab-indicator"
-                className="absolute inset-0 rounded-md bg-[#6B8DD6]/30"
+              className="absolute inset-0 rounded-md bg-[#6B8DD6]/30"
               transition={TAB_INDICATOR_TRANSITION}
             />
           )}

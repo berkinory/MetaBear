@@ -23,7 +23,6 @@ import { useEffect, useRef, useState } from "react";
 
 import type { AuditResult, Issue, MetadataInfo } from "@/types/audit";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -505,6 +504,13 @@ function ScoreCircle({
   );
 }
 
+function getScoreLabel(score: number): string {
+  if (score >= 95) return "Excellent";
+  if (score >= 90) return "Great";
+  if (score >= 75) return "Good";
+  return "Needs Work";
+}
+
 function ScoreCard({
   loading,
   score,
@@ -517,6 +523,7 @@ function ScoreCard({
   const showValue = !loading && score !== null;
   const showIssues = !loading && issuesCount !== null;
   const issuesLabel = issuesCount === 1 ? "issue" : "issues";
+  const scoreLabel = showValue && score !== null ? getScoreLabel(score) : "";
 
   return (
     <Card>
@@ -549,8 +556,8 @@ function ScoreCard({
                 style={{ opacity: showIssues ? 1 : 0 }}
               >
                 {issuesCount === 0
-                  ? "No issues"
-                  : `${issuesCount} ${issuesLabel}`}
+                  ? `${scoreLabel} - No issues`
+                  : `${scoreLabel} - ${issuesCount} ${issuesLabel}`}
               </span>
             )}
           </div>
@@ -692,31 +699,47 @@ function IssuesCard({
           >
             {issues?.map((issue) => (
               <motion.div key={issue.id} variants={itemVariants}>
-                <Card className="border border-white/10 bg-white/5">
-                  <CardContent className="space-y-1 py-0">
-                    <div className="flex items-start justify-between gap-2">
-                      <Badge
-                        variant="secondary"
-                        className={
+                <Card className="border border-white/10 bg-white/5 group">
+                  <CardContent className="py-0">
+                    <div className="flex items-start gap-1.5">
+                      <div
+                        className={cn(
+                          "flex-none size-5 rounded-full flex items-center justify-center mt-0.5",
                           issue.severity === "high"
-                            ? "w-fit gap-1 select-none bg-red-500/15 text-red-200"
-                            : "w-fit gap-1 select-none bg-orange-400/15 text-orange-200"
-                        }
+                            ? "bg-red-500/15 text-red-200"
+                            : "bg-orange-400/15 text-orange-200"
+                        )}
                       >
                         <HugeiconsIcon
                           icon={getIssueIcon(issue.type)}
                           strokeWidth={2}
-                          className="size-3"
+                          className="size-2.5"
                         />
-                        {issue.type === "seo"
-                          ? "SEO"
-                          : issue.type.charAt(0).toUpperCase() +
-                            issue.type.slice(1)}
-                      </Badge>
+                      </div>
+                      <span className="text-sm text-muted-foreground flex-1 min-w-0 leading-snug">
+                        {issue.title}
+                      </span>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button
+                            type="button"
+                            aria-label="Issue details"
+                            className="flex-none h-5 w-5 items-center justify-center rounded-full border border-white/15 bg-white/5 text-[10px] font-semibold text-white/70 shadow-[0_0_0_1px_rgba(255,255,255,0.06)] transition hover:bg-white/10 hover:text-white inline-flex mt-0.5"
+                          >
+                            i
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent
+                          className="font-sans max-w-xs"
+                          sideOffset={6}
+                        >
+                          {parseDescription(issue.description)}
+                        </TooltipContent>
+                      </Tooltip>
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground"
+                        className="flex-none h-5 w-5 p-0 text-muted-foreground hover:text-foreground mt-0.5"
                         onClick={async () => {
                           await copyToClipboard(buildPrompt(issue));
                           setCopiedId(issue.id);
@@ -740,12 +763,6 @@ function IssuesCard({
                         />
                       </Button>
                     </div>
-                    <div className="text-sm font-medium text-foreground">
-                      {issue.title}
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      {parseDescription(issue.description)}
-                    </p>
                   </CardContent>
                 </Card>
               </motion.div>

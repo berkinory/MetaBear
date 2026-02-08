@@ -390,24 +390,27 @@ function auditSEO(metadata: MetadataInfo): Issue[] {
       type: "seo",
       severity: "high",
       id: "seo-missing-title",
-      title: "Missing Page Title",
-      description: "No <title> tag found. Required for SEO and browser tabs.",
+      title: "Missing page title",
+      description:
+        "The <title> tag is missing from the <head> section. Page titles are essential for SEO rankings and appear in browser tabs and search results.",
     });
   } else if (metadata.title.length < 40) {
     issues.push({
       type: "seo",
       severity: "high",
       id: "seo-title-too-short",
-      title: "Short Page Title",
-      description: `Title is ${metadata.title.length} characters. Recommended: 40–60 characters.`,
+      title: `Short page title (${metadata.title.length} chars)`,
+      description:
+        "Page titles under 40 characters may not fully describe your content to search engines. Aim for 40-60 characters to maximize visibility in search results.",
     });
   } else if (metadata.title.length > 60) {
     issues.push({
       type: "seo",
       severity: "high",
       id: "seo-title-too-long",
-      title: "Long Page Title",
-      description: `Title is ${metadata.title.length} characters. Recommended: 40–60 characters.`,
+      title: `Long page title (${metadata.title.length} chars)`,
+      description:
+        "Titles over 60 characters get truncated in search results. Keep it between 40-60 characters to ensure your full message appears.",
     });
   }
 
@@ -416,25 +419,27 @@ function auditSEO(metadata: MetadataInfo): Issue[] {
       type: "seo",
       severity: "high",
       id: "seo-missing-description",
-      title: "Missing Meta Description",
+      title: "Missing meta description",
       description:
-        "No meta description found. Affects click-through rate in search results.",
+        "The meta description tag is missing. This summary text appears in search results and significantly impacts click-through rates. Add a compelling 100-150 character description.",
     });
   } else if (metadata.description.length < 100) {
     issues.push({
       type: "seo",
       severity: "high",
       id: "seo-description-too-short",
-      title: "Short Meta Description",
-      description: `Description is ${metadata.description.length} characters. Recommended: 100–150 characters.`,
+      title: `Short meta description (${metadata.description.length} chars)`,
+      description:
+        "Descriptions under 100 characters don't provide enough context for users in search results. Expand your description to 100-150 characters for better engagement.",
     });
   } else if (metadata.description.length > 150) {
     issues.push({
       type: "seo",
       severity: "high",
       id: "seo-description-too-long",
-      title: "Long Meta Description",
-      description: `Description is ${metadata.description.length} characters. Recommended: 100–150 characters.`,
+      title: `Long meta description (${metadata.description.length} chars)`,
+      description:
+        "Search engines truncate descriptions over 150 characters. Shorten your meta description to ensure the full message is visible to users.",
     });
   }
 
@@ -443,8 +448,9 @@ function auditSEO(metadata: MetadataInfo): Issue[] {
       type: "seo",
       severity: "high",
       id: "seo-missing-canonical",
-      title: "Missing Canonical",
-      description: "No canonical URL. Can cause duplicate content issues.",
+      title: "Missing canonical URL",
+      description:
+        "No canonical URL is set. Canonical tags tell search engines which version of a page is the primary one, preventing duplicate content penalties.",
     });
   } else {
     try {
@@ -458,9 +464,9 @@ function auditSEO(metadata: MetadataInfo): Issue[] {
           type: "seo",
           severity: "medium",
           id: "seo-canonical-mismatch",
-          title: "Canonical Mismatch",
+          title: "Canonical URL doesn't match current page",
           description:
-            "Current and canonical URLs don't match. Update the canonical tag to reflect the primary URL.",
+            "Your canonical URL points to a different page. This can confuse search engines about which page to index. Update the canonical tag to match your primary URL.",
         });
       }
     } catch {
@@ -473,9 +479,9 @@ function auditSEO(metadata: MetadataInfo): Issue[] {
       type: "seo",
       severity: "medium",
       id: "seo-missing-robots",
-      title: "Missing robots.txt",
+      title: "Missing robots.txt file",
       description:
-        "robots.txt not found. Search engines lack explicit crawl directives for this site.",
+        "The robots.txt file controls how search engines crawl your site. Without it, you can't control which pages are indexed or set crawl rate limits.",
     });
   }
 
@@ -484,9 +490,9 @@ function auditSEO(metadata: MetadataInfo): Issue[] {
       type: "seo",
       severity: "medium",
       id: "seo-missing-sitemap",
-      title: "Missing sitemap",
+      title: "Missing sitemap.xml",
       description:
-        "No sitemap.xml found. Search engines may discover pages more slowly without a sitemap.",
+        "Sitemaps help search engines discover and index your pages efficiently. Without one, important pages might be missed or crawled less frequently.",
     });
   }
 
@@ -506,8 +512,8 @@ function auditSEO(metadata: MetadataInfo): Issue[] {
       type: "seo",
       severity: "medium",
       id: "seo-missing-og-tags",
-      title: "Missing OG Tags",
-      description: `Missing: ${missingOgTags.join(", ")}. Affects social media previews.`,
+      title: `Missing OG tags`,
+      description: `Missing tags: ${missingOgTags.join(", ")}. Open Graph tags control how your page appears when shared on social media platforms like Facebook, LinkedIn, and Twitter.`,
     });
   }
 
@@ -516,8 +522,9 @@ function auditSEO(metadata: MetadataInfo): Issue[] {
       type: "seo",
       severity: "high",
       id: "seo-thin-content",
-      title: "Thin Content",
-      description: `Only ${metadata.wordCount} words. Pages under 100 words may be seen as thin content.`,
+      title: `Page has thin content (${metadata.wordCount} words)`,
+      description:
+        "Pages with less than 100 words are considered thin content by search engines and may rank poorly. Add more valuable, relevant content to improve SEO.",
     });
   }
 
@@ -713,8 +720,9 @@ function auditImages(images: ImageInfo[]): Issue[] {
       type: "accessibility",
       severity: "medium",
       id: "image-missing-alt",
-      title: "Missing Alt Text",
-      description: `${missingAltCount} ${imageWord} without alt text. Required for screen readers.`,
+      title: `Missing alt text on ${missingAltCount} ${imageWord}`,
+      description:
+        "Alt text describes images for screen reader users and appears when images fail to load. It's essential for accessibility and helps search engines understand image content.",
     });
   }
 
@@ -725,8 +733,9 @@ function auditImages(images: ImageInfo[]): Issue[] {
       type: "accessibility",
       severity: "high",
       id: "image-broken",
-      title: "Broken Images",
-      description: `${imageCount} ${imageWord} failed to load. Ensure all image URLs are valid and accessible.`,
+      title: `${imageCount} broken ${imageWord} detected`,
+      description:
+        "These images failed to load, creating a poor user experience. Check that image URLs are correct, files exist, and permissions allow access.",
     });
   }
 
@@ -741,9 +750,9 @@ function auditHeadings(headings: HeadingInfo[]): Issue[] {
       type: "accessibility",
       severity: "medium",
       id: "heading-no-headings",
-      title: "No Headings",
+      title: "No heading tags found on page",
       description:
-        "No h1–h6 elements found. Headings help structure and accessibility.",
+        "Headings (h1-h6) structure your content and help screen readers navigate. They also signal content hierarchy to search engines. Add heading tags to organize your content.",
     });
     return issues;
   }
@@ -765,9 +774,9 @@ function auditHeadings(headings: HeadingInfo[]): Issue[] {
       type: "accessibility",
       severity: "medium",
       id: "heading-hierarchy-skip",
-      title: "Heading Level Skip",
+      title: "Heading levels skip in hierarchy",
       description:
-        "Levels are skipped (e.g., h1 → h3). Keep heading levels sequential.",
+        "Jumping heading levels (e.g., h1 directly to h3) confuses screen reader users and breaks content structure. Use sequential heading levels to maintain proper document hierarchy.",
     });
   }
 
@@ -835,8 +844,9 @@ function auditLinks(links: LinkInfo[]): Issue[] {
       type: "accessibility",
       severity: "medium",
       id: "link-empty-text",
-      title: "Empty Link Text",
-      description: `${emptyTextCount} ${linkWord} with no visible text. Add descriptive text for accessibility.`,
+      title: `${emptyTextCount} ${linkWord} with no visible text`,
+      description:
+        "Links without text are invisible to screen readers, making navigation impossible for blind users. Add descriptive text or aria-label attributes to all links.",
     });
   }
 
