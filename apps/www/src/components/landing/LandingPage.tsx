@@ -199,6 +199,12 @@ export default function LandingPage() {
             </a>
             <div className="flex items-center gap-3 sm:gap-4">
               <a
+                href="/blog"
+                className="text-[var(--landing-text-muted)] hover:text-[var(--landing-text)] text-sm font-medium transition-colors duration-200"
+              >
+                Blog
+              </a>
+              <a
                 href="https://chrome.google.com/webstore"
                 target="_blank"
                 rel="noopener noreferrer"
