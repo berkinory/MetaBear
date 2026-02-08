@@ -33,7 +33,7 @@ USER astro
 EXPOSE 4001
 
 ENV NODE_ENV=production
+ENV HOST=0.0.0.0
 ENV PORT=4001
-ENV HOSTNAME="0.0.0.0"
 
-CMD ["bunx", "--bun", "http-server", "./dist", "-p", "4001", "-a", "0.0.0.0"]
+CMD ["bun", "x", "serve", "-l", "tcp://0.0.0.0:4001", "-s", "./dist"]
