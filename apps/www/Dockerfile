@@ -36,4 +36,4 @@ ENV NODE_ENV=production
 ENV PORT=4001
 ENV HOSTNAME="0.0.0.0"
 
-CMD ["bunx", "serve", "./dist", "-l", "4001"]
+CMD ["bunx", "--bun", "http-server", "./dist", "-p", "4001", "-a", "0.0.0.0"]
