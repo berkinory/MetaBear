@@ -10,7 +10,7 @@ RUN bun install --frozen-lockfile
 FROM base AS builder
 WORKDIR /app
 
-ARG PUBLIC_WWW_URL=http://localhost:4001
+ARG PUBLIC_WWW_URL
 ENV PUBLIC_WWW_URL=$PUBLIC_WWW_URL
 
 COPY --from=deps /app/node_modules ./node_modules
