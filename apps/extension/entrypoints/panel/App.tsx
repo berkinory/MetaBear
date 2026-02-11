@@ -228,9 +228,10 @@ export default function App() {
             className={tabTriggerClassName}
           >
             {activeTab === "headings" && (
-              <div
+              <motion.span
+                layoutId="tab-indicator"
                 className="absolute inset-0 rounded-md bg-[#6B8DD6]/30"
-                style={{ zIndex: -1 }}
+                transition={tabIndicatorTransition}
               />
             )}
             <span className="relative z-10 flex items-center gap-1.5">
@@ -290,9 +291,10 @@ export default function App() {
             className={tabTriggerClassName}
           >
             {activeTab === "social" && (
-              <div
+              <motion.span
+                layoutId="tab-indicator"
                 className="absolute inset-0 rounded-md bg-[#6B8DD6]/30"
-                style={{ zIndex: -1 }}
+                transition={tabIndicatorTransition}
               />
             )}
             <span className="relative z-10 flex items-center gap-1.5">
