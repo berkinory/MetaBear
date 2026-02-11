@@ -431,7 +431,9 @@ function OpenGraphPreviewCard({
           className="size-6"
         />
         <span className="text-sm">
-          {imgError ? "Open Graph image failed to load" : "No Open Graph image found"}
+          {imgError
+            ? "Open Graph image failed to load"
+            : "No Open Graph image found"}
         </span>
       </div>
     );
