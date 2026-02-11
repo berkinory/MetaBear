@@ -803,7 +803,13 @@ function formatSerpUrl(url: string): string {
       return host;
     }
     const trail = segments.join(" > ");
-    return `${host} > ${trail}`;
+    const fullUrl = `${host} > ${trail}`;
+
+    // Limit to 50 characters
+    if (fullUrl.length > 50) {
+      return `${fullUrl.slice(0, 50)}...`;
+    }
+    return fullUrl;
   } catch {
     return formatUrl(url);
   }
