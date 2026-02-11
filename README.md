@@ -14,15 +14,21 @@ All in one browser extension for web developers.
 Install dependencies
 
 ```bash
-npm install
+bun install
+```
+
+Go to the extension directory
+
+```bash
+cd apps/extension
 ```
 
 Run the extension in development mode
 
 ```bash
-npm --cwd apps/extension run dev
-or
-npm --cwd apps/extension run dev:firefox
+bun run dev
+# or for Firefox
+bun run dev:firefox
 ```
 
 WXT opens and reloads the extension automatically.
@@ -30,7 +36,7 @@ WXT opens and reloads the extension automatically.
 ### Build
 
 ```bash
-npm --cwd apps/extension run build
+bun run build
 ```
 
 Build output goes to `apps/extension/.output/chrome-mv3`.
@@ -38,12 +44,20 @@ Build output goes to `apps/extension/.output/chrome-mv3`.
 To create a zip:
 
 ```bash
-npm --cwd apps/extension run zip
+bun run zip
 ```
 
 ## Repo Scripts
 
-`npm run check` and `npm run check-types` run code and type checks across the repo.
+Run these commands from the **root** directory:
+
+```bash
+# Code quality checks
+bun run check
+
+# TypeScript type checks
+bun run check-types
+```
 
 ## Structure
 
