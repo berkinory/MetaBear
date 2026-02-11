@@ -58,6 +58,13 @@ interface SocialTabProps {
 
 export function SocialTab({ metadata }: SocialTabProps) {
   const [activeTab, setActiveTab] = useState("tags");
+  const [ogImageLoaded, setOgImageLoaded] = useState(false);
+  const [ogImageError, setOgImageError] = useState(false);
+  const [twitterImageLoaded, setTwitterImageLoaded] = useState(false);
+  const [twitterImageError, setTwitterImageError] = useState(false);
+  const [fbImageLoaded, setFbImageLoaded] = useState(false);
+  const [fbImageError, setFbImageError] = useState(false);
+
   const isLoading = !metadata;
   const openGraph = metadata?.openGraph ?? DEFAULT_OPEN_GRAPH;
   const twitter = metadata?.twitter ?? DEFAULT_TWITTER;
@@ -213,6 +220,10 @@ export function SocialTab({ metadata }: SocialTabProps) {
           <OpenGraphPreviewCard
             imageUrl={openGraph.image}
             title={openGraph.title}
+            imgLoaded={ogImageLoaded}
+            setImgLoaded={setOgImageLoaded}
+            imgError={ogImageError}
+            setImgError={setOgImageError}
           />
         </motion.div>
       </TabsContent>
@@ -227,6 +238,10 @@ export function SocialTab({ metadata }: SocialTabProps) {
             imageUrl={twitter.image}
             title={twitter.title}
             fallbackTitle={openGraph.title}
+            imgLoaded={twitterImageLoaded}
+            setImgLoaded={setTwitterImageLoaded}
+            imgError={twitterImageError}
+            setImgError={setTwitterImageError}
           />
         </motion.div>
       </TabsContent>
@@ -259,6 +274,10 @@ export function SocialTab({ metadata }: SocialTabProps) {
             imageUrl={openGraph.image}
             url={pageUrl ?? openGraph.url}
             siteName={openGraph.siteName}
+            imgLoaded={fbImageLoaded}
+            setImgLoaded={setFbImageLoaded}
+            imgError={fbImageError}
+            setImgError={setFbImageError}
           />
         </motion.div>
       </TabsContent>
@@ -391,11 +410,19 @@ function TwitterCard({ twitter }: { twitter: MetadataInfo["twitter"] }) {
 function OpenGraphPreviewCard({
   imageUrl,
   title,
+  imgLoaded,
+  setImgLoaded,
+  imgError,
+  setImgError,
 }: {
   imageUrl: string | null;
   title: string | null;
+  imgLoaded: boolean;
+  setImgLoaded: (loaded: boolean) => void;
+  imgError: boolean;
+  setImgError: (error: boolean) => void;
 }) {
-  if (!imageUrl) {
+  if (!imageUrl || imgError) {
     return (
       <div className="flex flex-col items-center gap-2 py-6 text-muted-foreground">
         <HugeiconsIcon
@@ -403,12 +430,12 @@ function OpenGraphPreviewCard({
           strokeWidth={2}
           className="size-6"
         />
-        <span className="text-sm">No Open Graph image found</span>
+        <span className="text-sm">
+          {imgError ? "Open Graph image failed to load" : "No Open Graph image found"}
+        </span>
       </div>
     );
   }
-
-  const [imgLoaded, setImgLoaded] = useState(false);
 
   return (
     <div className="space-y-2">
@@ -427,9 +454,7 @@ function OpenGraphPreviewCard({
           className="h-48 w-full object-cover transition-opacity duration-300"
           style={{ opacity: imgLoaded ? 1 : 0 }}
           onLoad={() => setImgLoaded(true)}
-          onError={(event) => {
-            event.currentTarget.style.display = "none";
-          }}
+          onError={() => setImgError(true)}
         />
       </a>
     </div>
@@ -440,14 +465,22 @@ function TwitterPreviewCard({
   imageUrl,
   title,
   fallbackTitle,
+  imgLoaded,
+  setImgLoaded,
+  imgError,
+  setImgError,
 }: {
   imageUrl: string | null;
   title: string | null;
   fallbackTitle: string | null;
+  imgLoaded: boolean;
+  setImgLoaded: (loaded: boolean) => void;
+  imgError: boolean;
+  setImgError: (error: boolean) => void;
 }) {
   const resolvedTitle = title ?? fallbackTitle;
 
-  if (!imageUrl) {
+  if (!imageUrl || imgError) {
     return (
       <div className="flex flex-col items-center gap-2 py-6 text-muted-foreground">
         <HugeiconsIcon
@@ -455,12 +488,12 @@ function TwitterPreviewCard({
           strokeWidth={2}
           className="size-6"
         />
-        <span className="text-sm">No Twitter image found</span>
+        <span className="text-sm">
+          {imgError ? "Twitter image failed to load" : "No Twitter image found"}
+        </span>
       </div>
     );
   }
-
-  const [imgLoaded, setImgLoaded] = useState(false);
 
   return (
     <div className="space-y-2">
@@ -479,9 +512,7 @@ function TwitterPreviewCard({
           className="h-48 w-full object-cover transition-opacity duration-300"
           style={{ opacity: imgLoaded ? 1 : 0 }}
           onLoad={() => setImgLoaded(true)}
-          onError={(event) => {
-            event.currentTarget.style.display = "none";
-          }}
+          onError={() => setImgError(true)}
         />
         {resolvedTitle ? (
           <div className="absolute inset-x-2 bottom-1.5">
@@ -501,14 +532,21 @@ function FacebookPreviewCard({
   imageUrl,
   url,
   siteName,
+  imgLoaded,
+  setImgLoaded,
+  imgError,
+  setImgError,
 }: {
   title: string | null;
   description: string | null;
   imageUrl: string | null;
   url: string | null;
   siteName: string | null;
+  imgLoaded: boolean;
+  setImgLoaded: (loaded: boolean) => void;
+  imgError: boolean;
+  setImgError: (error: boolean) => void;
 }) {
-  const [imgLoaded, setImgLoaded] = useState(false);
   const host = getHost(url ?? "");
   const displaySite = siteName || host || "Website";
 
@@ -538,7 +576,7 @@ function FacebookPreviewCard({
           </div>
           <div className="mt-3 text-sm text-white/90">Hey, Check this out!</div>
         </div>
-        {imageUrl ? (
+        {imageUrl && !imgError ? (
           <div className="bg-[#242424]">
             <img
               src={imageUrl}
@@ -546,9 +584,7 @@ function FacebookPreviewCard({
               className="h-56 w-full object-contain transition-opacity duration-300"
               style={{ opacity: imgLoaded ? 1 : 0 }}
               onLoad={() => setImgLoaded(true)}
-              onError={(event) => {
-                event.currentTarget.style.display = "none";
-              }}
+              onError={() => setImgError(true)}
             />
           </div>
         ) : null}

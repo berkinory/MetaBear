@@ -392,7 +392,7 @@ function collectMetadata(): Omit<
     openGraph: {
       title: ogTitle?.getAttribute("content") || null,
       description: ogDescription?.getAttribute("content") || null,
-      image: ogImage?.getAttribute("content") || null,
+      image: resolveImageUrl(ogImage?.getAttribute("content") || null),
       url: ogUrl?.getAttribute("content") || null,
       type: ogType?.getAttribute("content") || null,
       locale: ogLocale?.getAttribute("content") || null,
@@ -402,7 +402,7 @@ function collectMetadata(): Omit<
       card: twitterCard?.getAttribute("content") || null,
       title: twitterTitle?.getAttribute("content") || null,
       description: twitterDescription?.getAttribute("content") || null,
-      image: twitterImage?.getAttribute("content") || null,
+      image: resolveImageUrl(twitterImage?.getAttribute("content") || null),
     },
     jsonLd,
     hreflang,
