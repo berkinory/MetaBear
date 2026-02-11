@@ -205,7 +205,7 @@ export default function LandingPage() {
                 Blog
               </a>
               <a
-                href="https://chrome.google.com/webstore"
+                href="https://chrome.google.com/webstore/detail/jklebfmomoajnoocichmchpdbkcbibac"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="group relative inline-flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-[var(--landing-accent)] text-[#1a1a1e] text-sm font-semibold transition-all duration-300 hover:brightness-110 hover:shadow-lg hover:shadow-[var(--landing-accent)]/20"
@@ -274,7 +274,7 @@ export default function LandingPage() {
 
           <div className="landing-stagger-5 flex flex-col sm:flex-row items-center justify-center gap-4">
             <a
-              href="https://chrome.google.com/webstore"
+              href="https://chrome.google.com/webstore/detail/jklebfmomoajnoocichmchpdbkcbibac"
               target="_blank"
               rel="noopener noreferrer"
               className="group relative inline-flex items-center gap-3 px-8 py-4 rounded-2xl bg-[var(--landing-accent)] text-[#1a1a1e] font-semibold text-base transition-all duration-300 hover:brightness-110 hover:shadow-xl hover:shadow-[var(--landing-accent)]/25 hover:-translate-y-0.5"
@@ -525,7 +525,7 @@ export default function LandingPage() {
                 professionals
               </p>
               <a
-                href="https://chrome.google.com/webstore"
+                href="https://chrome.google.com/webstore/detail/jklebfmomoajnoocichmchpdbkcbibac"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="group inline-flex items-center gap-3 px-8 py-4 rounded-2xl bg-[var(--landing-accent)] text-[#1a1a1e] font-semibold text-base transition-all duration-300 hover:brightness-110 hover:shadow-xl hover:shadow-[var(--landing-accent)]/25 hover:-translate-y-0.5"
