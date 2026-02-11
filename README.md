@@ -1,6 +1,14 @@
-# MetaBear
+<div align="center">
 
-All in one browser extension for web developers.
+# 🐻 MetaBear
+
+**All in one browser extension for web developers**
+
+[![Chrome Web Store](https://img.shields.io/badge/Chrome-Install_Extension-4285F4?style=for-the-badge&logo=googlechrome&logoColor=white)](https://chromewebstore.google.com/detail/YOUR_EXTENSION_ID)
+
+---
+
+</div>
 
 ## Local Development
 
