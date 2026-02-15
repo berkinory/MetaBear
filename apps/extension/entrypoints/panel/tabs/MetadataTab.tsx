@@ -90,7 +90,16 @@ function BasicMetaCard({ metadata }: { metadata: MetadataInfo }) {
     if (!metadata.canonical || !metadata.url) {
       return "missing";
     }
-    return metadata.url === metadata.canonical ? "match" : "mismatch";
+    try {
+      const current = new URL(metadata.url);
+      const canonical = new URL(metadata.canonical, metadata.url);
+      return current.origin + current.pathname ===
+        canonical.origin + canonical.pathname
+        ? "match"
+        : "mismatch";
+    } catch {
+      return metadata.url === metadata.canonical ? "match" : "mismatch";
+    }
   })();
   return (
     <Card>
