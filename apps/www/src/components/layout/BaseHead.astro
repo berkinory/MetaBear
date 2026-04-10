@@ -142,11 +142,38 @@ const jsonLd =
 
 <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
 
-<script
-  is:inline
-  src="https://openpanel.mirac.dev/op1.js"
-  data-client-id="53565522-44c7-4955-ad61-6074be136846"
-  data-api-url="https://openpanel.mirac.dev/api"
-  data-track-screen-views
-  data-track-outgoing-links
-  async></script>
+<script is:inline>
+  window.op =
+    window.op ||
+    (() => {
+      const q = [];
+      const fn = (...args) => {
+        if (args.length > 0) {
+          q.push(args);
+        }
+      };
+
+      return new Proxy(fn, {
+        get(_target, key) {
+          if (key === 'q') {
+            return q;
+          }
+
+          return (...args) => {
+            q.push([key, ...args]);
+          };
+        },
+        has(_target, key) {
+          return key === 'q';
+        },
+      });
+    })();
+
+  window.op('init', {
+    clientId: '53565522-44c7-4955-ad61-6074be136846',
+    apiUrl: 'https://openpanel.mirac.dev/api',
+    trackScreenViews: true,
+    trackOutgoingLinks: true,
+  });
+</script>
+<script is:inline src="https://openpanel.mirac.dev/op1.js" defer async></script>
